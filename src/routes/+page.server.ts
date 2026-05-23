@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({ setHeaders, url }) => {
   const [headlinesRes, latestRes, moreRes, tagsRes, popularRes, eventRes, writersRes, techRes, ad0Res, ad1Res, ad2Res, ad3Res, curhatanRes] = await Promise.allSettled([
     listArticles({ page: 1, perPage: 6 }),
     listArticles({ page: 1, perPage: 15 }),
-    listArticles({ page: 2, perPage: 12 }),
+    listArticles({ page: 2, perPage: 15 }),
     getPopularTags(15),
     getPopularArticles(5),
     listArticles({ page: 1, perPage: 8, category: 'event' }),
