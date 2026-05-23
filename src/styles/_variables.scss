@@ -1,0 +1,82 @@
+// ===========================================
+// Mokultur Design System — Variables
+// "Bold Minimal" hybrid design tokens
+// ===========================================
+
+// ---- Colors ----
+$mokultur-yellow:   #a51d2d;
+$mokultur-dark:         #0a0a0a;
+$mokultur-accent-glow:  #a51d2d;
+$badge-text-color:      #ffffff;
+$mokultur-black:        #000000;
+$mokultur-white:    #ffffff;
+$mokultur-surface:  #fafafa;
+$mokultur-border:   #e5e5e5;
+$mokultur-text:     #1a1a1a;
+$mokultur-text-secondary: #6b7280;
+
+// ---- Bootstrap Variable Overrides ----
+
+// Body
+$body-bg:    $mokultur-white;
+$body-color: $mokultur-text;
+
+// Typography
+$font-family-sans-serif: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+$font-size-base:   0.9375rem; // 15px
+$line-height-base: 1.6;
+$headings-font-weight: 700;
+$headings-color: $mokultur-text;
+
+// Links
+$link-color:           $mokultur-dark;
+$link-hover-color:     $mokultur-dark;
+$link-decoration:      none;
+$link-hover-decoration: underline;
+
+// Borders & Radius
+$border-color: $mokultur-border;
+$border-radius:    0.5rem;  // 8px
+$border-radius-sm: 0.375rem; // 6px
+$border-radius-lg: 0.75rem;  // 12px
+
+// Shadows
+$box-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+$box-shadow:    0 2px 8px rgba(0, 0, 0, 0.08);
+$box-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.1);
+
+// Primary color
+$primary: $mokultur-dark;
+$warning: $mokultur-yellow;
+
+// Cards
+$card-border-color: $mokultur-border;
+$card-border-radius: $border-radius;
+$card-cap-bg: transparent;
+
+// Inputs
+$input-border-color: $mokultur-border;
+$input-border-radius: $border-radius-sm;
+$input-focus-border-color: $mokultur-dark;
+$input-focus-box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
+
+// Navbar
+$navbar-light-color: $mokultur-text;
+$navbar-light-hover-color: $mokultur-dark;
+
+// Breadcrumb
+$breadcrumb-divider-color: $mokultur-text-secondary;
+$breadcrumb-active-color:  $mokultur-text-secondary;
+
+// Pagination
+$pagination-color:        $mokultur-text;
+$pagination-bg:           $mokultur-white;
+$pagination-border-color: $mokultur-border;
+$pagination-active-color: $mokultur-dark;
+$pagination-active-bg:    $mokultur-yellow;
+$pagination-active-border-color: $mokultur-yellow;
+$pagination-hover-bg:     $mokultur-surface;
+$pagination-hover-color:  $mokultur-dark;
+
+// Transitions
+$transition-base: all 0.2s ease-in-out;
