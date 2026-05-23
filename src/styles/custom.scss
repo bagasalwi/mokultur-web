@@ -4844,8 +4844,8 @@ footer {
 
             &:hover {
                 background-color: var(--site-primary, #{$mokultur-yellow});
-                color: #0a0a0a;
-                border-color: $mokultur-yellow !important;
+                color: var(--site-primary-contrast, #0a0a0a);
+                border-color: var(--site-primary, #{$mokultur-yellow}) !important;
                 z-index: 10;
             }
 
