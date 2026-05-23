@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({ setHeaders, url }) => {
   const [headlinesRes, latestRes, moreRes, tagsRes, popularRes, eventRes, writersRes, techRes, ad0Res, ad1Res, ad2Res, ad3Res, curhatanRes] = await Promise.allSettled([
     listArticles({ page: 1, perPage: 6 }),
     listArticles({ page: 1, perPage: 15 }),
-    listArticles({ page: 2, perPage: 15 }),
+    listArticles({ page: 2, perPage: 20 }),
     getPopularTags(15),
     getPopularArticles(5),
     listArticles({ page: 1, perPage: 8, category: 'event' }),
@@ -21,10 +21,17 @@ export const load: PageServerLoad = async ({ setHeaders, url }) => {
     listCurhatan({ perPage: 6 }),
   ]);
 
+  const headlines = headlinesRes.status === 'fulfilled' ? headlinesRes.value.data : [];
+  const latest = latestRes.status === 'fulfilled' ? latestRes.value.data : [];
+  const seenIds = new Set([...headlines, ...latest].map((a) => a.id));
+  const moreArticles = (moreRes.status === 'fulfilled' ? moreRes.value.data : [])
+    .filter((a) => !seenIds.has(a.id))
+    .slice(0, 16);
+
   return {
-    headlines: headlinesRes.status === 'fulfilled' ? headlinesRes.value.data : [],
-    latest: latestRes.status === 'fulfilled' ? latestRes.value.data : [],
-    moreArticles: moreRes.status === 'fulfilled' ? moreRes.value.data : [],
+    headlines,
+    latest,
+    moreArticles,
     popularTags: tagsRes.status === 'fulfilled' ? tagsRes.value.data : [],
     popularArticles: popularRes.status === 'fulfilled' ? popularRes.value.data : [],
     eventArticles: eventRes.status === 'fulfilled' ? eventRes.value.data : [],

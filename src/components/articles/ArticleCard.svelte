@@ -139,7 +139,7 @@
           <span class="badge badge-main mb-2">{article.category.name}</span>
         {/if}
         {#if article.isReview && article.reviewScore}
-          <span class="badge bg-warning text-dark mb-2 ms-1">★ {article.reviewScore}</span>
+          <span class="badge badge-main mb-2 ms-1">★ {article.reviewScore}</span>
         {/if}
         <h5 class="fw-bold mb-2 lh-sm" style="font-size: 1rem;">{article.title}</h5>
         {#if article.description}
