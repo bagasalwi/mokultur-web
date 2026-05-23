@@ -50,7 +50,7 @@ src/routes/
 ├── index-article/          # Listing semua artikel + search
 ├── curhat-[id]/[slug]/     # Detail curhatan
 ├── curhatan/               # Index curhatan
-├── author/[username]/      # Profil penulis
+├── @[username]/            # Profil penulis (/@username)
 ├── contact/                # Halaman kontak
 ├── media-partner/          # Media partners
 ├── page/[id]/[slug]/       # Halaman statis (privacy, terms, dsb)
