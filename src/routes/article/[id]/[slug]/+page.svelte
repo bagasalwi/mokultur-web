@@ -302,7 +302,7 @@
           {#if a.author}
             <span>
               Publish By <a
-                href="/author/{a.author.id}"
+                href="/@{a.author.username ?? a.author.id}"
                 class="ms-1 text-decoration-none"
                 style="color: var(--site-primary, #f1ff32);"
               >

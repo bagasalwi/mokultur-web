@@ -1848,7 +1848,7 @@ a {
         position: relative;
         border-radius: 24px;
         background:
-            radial-gradient(circle at top right, rgba($mokultur-accent-glow, 0.75), transparent 28%),
+            radial-gradient(circle at top right, color-mix(in srgb, var(--site-accent-glow, #{$mokultur-accent-glow}) 75%, transparent), transparent 28%),
             linear-gradient(135deg, #0a0a0a 0%, #111827 55%, #1f2937 100%);
         color: #fff;
         box-shadow: 0 24px 80px rgba(10, 10, 10, 0.16);
@@ -1860,7 +1860,7 @@ a {
         width: 240px;
         height: 240px;
         border-radius: 50%;
-        background: rgba($mokultur-accent-glow, 0.18);
+        background: color-mix(in srgb, var(--site-accent-glow, #{$mokultur-accent-glow}) 18%, transparent);
         filter: blur(10px);
     }
 
@@ -1869,7 +1869,7 @@ a {
         height: 108px;
         padding: 4px;
         border-radius: 28px;
-        background: linear-gradient(180deg, $mokultur-yellow 0%, #fff68a 100%);
+        background: linear-gradient(180deg, var(--site-primary, #{$mokultur-yellow}) 0%, color-mix(in srgb, var(--site-primary, #{$mokultur-yellow}) 60%, #fff) 100%);
         box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
         flex-shrink: 0;
 
@@ -1933,7 +1933,7 @@ a {
 
     .creator-profile-statbar {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 1rem;
 
         @media (max-width: 991px) {
@@ -2030,8 +2030,8 @@ a {
         gap: 0.85rem;
         padding: 0.95rem;
         border-radius: 16px;
-        background: linear-gradient(180deg, rgba($mokultur-accent-glow, 0.18) 0%, rgba($mokultur-accent-glow, 0.05) 100%);
-        border: 1px solid rgba($mokultur-accent-glow, 0.35);
+        background: linear-gradient(180deg, color-mix(in srgb, var(--site-accent-glow, #{$mokultur-accent-glow}) 18%, transparent) 0%, color-mix(in srgb, var(--site-accent-glow, #{$mokultur-accent-glow}) 5%, transparent) 100%);
+        border: 1px solid color-mix(in srgb, var(--site-accent-glow, #{$mokultur-accent-glow}) 35%, transparent);
 
         strong {
             color: #0a0a0a;
@@ -2054,7 +2054,7 @@ a {
         align-items: center;
         justify-content: center;
         background: #0a0a0a;
-        color: $mokultur-yellow;
+        color: var(--site-primary, #{$mokultur-yellow});
         flex-shrink: 0;
         font-size: 1.1rem;
     }
@@ -2074,7 +2074,7 @@ a {
             justify-content: center;
             border-radius: 16px;
             background: #111827;
-            color: $mokultur-yellow;
+            color: var(--site-primary, #{$mokultur-yellow});
             font-size: 1.3rem;
             margin-bottom: 0.9rem;
         }
@@ -2129,7 +2129,7 @@ a {
         height: 64px;
         border-radius: 20px;
         background: #111827;
-        color: $mokultur-yellow;
+        color: var(--site-primary, #{$mokultur-yellow});
         display: inline-flex;
         align-items: center;
         justify-content: center;

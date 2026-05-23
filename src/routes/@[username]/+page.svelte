@@ -135,11 +135,9 @@
           </div>
 
           {#if articles.data.length > 0}
-            <div class="row g-0">
+            <div class="d-flex flex-column gap-3">
               {#each articles.data as article}
-                <div class="col-12">
-                  <ArticleCard article={asArticleItem(article)} variant="horizontal" />
-                </div>
+                <ArticleCard article={asArticleItem(article)} variant="horizontal" />
               {/each}
             </div>
             <div class="d-flex justify-content-center mt-4">

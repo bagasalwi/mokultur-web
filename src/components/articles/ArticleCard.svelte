@@ -31,18 +31,17 @@
 
 {#if variant === 'horizontal'}
   <article class="article-card article-card--horizontal">
-    <a {href} class="article-card-link d-flex gap-3 text-decoration-none">
+    <a {href} class="article-card-link text-decoration-none d-flex w-100 h-100">
       {#if article.image}
-        <div class="flex-shrink-0" style="width: 120px; height: 80px; overflow: hidden; border-radius: 8px;">
-          <img src={article.image} alt={article.title} loading="lazy" decoding="async"
-            style="width:100%; height:100%; object-fit:cover;" on:error={imgFallback} />
+        <div class="article-card--horizontal__img">
+          <img src={article.image} alt={article.title} loading="lazy" decoding="async" on:error={imgFallback} />
         </div>
       {/if}
-      <div class="flex-grow-1 min-w-0">
+      <div class="article-card--horizontal__body">
         {#if article.category}
-          <span class="badge badge-main mb-1">{article.category.name}</span>
+          <span class="badge badge-main" style="font-size:0.65rem">{article.category.name}</span>
         {/if}
-        <h6 class="fw-bold mb-1 lh-sm" style="font-size: 0.875rem;">{article.title}</h6>
+        <h6 class="article-card--horizontal__title">{article.title}</h6>
         <small class="text-muted">{timeAgo(article.publishDate)}</small>
       </div>
     </a>

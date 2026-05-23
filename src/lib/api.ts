@@ -37,7 +37,7 @@ export interface ArticleListItem {
   viewCount: number | null;
   isReview: boolean;
   reviewScore: string | null;
-  author: { id: number; name: string; img: string | null } | null;
+  author: { id: number; name: string; username: string | null; img: string | null } | null;
   category: { id: number; name: string; slug: string } | null;
 }
 
@@ -150,6 +150,7 @@ export interface Writer {
   role: string;
   totalArticles: number;
   totalViews: number;
+  latestPublishDate: string | null;
 }
 
 export function listWriters(page = 1, perPage = 12) {
