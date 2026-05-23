@@ -2632,7 +2632,7 @@ a {
         padding: 2rem;
         color: #fff;
         background:
-            radial-gradient(circle at top right, rgba($mokultur-accent-glow, 0.75), transparent 22%),
+            radial-gradient(circle at top right, color-mix(in srgb, var(--site-accent-glow, #{$mokultur-accent-glow}) 75%, transparent), transparent 22%),
             linear-gradient(135deg, #0a0a0a 0%, #111827 48%, #1f2937 100%);
         box-shadow: 0 24px 80px rgba(10, 10, 10, 0.15);
 
@@ -2727,7 +2727,7 @@ a {
         align-items: center;
         justify-content: center;
         background: #0a0a0a;
-        color: $mokultur-yellow;
+        color: var(--site-primary, #{$mokultur-yellow});
         font-size: 1.2rem;
         margin-bottom: 0.85rem;
     }
@@ -2770,7 +2770,7 @@ a {
         border-radius: 16px;
         overflow: hidden;
         background: #0f172a;
-        color: $mokultur-yellow;
+        color: var(--site-primary, #{$mokultur-yellow});
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -4797,7 +4797,7 @@ footer {
 
     &:hover {
         opacity: 1;
-        color: $mokultur-yellow !important;
+        color: var(--site-primary, #{$mokultur-yellow}) !important;
     }
 }
 

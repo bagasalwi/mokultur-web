@@ -108,7 +108,7 @@
   {/if}
 
   <!-- Latest Articles -->
-  <section class="container-xl py-4">
+  <section class="container-xl pt-4 pb-5 pb-lg-4">
     <div class="row">
       <div class="col-lg-8">
         <div class="d-flex align-items-center justify-content-between mb-4">
