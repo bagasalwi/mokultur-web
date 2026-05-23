@@ -49,6 +49,18 @@
   $: earnedAchievements = achievements.map((k) => ACHIEVEMENTS[k]).filter(Boolean);
   $: hasSocial = !!(user.instagram || user.facebook);
 
+  type CardStyle = 'vertical' | 'horizontal' | 'magazine' | 'minimal' | 'compact-news' | 'feature-tile' | 'borderless-feed';
+  $: cardStyle = (data.settings?.card_style ?? 'vertical') as CardStyle;
+  const colMap: Record<string, string> = {
+    vertical: 'col-6 col-sm-6 col-md-6 col-lg-4',
+    horizontal: 'col-12 col-md-6',
+    magazine: 'col-6 col-md-4',
+    minimal: 'col-12',
+    'compact-news': 'col-12',
+    'feature-tile': 'col-12 col-md-6 col-lg-4',
+    'borderless-feed': 'col-12 col-md-6',
+  };
+
   function asArticleItem(a: typeof articles.data[0]): ArticleListItem {
     return { ...a, category: null, author: null };
   }
@@ -135,9 +147,11 @@
           </div>
 
           {#if articles.data.length > 0}
-            <div class="d-flex flex-column gap-3">
+            <div class="row g-4">
               {#each articles.data as article}
-                <ArticleCard article={asArticleItem(article)} variant="horizontal" />
+                <div class="{colMap[cardStyle] ?? 'col-6 col-sm-6 col-md-6 col-lg-4'}">
+                  <ArticleCard article={asArticleItem(article)} variant={cardStyle} />
+                </div>
               {/each}
             </div>
             <div class="d-flex justify-content-center mt-4">
