@@ -8,7 +8,7 @@
 <a href="/article/{article.id}/{article.slug}" class="popular-item text-decoration-none">
   <div class="popular-item__thumb">
     {#if article.image}
-      <img src={article.image} alt={article.title} loading="lazy" />
+      <img src={article.image} alt={article.title} loading="lazy" decoding="async" />
     {:else}
       <div class="popular-item__thumb-placeholder">{rank}</div>
     {/if}

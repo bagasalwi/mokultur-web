@@ -30,6 +30,16 @@
   <title>{metaTitle}</title>
   <meta name="description" content={metaDesc} />
   <meta name="robots" content={isSearch ? 'noindex, follow' : 'index, follow'} />
+  {#if !isSearch}
+    <link rel="canonical" href="/index-article" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={metaTitle} />
+    <meta property="og:description" content={metaDesc} />
+    <meta property="og:url" content="/index-article" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={metaTitle} />
+    <meta name="twitter:description" content={metaDesc} />
+  {/if}
 </svelte:head>
 
 <div class="section-md container-xl archive-page">

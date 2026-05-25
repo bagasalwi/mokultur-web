@@ -80,11 +80,16 @@
 
 <svelte:head>
   <title>Kontak & Kolaborasi — {siteName}</title>
-  <meta
-    name="description"
-    content="Hubungi {siteName} untuk kolaborasi konten, press release, event coverage, dan paid partnership."
-  />
+  <meta name="description" content="Hubungi {siteName} untuk kolaborasi konten, press release, event coverage, dan paid partnership." />
+  <meta name="robots" content="index, follow" />
   <link rel="canonical" href="/contact" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Kontak & Kolaborasi — {siteName}" />
+  <meta property="og:description" content="Hubungi {siteName} untuk kolaborasi konten, press release, event coverage, dan paid partnership." />
+  <meta property="og:url" content="/contact" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Kontak & Kolaborasi — {siteName}" />
+  <meta name="twitter:description" content="Hubungi {siteName} untuk kolaborasi konten, press release, event coverage, dan paid partnership." />
 </svelte:head>
 
 <div class="contact-hub section-md container-xl">

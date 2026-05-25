@@ -3353,7 +3353,7 @@ a {
         background: #fff;
 
         &:focus-within {
-            box-shadow: 0 0 0 4px rgba($mokultur-accent-glow, 0.2);
+            box-shadow: 0 0 0 4px color-mix(in srgb, var(--site-accent-glow, #{$mokultur-accent-glow}) 20%, transparent);
         }
 
         .search-icon-prefix {
@@ -3688,7 +3688,7 @@ a {
 .collab-modal__hero {
     padding: 1.5rem;
     background:
-        radial-gradient(circle at top right, rgba($mokultur-accent-glow, 0.75), transparent 22%),
+        radial-gradient(circle at top right, color-mix(in srgb, var(--site-accent-glow, #{$mokultur-accent-glow}) 75%, transparent), transparent 22%),
         linear-gradient(135deg, #0a0a0a 0%, #111827 55%, #1f2937 100%);
     color: #fff;
 }
@@ -4227,15 +4227,22 @@ input[readonly="readonly"] {
     }
 
     img {
-        max-width: 100%;
-        width: 100%;
-        height: auto;
+        max-width: 100% !important;
+        width: auto;
+        height: auto !important;
         border-radius: 8px;
         margin: 1rem 0;
     }
 
+    table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        border-collapse: collapse;
+    }
+
     blockquote {
-        border-left: 3px solid $mokultur-yellow;
+        border-left: 3px solid var(--site-primary, #{$mokultur-yellow});
         padding: 1rem 1.25rem;
         font-style: italic;
         color: #555;
@@ -4263,7 +4270,7 @@ input[readonly="readonly"] {
     }
 
     ::selection {
-        background: rgba($mokultur-accent-glow, 0.35);
+        background: color-mix(in srgb, var(--site-accent-glow, #{$mokultur-accent-glow}) 35%, transparent);
     }
 
     code {
@@ -4432,8 +4439,8 @@ input[readonly="readonly"] {
         background: #1a1a1a;
 
         img {
-            width: 100%;
-            height: 100%;
+            width: 100% !important;
+            height: 100% !important;
             object-fit: cover;
             display: block;
             transition: transform 0.2s ease, filter 0.2s ease;
@@ -4610,8 +4617,16 @@ input[readonly="readonly"] {
         }
     }
 
-    // Mobile gallery adjustments
+    // Mobile gallery & carousel adjustments
     @media (max-width: 767.98px) {
+
+        .carousel-item {
+            height: 280px;
+        }
+
+        .fb-grid-1 .fb-gallery-item {
+            height: 260px;
+        }
 
         .fb-grid-2 .fb-gallery-item,
         .fb-grid-3 .fb-gallery-item:not(:first-child),
@@ -5518,7 +5533,7 @@ header.sticky-top {
 .search-hub-modal__hero {
     padding: 1.5rem;
     background:
-        radial-gradient(circle at top right, rgba($mokultur-accent-glow, 0.75), transparent 22%),
+        radial-gradient(circle at top right, color-mix(in srgb, var(--site-accent-glow, #{$mokultur-accent-glow}) 75%, transparent), transparent 22%),
         linear-gradient(135deg, #0a0a0a 0%, #111827 55%, #1f2937 100%);
     color: #fff;
 }
@@ -7761,7 +7776,7 @@ button.emoji-picker {
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
     background:
-        radial-gradient(circle at 18% 18%, rgba($mokultur-accent-glow, 0.24), transparent 34%),
+        radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--site-accent-glow, #{$mokultur-accent-glow}) 24%, transparent), transparent 34%),
         linear-gradient(135deg, #070707 0%, #171717 100%);
 
     .article-detail__hero-row {

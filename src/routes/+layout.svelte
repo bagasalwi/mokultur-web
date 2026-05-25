@@ -90,10 +90,11 @@
   </style>`}
 </svelte:head>
 
+<a href="#main-content" class="visually-hidden-focusable">Skip to content</a>
 <NavProgress />
 <Navbar settings={data.settings} navItems={data.navHeader} socials={data.socials} categories={data.categories} />
 
-<main>
+<main id="main-content">
   <slot />
 </main>
 

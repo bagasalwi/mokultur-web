@@ -1,12 +1,13 @@
 import type { PageServerLoad } from './$types';
 import { listArticles, getPopularTags, listCategories, getAd } from '$lib/api';
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url, setHeaders }) => {
   const page = Math.max(1, Number(url.searchParams.get('page') ?? 1));
   const search = url.searchParams.get('search') ?? undefined;
   const category = url.searchParams.get('category') ?? undefined;
   const reviewOnly = url.searchParams.get('reviewOnly') === 'true';
   const preview = url.searchParams.get('preview_ads') === 'true';
+  if (!search) setHeaders({ 'cache-control': 'public, max-age=60, stale-while-revalidate=300' });
 
   const [articlesRes, tagsRes, editorPicksRes, categoriesRes, adSidebarRes] = await Promise.allSettled([
     listArticles({ page, perPage: 12, search, category, reviewOnly }),

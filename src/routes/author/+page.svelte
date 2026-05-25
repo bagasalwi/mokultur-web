@@ -31,7 +31,15 @@
 <svelte:head>
   <title>Penulis - {siteName}</title>
   <meta name="description" content="Kenali para penulis dan kontributor di {siteName}." />
+  <meta name="robots" content="index, follow" />
   <link rel="canonical" href="/author" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Penulis - {siteName}" />
+  <meta property="og:description" content="Kenali para penulis dan kontributor di {siteName}." />
+  <meta property="og:url" content="/author" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Penulis - {siteName}" />
+  <meta name="twitter:description" content="Kenali para penulis dan kontributor di {siteName}." />
 </svelte:head>
 
 <div class="archive-page section-top container-xl">

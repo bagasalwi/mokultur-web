@@ -50,6 +50,14 @@
   <title>Curhatan {siteName} — Cerita Jujur Komunitas</title>
   <meta name="description" content="Kumpulan cerita jujur dari komunitas {siteName}. Baca, upvote, dan bagikan ceritamu sendiri." />
   <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="/curhatan" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Curhatan {siteName} — Cerita Jujur Komunitas" />
+  <meta property="og:description" content="Kumpulan cerita jujur dari komunitas {siteName}. Baca, upvote, dan bagikan ceritamu sendiri." />
+  <meta property="og:url" content="/curhatan" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Curhatan {siteName} — Cerita Jujur Komunitas" />
+  <meta name="twitter:description" content="Kumpulan cerita jujur dari komunitas {siteName}. Baca, upvote, dan bagikan ceritamu sendiri." />
 </svelte:head>
 
 <section class="section-md container-xl">

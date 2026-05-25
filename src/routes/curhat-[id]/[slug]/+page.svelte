@@ -276,12 +276,19 @@
 <svelte:head>
   <title>Curhatan {c.curhatanDari} — {siteName}</title>
   <meta name="description" content={metaDesc} />
+  <meta name="robots" content="index, follow" />
   <link rel="canonical" href={canonicalUrl} />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Curhatan {c.curhatanDari} — {siteName}" />
+  <meta property="og:description" content={metaDesc} />
+  <meta property="og:url" content={canonicalUrl} />
   {#if c.gambar}
     <meta property="og:image" content={c.gambar} />
     <meta name="twitter:image" content={c.gambar} />
   {/if}
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Curhatan {c.curhatanDari} — {siteName}" />
+  <meta name="twitter:description" content={metaDesc} />
 </svelte:head>
 
 <section class="section-md container-xl">

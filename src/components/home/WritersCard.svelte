@@ -15,7 +15,7 @@
       {#each writers as w}
         <a href="/author/{w.username}" class="home-writer-card__item text-decoration-none">
           <div class="home-writer-card__avatar">
-            <img src={w.img ?? '/images/noimage.png'} alt={w.name} loading="lazy" on:error={imgFallback} />
+            <img src={w.img ?? '/images/noimage.png'} alt={w.name} loading="lazy" decoding="async" on:error={imgFallback} />
           </div>
           <div class="flex-grow-1 min-w-0">
             <strong class="d-block text-truncate text-dark">{w.name}</strong>
