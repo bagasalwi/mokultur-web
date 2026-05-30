@@ -13,7 +13,7 @@
     <h6 class="fw-bold mb-3">Penulis</h6>
     <div class="home-writer-card__list">
       {#each writers as w}
-        <a href="/author/{w.username}" class="home-writer-card__item text-decoration-none">
+        <a href="/@{w.username ?? w.id}" class="home-writer-card__item text-decoration-none">
           <div class="home-writer-card__avatar">
             <img src={w.img ?? '/images/noimage.png'} alt={w.name} loading="lazy" decoding="async" on:error={imgFallback} />
           </div>
