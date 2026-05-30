@@ -92,7 +92,7 @@
 
 <a href="#main-content" class="visually-hidden-focusable">Skip to content</a>
 <NavProgress />
-<Navbar settings={data.settings} navItems={data.navHeader} socials={data.socials} categories={data.categories} />
+<Navbar settings={data.settings} navItems={data.navHeader} socials={data.socials} categories={data.categories} user={data.user ?? null} />
 
 <main id="main-content">
   <slot />

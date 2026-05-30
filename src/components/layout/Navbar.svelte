@@ -15,6 +15,17 @@
   export let navItems: NavbarItem[] = [];
   export let socials: SocialMediaItem[] = [];
   export let categories: Category[] = [];
+  export let user: AuthUser | null = null;
+
+  const DASHBOARD_URL = 'https://dashboard.mokultur.com';
+
+  let userMenuOpen = false;
+  function toggleUserMenu() { userMenuOpen = !userMenuOpen; }
+  function closeUserMenu() { userMenuOpen = false; }
+
+  function initials(name: string): string {
+    return name.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '').join('') || '?';
+  }
 
   $: siteName = settings?.site_name ?? 'Mokultur';
   $: siteLogo = settings?.site_logo ?? null;
@@ -70,6 +81,47 @@
     ? navItems.map(item => ({ label: item.navName, href: item.navTarget }))
     : categories.map(cat => ({ label: cat.name, href: `/category/${cat.slug}` }));
 </script>
+
+<svelte:window on:click={closeUserMenu} />
+
+<style>
+  .navbar-user__avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--site-primary, #f1ff32);
+    color: var(--site-dark, #0a0a0a);
+    border: none; font-weight: 700; font-size: 13px;
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .navbar-user__menu {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    min-width: 200px; padding: 8px 0; z-index: 1050;
+  }
+  .navbar-user__greet { padding: 6px 14px; }
+  .navbar-user__greet small { color: #6b7280; font-size: 11px; display: block; }
+  .navbar-user__greet strong { font-size: 14px; }
+  .navbar-user__menu hr { margin: 4px 0; border-color: #f1f1f1; }
+  .navbar-user__item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 14px; font-size: 13px; color: #111;
+    text-decoration: none; background: none; border: none; width: 100%; text-align: left;
+    cursor: pointer;
+  }
+  .navbar-user__item:hover { background: #f5f5f5; }
+  .navbar-user__item--logout { color: #dc2626; }
+
+  .navbar-login-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--site-primary, #f1ff32);
+    color: var(--site-dark, #0a0a0a);
+    text-decoration: none; font-weight: 600; font-size: 13px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  .navbar-login-btn:hover { filter: brightness(0.95); }
+</style>
 
 <header class="sticky-top navbar-times" class:navbar-times--scrolled={scrolled}>
   <!-- Row 1: Brand bar -->
@@ -139,6 +191,45 @@
                 </a>
               {/each}
             </div>
+          {/if}
+
+          {#if user}
+            <div class="navbar-user" style="position:relative;">
+              <button
+                type="button"
+                class="navbar-user__avatar"
+                aria-label="Menu akun"
+                aria-expanded={userMenuOpen}
+                on:click={toggleUserMenu}
+              >{initials(user.name)}</button>
+
+              {#if userMenuOpen}
+                <div class="navbar-user__menu" role="menu">
+                  <div class="navbar-user__greet">
+                    <small>Halo,</small>
+                    <strong>{user.name}</strong>
+                  </div>
+                  <hr />
+                  <a class="navbar-user__item" href="/profile" role="menuitem" on:click={closeUserMenu}>
+                    <i class="bi bi-person"></i> Profil
+                  </a>
+                  <form method="POST" action="{DASHBOARD_URL}/auth/logout-public" class="d-block">
+                    <button type="submit" class="navbar-user__item navbar-user__item--logout" role="menuitem">
+                      <i class="bi bi-box-arrow-right"></i> Keluar
+                    </button>
+                  </form>
+                </div>
+              {/if}
+            </div>
+          {:else}
+            <a
+              class="navbar-login-btn"
+              href="{DASHBOARD_URL}/auth/google/redirect?from=public"
+              aria-label="Masuk dengan Google"
+            >
+              <i class="bi bi-google"></i>
+              <span class="d-none d-md-inline">Masuk</span>
+            </a>
           {/if}
         </div>
       {/if}

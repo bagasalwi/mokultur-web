@@ -4,17 +4,20 @@
   import { createEventDispatcher } from 'svelte';
 
   export let siteName = 'Mokultur';
+  export let user: AuthUser | null = null;
 
   const dispatch = createEventDispatcher<{ submitted: CurhatanItem }>();
 
   let curhatan = '';
   let curhatanDari = '';
+  let postAsAccount = !!user;
   let loading = false;
   let error = '';
   let success = false;
 
   $: charCount = curhatan.length;
   $: overLimit = charCount > 250;
+  $: effectiveAuthor = postAsAccount && user ? user.name : curhatanDari;
 
   async function handleSubmit(e: Event) {
     e.preventDefault();
@@ -22,22 +25,31 @@
 
     if (!curhatan.trim()) { error = 'Ceritanya jangan kosong ya.'; return; }
     if (overLimit) { error = 'Maksimal 250 karakter.'; return; }
-    if (!curhatanDari.trim()) { error = 'Nama / panggilan wajib diisi.'; return; }
-    if (curhatanDari.length > 30) { error = 'Nama maksimal 30 karakter.'; return; }
+    if (!postAsAccount) {
+      if (!curhatanDari.trim()) { error = 'Nama / panggilan wajib diisi.'; return; }
+      if (curhatanDari.length > 30) { error = 'Nama maksimal 30 karakter.'; return; }
+    }
 
     loading = true;
     try {
       const form = new FormData();
       form.append('curhatan', curhatan.trim());
-      form.append('curhatan_dari', curhatanDari.trim());
+      // Kalau "Posting sebagai akun" aktif, tidak kirim curhatan_dari → Elysia auto pakai user.name dari cookie
+      if (!postAsAccount) {
+        form.append('curhatan_dari', curhatanDari.trim());
+      }
 
-      const res = await fetch(`${PUBLIC_API_URL}/api/curhatan`, { method: 'POST', body: form });
+      const res = await fetch(`${PUBLIC_API_URL}/api/curhatan`, {
+        method: 'POST',
+        body: form,
+        credentials: 'include', // wajib agar cookie .mokultur.com terkirim ke api.mokultur.com
+      });
       const json = await res.json();
 
       if (json.success && json.data) {
         success = true;
         curhatan = '';
-        curhatanDari = '';
+        if (!postAsAccount) curhatanDari = '';
         dispatch('submitted', json.data);
       } else {
         error = json.error ?? 'Terjadi kesalahan, coba lagi.';
@@ -73,22 +85,33 @@
       </div>
     </div>
 
-    <div class="col-12">
-      <div class="collab-field">
-        <div class="collab-field__label-wrap">
-          <label for="curhatan-dari" class="collab-field__label">Dari siapa?</label>
-          <span class="collab-field__hint">Nama samaran juga boleh.</span>
-        </div>
-        <input
-          id="curhatan-dari"
-          type="text"
-          class="collab-field__control"
-          placeholder="Misal: seorang wibu lelah"
-          maxlength="30"
-          bind:value={curhatanDari}
-        />
+    {#if user}
+      <div class="col-12">
+        <label class="curhat-account-toggle">
+          <input type="checkbox" bind:checked={postAsAccount} />
+          <span>Posting sebagai <strong>{user.name}</strong> <em>(akun saya)</em></span>
+        </label>
       </div>
-    </div>
+    {/if}
+
+    {#if !postAsAccount}
+      <div class="col-12">
+        <div class="collab-field">
+          <div class="collab-field__label-wrap">
+            <label for="curhatan-dari" class="collab-field__label">Dari siapa?</label>
+            <span class="collab-field__hint">Nama samaran juga boleh.</span>
+          </div>
+          <input
+            id="curhatan-dari"
+            type="text"
+            class="collab-field__control"
+            placeholder="Misal: seorang wibu lelah"
+            maxlength="30"
+            bind:value={curhatanDari}
+          />
+        </div>
+      </div>
+    {/if}
   </div>
 
   {#if error}
@@ -113,3 +136,14 @@
     Dengan mengirim, kamu setuju tidak melanggar aturan komunitas {siteName}.
   </p>
 </form>
+
+<style>
+  .curhat-account-toggle {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px; background: rgba(241,255,50,0.12);
+    border: 1px solid rgba(241,255,50,0.45); border-radius: 8px;
+    font-size: 13px; cursor: pointer;
+  }
+  .curhat-account-toggle em { color: #6b7280; font-style: normal; }
+  .curhat-account-toggle input { width: 16px; height: 16px; cursor: pointer; }
+</style>

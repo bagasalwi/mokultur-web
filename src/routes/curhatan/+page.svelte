@@ -78,7 +78,7 @@
       </div>
       <div class="col-12 col-lg-7">
         <div class="home-collab-card__panel">
-          <CurhatForm {siteName} on:submitted={handleSubmitted} />
+          <CurhatForm {siteName} user={data.user ?? null} on:submitted={handleSubmitted} />
         </div>
       </div>
     </div>
