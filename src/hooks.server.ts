@@ -17,6 +17,11 @@ export const handle: Handle = async ({ event, resolve }) => {
           name: String(payload.name ?? ''),
           email: String(payload.email ?? ''),
           role: String(payload.role ?? 'user'),
+          img: payload.img ? String(payload.img) : null,
+          username: payload.username ? String(payload.username) : null,
+          description: payload.description ? String(payload.description) : null,
+          instagram: payload.instagram ? String(payload.instagram) : null,
+          facebook: payload.facebook ? String(payload.facebook) : null,
         };
       }
     } catch {

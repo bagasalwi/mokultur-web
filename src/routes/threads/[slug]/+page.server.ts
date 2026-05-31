@@ -1,10 +1,10 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { PUBLIC_API_URL } from '$env/static/public';
-import { fetchForumThread } from '$lib/forum';
+import { fetchThread } from '$lib/threads';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
-  const thread = await fetchForumThread(fetch, params.slug);
+  const thread = await fetchThread(fetch, params.slug);
   if (!thread) throw error(404, 'Thread tidak ditemukan');
   return { thread };
 };
@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 export const actions: Actions = {
   reply: async ({ request, cookies, fetch, params, locals }) => {
     if (!locals.user) {
-      throw redirect(303, `/auth/login?redirect=/forum/${params.slug}`);
+      throw redirect(303, `/auth/login?redirect=/threads/${params.slug}`);
     }
 
     const fd = await request.formData();
@@ -23,7 +23,7 @@ export const actions: Actions = {
     if (body.length > 5000) return fail(400, { error: 'Balasan maksimal 5000 karakter.' });
 
     const token = cookies.get('mokultur_token') ?? '';
-    const res = await fetch(`${PUBLIC_API_URL}/api/forum/threads/${threadId}/replies`, {
+    const res = await fetch(`${PUBLIC_API_URL}/api/threads/${threadId}/replies`, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',

@@ -13,6 +13,10 @@ export type AuthApiUser = {
   email: string;
   role: string;
   img?: string | null;
+  username?: string | null;
+  description?: string | null;
+  instagram?: string | null;
+  facebook?: string | null;
 };
 
 export async function signSessionJwt(user: AuthApiUser): Promise<string> {
@@ -20,6 +24,11 @@ export async function signSessionJwt(user: AuthApiUser): Promise<string> {
     email: user.email,
     name: user.name,
     role: user.role,
+    img: user.img ?? null,
+    username: user.username ?? null,
+    description: user.description ?? null,
+    instagram: user.instagram ?? null,
+    facebook: user.facebook ?? null,
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setSubject(String(user.id))

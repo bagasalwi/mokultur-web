@@ -14,6 +14,11 @@ declare global {
     name: string;
     email: string;
     role: string;
+    img: string | null;
+    username: string | null;
+    description: string | null;
+    instagram: string | null;
+    facebook: string | null;
   }
 }
 

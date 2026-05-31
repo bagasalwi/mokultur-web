@@ -1,7 +1,15 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { tick, onMount } from 'svelte';
+  import { PUBLIC_API_URL } from '$env/static/public';
   import type { SiteSettings, SocialMediaItem, NavbarItem, Category } from '$lib/api';
+
+  function avatarUrl(img: string | null | undefined): string | null {
+    if (!img) return null;
+    if (img.startsWith('http://') || img.startsWith('https://')) return img;
+    if (img.startsWith('/uploads/')) return `${PUBLIC_API_URL}${img}`;
+    return img;
+  }
 
   let scrolled = false;
 
@@ -91,7 +99,10 @@
     color: var(--site-dark, #0a0a0a);
     border: none; font-weight: 700; font-size: 13px;
     display: inline-flex; align-items: center; justify-content: center;
-    cursor: pointer;
+    cursor: pointer; overflow: hidden; padding: 0;
+  }
+  .navbar-user__avatar img {
+    width: 100%; height: 100%; object-fit: cover;
   }
   .navbar-user__menu {
     position: absolute; top: calc(100% + 8px); right: 0;
@@ -201,7 +212,13 @@
                 aria-label="Menu akun"
                 aria-expanded={userMenuOpen}
                 on:click={toggleUserMenu}
-              >{initials(user.name)}</button>
+              >
+                {#if user.img}
+                  <img src={avatarUrl(user.img)} alt={user.name} />
+                {:else}
+                  {initials(user.name)}
+                {/if}
+              </button>
 
               {#if userMenuOpen}
                 <div class="navbar-user__menu" role="menu">
@@ -210,8 +227,8 @@
                     <strong>{user.name}</strong>
                   </div>
                   <hr />
-                  <a class="navbar-user__item" href="/profile" role="menuitem" on:click={closeUserMenu}>
-                    <i class="bi bi-person"></i> Profil
+                  <a class="navbar-user__item" href="/account" role="menuitem" on:click={closeUserMenu}>
+                    <i class="bi bi-person-gear"></i> Pengaturan Akun
                   </a>
                   <form method="POST" action="/auth/logout" class="d-block">
                     <button type="submit" class="navbar-user__item navbar-user__item--logout" role="menuitem">

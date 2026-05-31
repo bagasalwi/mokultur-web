@@ -1,10 +1,13 @@
 import { PUBLIC_API_URL } from '$env/static/public';
 
-export type ForumThread = {
+export type Thread = {
   id: number;
   slug: string;
-  title: string;
+  title: string | null;
   body: string | null;
+  imagePath: string | null;
+  imageWidth: number | null;
+  imageHeight: number | null;
   status: string;
   isPinned: boolean | number;
   viewCount: number;
@@ -20,7 +23,7 @@ export type ForumThread = {
   authorImg: string | null;
 };
 
-export type ForumReply = {
+export type ThreadReply = {
   id: number;
   body: string;
   status: string;
@@ -31,7 +34,7 @@ export type ForumReply = {
   authorImg: string | null;
 };
 
-export type ForumThreadDetail = ForumThread & { replies: ForumReply[] };
+export type ThreadDetail = Thread & { replies: ThreadReply[] };
 
 export type AnimeOption = {
   id: number;
@@ -44,33 +47,41 @@ export type AnimeOption = {
 
 type FetchFn = typeof fetch;
 
-export async function fetchForumThreads(
+export async function fetchThreads(
   fetch: FetchFn,
   opts: { page?: number; perPage?: number; animeId?: number } = {},
-): Promise<{ data: ForumThread[]; meta: { total: number; page: number; perPage: number; hasMore: boolean } }> {
+): Promise<{ data: Thread[]; meta: { total: number; page: number; perPage: number; hasMore: boolean } }> {
   const params = new URLSearchParams();
   if (opts.page) params.set('page', String(opts.page));
   if (opts.perPage) params.set('perPage', String(opts.perPage));
   if (opts.animeId) params.set('animeId', String(opts.animeId));
 
-  const res = await fetch(`${PUBLIC_API_URL}/api/forum/threads?${params}`);
-  if (!res.ok) throw new Error(`Forum list ${res.status}`);
+  const qs = params.toString();
+  const res = await fetch(`${PUBLIC_API_URL}/api/threads${qs ? `?${qs}` : ''}`);
+  if (!res.ok) throw new Error(`Threads list ${res.status}`);
   return res.json();
 }
 
-export async function fetchForumThread(fetch: FetchFn, slug: string): Promise<ForumThreadDetail | null> {
-  const res = await fetch(`${PUBLIC_API_URL}/api/forum/threads/${encodeURIComponent(slug)}`);
+export async function fetchThread(fetch: FetchFn, slug: string): Promise<ThreadDetail | null> {
+  const res = await fetch(`${PUBLIC_API_URL}/api/threads/${encodeURIComponent(slug)}`);
   if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`Forum thread ${res.status}`);
+  if (!res.ok) throw new Error(`Thread ${res.status}`);
   const json = await res.json();
   return json.data;
 }
 
 export async function fetchAnimeOptions(fetch: FetchFn): Promise<AnimeOption[]> {
-  const res = await fetch(`${PUBLIC_API_URL}/api/forum/anime-options`);
+  const res = await fetch(`${PUBLIC_API_URL}/api/threads/anime-options`);
   if (!res.ok) return [];
   const json = await res.json();
   return json.data;
+}
+
+export function imgUrl(path: string | null | undefined): string | null {
+  if (!path) return null;
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  if (path.startsWith('/uploads/')) return `${PUBLIC_API_URL}${path}`;
+  return path;
 }
 
 export function formatRelative(input: string | null): string {
