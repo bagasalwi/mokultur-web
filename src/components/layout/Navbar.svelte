@@ -213,7 +213,7 @@
                   <a class="navbar-user__item" href="/profile" role="menuitem" on:click={closeUserMenu}>
                     <i class="bi bi-person"></i> Profil
                   </a>
-                  <form method="POST" action="{DASHBOARD_URL}/auth/logout-public" class="d-block">
+                  <form method="POST" action="/auth/logout" class="d-block">
                     <button type="submit" class="navbar-user__item navbar-user__item--logout" role="menuitem">
                       <i class="bi bi-box-arrow-right"></i> Keluar
                     </button>
@@ -222,12 +222,8 @@
               {/if}
             </div>
           {:else}
-            <a
-              class="navbar-login-btn"
-              href="{DASHBOARD_URL}/auth/google/redirect?from=public"
-              aria-label="Masuk dengan Google"
-            >
-              <i class="bi bi-google"></i>
+            <a class="navbar-login-btn" href="/auth/login" aria-label="Masuk">
+              <i class="bi bi-box-arrow-in-right"></i>
               <span class="d-none d-md-inline">Masuk</span>
             </a>
           {/if}
