@@ -11,15 +11,16 @@
   $: user = data.user;
   $: siteName = data.settings?.site_name ?? 'Mokultur';
   $: snippet = (thread.body ?? '').slice(0, 160);
+  $: handle = thread.authorUsername || (thread.authorId ? `u${thread.authorId}` : 'user');
 </script>
 
 <svelte:head>
   <title>{thread.authorName ?? 'Thread'} · MokuThreads · {siteName}</title>
-  <meta name="description" content={snippet || (thread.title ?? 'Thread di MokuThreads')} />
+  <meta name="description" content={snippet || 'Thread di MokuThreads'} />
 </svelte:head>
 
 <section class="mt-detail">
-  <div class="container-xl">
+  <div class="container-xl mt-detail__wrap">
     <a href="/threads" class="mt-back">← Kembali ke feed</a>
 
     <article class="mt-thread">
@@ -33,10 +34,12 @@
 
       <div class="mt-thread__body">
         <div class="mt-thread__head">
-          <strong>{thread.authorName ?? 'Admin'}</strong>
-          <span>· {formatRelative(thread.createdAt)}</span>
+          <div class="mt-thread__author">
+            <strong>{thread.authorName ?? 'User'}</strong>
+            <span class="mt-thread__handle">@{handle}</span>
+          </div>
+          <span class="mt-thread__time">· {formatRelative(thread.createdAt)}</span>
           {#if thread.animeTitle}<span class="mt-pill">{thread.animeTitle}</span>{/if}
-          <span class="mt-thread__views"><i class="bi bi-eye"></i> {thread.viewCount}</span>
         </div>
 
         {#if thread.body}
@@ -48,6 +51,11 @@
             <img src={imgUrl(thread.imagePath)} alt="" />
           </div>
         {/if}
+
+        <div class="mt-thread__stats">
+          <span><i class="bi bi-chat"></i> {thread.replyCount}</span>
+          <span><i class="bi bi-eye"></i> {thread.viewCount}</span>
+        </div>
       </div>
     </article>
 
@@ -66,6 +74,7 @@
           <div class="mt-reply__body">
             <div class="mt-reply__meta">
               <strong>{r.authorName ?? 'User'}</strong>
+              {#if r.authorUsername}<span class="mt-reply__handle">@{r.authorUsername}</span>{/if}
               <span>· {formatRelative(r.createdAt)}</span>
             </div>
             <p class="mt-reply__text">{r.body}</p>
@@ -107,16 +116,17 @@
       </form>
     {:else}
       <div class="mt-reply-cta">
-        <p>Mau ikut diskusi? <a href="/auth/login?redirect=/threads/{thread.slug}">Masuk dulu</a> ya.</p>
+        <p>Mau ikut diskusi? <a href="/auth/login?redirect=/threads/@{handle}/{thread.id}">Masuk dulu</a> ya.</p>
       </div>
     {/if}
   </div>
 </section>
 
 <style>
-  .mt-detail { padding: 24px 0 60px; }
+  .mt-detail { padding: 20px 0 60px; }
+  .mt-detail__wrap { max-width: 720px; }
   .mt-back {
-    display: inline-block; margin-bottom: 16px;
+    display: inline-block; margin-bottom: 14px;
     font-size: 13px; color: #4b5563; text-decoration: none;
   }
   .mt-back:hover { text-decoration: underline; }
@@ -125,15 +135,14 @@
     display: flex; gap: 14px;
     background: #fff;
     border-radius: 14px;
-    padding: 22px;
-    max-width: 720px; margin: 0 auto;
+    padding: 20px;
     border: 1px solid #e5e7eb;
   }
   .mt-thread__avatar {
-    width: 52px; height: 52px; border-radius: 50%;
+    width: 48px; height: 48px; border-radius: 50%;
     background: var(--site-primary, #f1ff32);
     color: var(--site-dark, #0a0a0a);
-    font-weight: 700; font-size: 17px;
+    font-weight: 700; font-size: 16px;
     display: inline-flex; align-items: center; justify-content: center;
     flex-shrink: 0; overflow: hidden;
   }
@@ -141,26 +150,36 @@
 
   .mt-thread__body { flex: 1; min-width: 0; }
   .mt-thread__head {
-    display: flex; flex-wrap: wrap; align-items: center;
-    gap: 8px; font-size: 13px; color: #6b7280;
+    display: flex; flex-wrap: wrap; align-items: baseline;
+    gap: 6px; font-size: 13px; color: #6b7280;
     margin-bottom: 10px;
   }
+  .mt-thread__author {
+    display: inline-flex; align-items: baseline; gap: 6px;
+    min-width: 0;
+  }
   .mt-thread__head strong { color: #111; font-weight: 600; font-size: 15px; }
-  .mt-thread__views { margin-left: auto; font-size: 12px; }
-  .mt-thread__views i { margin-right: 4px; }
+  .mt-thread__handle { color: #6b7280; font-size: 13px; }
+  .mt-thread__time { font-size: 12px; }
   .mt-thread__text {
-    color: #111; font-size: 17px; line-height: 1.6;
+    color: #111; font-size: 16px; line-height: 1.6;
     white-space: pre-wrap; word-wrap: break-word;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
   }
   .mt-thread__media {
     border-radius: 14px; overflow: hidden;
     border: 1px solid #e5e7eb;
+    margin-bottom: 12px;
   }
   .mt-thread__media img {
     width: 100%; max-height: 600px;
     object-fit: cover; display: block;
   }
+  .mt-thread__stats {
+    display: flex; gap: 18px;
+    font-size: 13px; color: #6b7280;
+  }
+  .mt-thread__stats i { margin-right: 4px; }
 
   .mt-pill {
     background: #f3f4f6; color: #374151;
@@ -168,13 +187,10 @@
     font-size: 11px; font-weight: 500;
   }
 
-  .mt-reply-heading {
-    font-size: 17px; margin: 32px auto 16px;
-    max-width: 720px;
-  }
+  .mt-reply-heading { font-size: 16px; margin: 28px 0 14px; font-weight: 700; }
+
   .mt-reply-list {
     list-style: none; padding: 0; margin: 0;
-    max-width: 720px; margin: 0 auto;
     display: flex; flex-direction: column; gap: 10px;
   }
   .mt-reply {
@@ -194,8 +210,12 @@
   }
   .mt-reply__avatar img { width: 100%; height: 100%; object-fit: cover; }
   .mt-reply__body { flex: 1; min-width: 0; }
-  .mt-reply__meta { font-size: 12px; color: #6b7280; margin-bottom: 2px; }
+  .mt-reply__meta {
+    font-size: 12px; color: #6b7280; margin-bottom: 2px;
+    display: flex; align-items: baseline; gap: 5px; flex-wrap: wrap;
+  }
   .mt-reply__meta strong { color: #111; font-weight: 600; }
+  .mt-reply__handle { color: #6b7280; }
   .mt-reply__text {
     color: #1f2937; font-size: 14px; line-height: 1.5;
     margin: 0; white-space: pre-wrap; word-wrap: break-word;
@@ -204,11 +224,10 @@
     text-align: center; color: #6b7280;
     padding: 20px; font-size: 14px;
     background: #f9fafb; border-radius: 10px;
-    max-width: 720px; margin: 0 auto;
   }
 
   .mt-locked, .mt-reply-cta {
-    margin: 20px auto; max-width: 720px;
+    margin: 18px 0;
     padding: 14px 16px;
     border-radius: 10px; text-align: center; font-size: 14px;
   }
@@ -217,7 +236,7 @@
   .mt-reply-cta a { color: var(--site-dark, #111); font-weight: 600; }
 
   .mt-reply-form {
-    margin: 20px auto 0; max-width: 720px;
+    margin: 18px 0 0;
     background: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
@@ -249,5 +268,12 @@
   .mt-btn--primary {
     background: var(--site-primary, #f1ff32);
     color: var(--site-dark, #0a0a0a);
+  }
+
+  @media (max-width: 540px) {
+    .mt-thread { padding: 16px; gap: 12px; }
+    .mt-thread__avatar { width: 42px; height: 42px; font-size: 14px; }
+    .mt-thread__text { font-size: 15px; }
+    .mt-thread__media img { max-height: 420px; }
   }
 </style>

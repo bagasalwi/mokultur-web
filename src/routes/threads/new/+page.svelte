@@ -118,11 +118,14 @@
   .mt-back:hover { text-decoration: underline; }
 
   .mt-new__card {
-    max-width: 640px; margin: 0 auto;
+    max-width: 600px; margin: 0 auto;
     background: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 16px;
-    padding: 26px;
+    padding: 24px;
+  }
+  @media (max-width: 540px) {
+    .mt-new__card { padding: 18px; border-radius: 12px; }
   }
   .mt-new__card h1 { font-size: 22px; margin: 0 0 4px; font-weight: 700; }
   .mt-new__hint { color: #6b7280; font-size: 13px; margin: 0 0 16px; }
@@ -167,10 +170,14 @@
   .mt-new__pick {
     display: flex; flex-direction: column; align-items: center;
     justify-content: center; gap: 4px;
-    min-height: 140px; padding: 16px;
+    min-height: 130px; padding: 16px;
     border: 2px dashed #d1d5db; border-radius: 12px;
     cursor: pointer; color: #6b7280; font-size: 13px;
     background: #fafafa; overflow: hidden;
+  }
+  @media (max-width: 540px) {
+    .mt-new__pick { min-height: 110px; }
+    .mt-new__pick i { font-size: 26px; }
   }
   .mt-new__pick:hover { border-color: var(--site-primary, #f1ff32); background: #fff; }
   .mt-new__pick i { font-size: 32px; }

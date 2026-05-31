@@ -20,6 +20,7 @@ export type Thread = {
   animeImg: string | null;
   authorId: number | null;
   authorName: string | null;
+  authorUsername: string | null;
   authorImg: string | null;
 };
 
@@ -31,6 +32,7 @@ export type ThreadReply = {
   createdAt: string | null;
   authorId: number | null;
   authorName: string | null;
+  authorUsername: string | null;
   authorImg: string | null;
 };
 
@@ -62,10 +64,17 @@ export async function fetchThreads(
   return res.json();
 }
 
-export async function fetchThread(fetch: FetchFn, slug: string): Promise<ThreadDetail | null> {
-  const res = await fetch(`${PUBLIC_API_URL}/api/threads/${encodeURIComponent(slug)}`);
+export async function fetchThread(fetch: FetchFn, id: number): Promise<ThreadDetail | null> {
+  const res = await fetch(`${PUBLIC_API_URL}/api/threads/${id}`);
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Thread ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+export async function fetchTopThreads(fetch: FetchFn, limit = 5): Promise<Thread[]> {
+  const res = await fetch(`${PUBLIC_API_URL}/api/threads/top?limit=${limit}`);
+  if (!res.ok) return [];
   const json = await res.json();
   return json.data;
 }
@@ -77,10 +86,30 @@ export async function fetchAnimeOptions(fetch: FetchFn): Promise<AnimeOption[]> 
   return json.data;
 }
 
+export function authorHandle(
+  t: { authorUsername?: string | null; authorId?: number | null } | null | undefined,
+): string {
+  if (!t) return 'user';
+  return t.authorUsername || (t.authorId ? `u${t.authorId}` : 'user');
+}
+
+export function threadUrl(t: {
+  id: number;
+  authorUsername?: string | null;
+  authorId?: number | null;
+}): string {
+  return `/threads/@${authorHandle(t)}/${t.id}`;
+}
+
 export function imgUrl(path: string | null | undefined): string | null {
   if (!path) return null;
   if (path.startsWith('http://') || path.startsWith('https://')) return path;
   if (path.startsWith('/uploads/')) return `${PUBLIC_API_URL}${path}`;
+  // legacy Laravel storage path
+  if (path.startsWith('storage/') || path.startsWith('/storage/')) {
+    const p = path.startsWith('/') ? path : `/${path}`;
+    return `https://mokultur.com${p}`;
+  }
   return path;
 }
 

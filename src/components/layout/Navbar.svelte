@@ -8,6 +8,11 @@
     if (!img) return null;
     if (img.startsWith('http://') || img.startsWith('https://')) return img;
     if (img.startsWith('/uploads/')) return `${PUBLIC_API_URL}${img}`;
+    // legacy Laravel storage path (e.g. "storage/profile/xxx.jpg")
+    if (img.startsWith('storage/') || img.startsWith('/storage/')) {
+      const p = img.startsWith('/') ? img : `/${img}`;
+      return `https://mokultur.com${p}`;
+    }
     return img;
   }
 

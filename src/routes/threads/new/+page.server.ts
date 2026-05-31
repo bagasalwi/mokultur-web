@@ -53,6 +53,7 @@ export const actions: Actions = {
     }
 
     const { data } = await res.json();
-    throw redirect(303, `/threads/${data.slug}`);
+    const handle = data.authorUsername || `u${locals.user.id}`;
+    throw redirect(303, `/threads/@${handle}/${data.id}`);
   },
 };

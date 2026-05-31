@@ -1,23 +1,33 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { PUBLIC_API_URL } from '$env/static/public';
-import { fetchThread } from '$lib/threads';
+import { fetchThread, threadUrl } from '$lib/threads';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
-  const thread = await fetchThread(fetch, params.slug);
+  const id = Number(params.id);
+  if (!Number.isFinite(id) || id <= 0) throw error(404, 'Thread tidak ditemukan');
+
+  const thread = await fetchThread(fetch, id);
   if (!thread) throw error(404, 'Thread tidak ditemukan');
+
+  // Canonical handle: if URL @username doesn't match actual author, 301 redirect
+  const canonicalHandle = thread.authorUsername || (thread.authorId ? `u${thread.authorId}` : 'user');
+  if (params.username !== canonicalHandle) {
+    throw redirect(301, threadUrl(thread));
+  }
+
   return { thread };
 };
 
 export const actions: Actions = {
   reply: async ({ request, cookies, fetch, params, locals }) => {
     if (!locals.user) {
-      throw redirect(303, `/auth/login?redirect=/threads/${params.slug}`);
+      throw redirect(303, `/auth/login?redirect=/threads/@${params.username}/${params.id}`);
     }
 
     const fd = await request.formData();
     const body = String(fd.get('body') ?? '').trim();
-    const threadId = String(fd.get('thread_id') ?? '');
+    const threadId = String(fd.get('thread_id') ?? params.id);
 
     if (!body) return fail(400, { error: 'Balasan tidak boleh kosong.' });
     if (body.length > 5000) return fail(400, { error: 'Balasan maksimal 5000 karakter.' });
