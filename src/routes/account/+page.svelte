@@ -18,11 +18,6 @@
     avatarPreview = URL.createObjectURL(f);
   }
 
-  function alertFor(section: string) {
-    if (!form) return null;
-    if (form.section !== section) return null;
-    return form;
-  }
 </script>
 
 <svelte:head>
@@ -37,15 +32,25 @@
       <p>Update profil, avatar, dan keamanan akun.</p>
     </header>
 
+    <div class="acc-grid">
+      <div class="acc-col">
     <!-- Profile -->
     <div class="acc-card">
       <h2><i class="bi bi-person"></i> Profil</h2>
 
-      {#if alertFor('profile') as a}
-        <div class="acc-alert" class:acc-alert--ok={a.success}>{a.error ?? a.success}</div>
+      {#if form?.section === 'profile'}
+        <div class="acc-alert" class:acc-alert--ok={form.success}>{form.error ?? form.success}</div>
       {/if}
 
-      <form method="POST" action="?/profile" class="acc-form" use:enhance>
+      <form
+        method="POST"
+        action="?/profile"
+        class="acc-form"
+        use:enhance={() => async ({ result, update }) => {
+          await update({ reset: false });
+          if (result.type === 'success') await invalidateAll();
+        }}
+      >
         <label class="acc-field">
           <span>Nama</span>
           <input type="text" name="name" required minlength="2" maxlength="100" value={profile.name} />
@@ -93,12 +98,15 @@
       </form>
     </div>
 
+      </div>
+
+      <div class="acc-col">
     <!-- Avatar -->
     <div class="acc-card">
       <h2><i class="bi bi-image"></i> Foto Profil</h2>
 
-      {#if alertFor('avatar') as a}
-        <div class="acc-alert" class:acc-alert--ok={a.success}>{a.error ?? a.success}</div>
+      {#if form?.section === 'avatar'}
+        <div class="acc-alert" class:acc-alert--ok={form.success}>{form.error ?? form.success}</div>
       {/if}
 
       <form
@@ -152,8 +160,8 @@
     <div class="acc-card">
       <h2><i class="bi bi-shield-lock"></i> Ganti Password</h2>
 
-      {#if alertFor('password') as a}
-        <div class="acc-alert" class:acc-alert--ok={a.success}>{a.error ?? a.success}</div>
+      {#if form?.section === 'password'}
+        <div class="acc-alert" class:acc-alert--ok={form.success}>{form.error ?? form.success}</div>
       {/if}
 
       <form method="POST" action="?/password" class="acc-form" use:enhance={() => async ({ result, update, formElement }) => {
@@ -181,21 +189,32 @@
         </div>
       </form>
     </div>
+      </div>
+    </div>
   </div>
 </section>
 
 <style>
-  .acc-page { padding: 32px 0 60px; }
-  .acc-head { max-width: 720px; margin: 0 auto 24px; }
-  .acc-head h1 { font-size: 26px; margin: 0; }
+  .acc-page { padding: 24px 0 40px; }
+  .acc-head { max-width: 1040px; margin: 0 auto 18px; }
+  .acc-head h1 { font-size: 24px; margin: 0; }
   .acc-head p { color: #6b7280; margin: 4px 0 0; }
 
+  .acc-grid {
+    max-width: 1040px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 18px; align-items: start;
+  }
+  .acc-col { display: flex; flex-direction: column; gap: 18px; }
+  @media (max-width: 860px) {
+    .acc-grid { grid-template-columns: 1fr; }
+  }
+
   .acc-card {
-    max-width: 720px; margin: 0 auto 18px;
     background: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 14px;
-    padding: 22px;
+    padding: 20px;
   }
   .acc-card h2 {
     font-size: 17px; margin: 0 0 14px;

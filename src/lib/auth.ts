@@ -1,7 +1,9 @@
 import { SignJWT } from 'jose';
 import type { Cookies } from '@sveltejs/kit';
+import { dev } from '$app/environment';
+import { env } from '$env/dynamic/private';
 
-const SECRET_BYTES = new TextEncoder().encode(process.env.JWT_SECRET ?? '');
+const SECRET_BYTES = new TextEncoder().encode(env.JWT_SECRET ?? '');
 export const COOKIE_NAME = 'mokultur_token';
 export const COOKIE_DOMAIN = '.mokultur.com';
 export const COOKIE_TTL_DAYS = 30;
@@ -41,9 +43,9 @@ export async function setSessionCookie(cookies: Cookies, user: AuthApiUser): Pro
   const token = await signSessionJwt(user);
   cookies.set(COOKIE_NAME, token, {
     path: '/',
-    domain: COOKIE_DOMAIN,
+    domain: dev ? undefined : COOKIE_DOMAIN,
     httpOnly: true,
-    secure: true,
+    secure: !dev,
     sameSite: 'lax',
     maxAge: COOKIE_TTL_SECONDS,
   });
@@ -52,6 +54,6 @@ export async function setSessionCookie(cookies: Cookies, user: AuthApiUser): Pro
 export function clearSessionCookie(cookies: Cookies): void {
   cookies.delete(COOKIE_NAME, {
     path: '/',
-    domain: COOKIE_DOMAIN,
+    domain: dev ? undefined : COOKIE_DOMAIN,
   });
 }

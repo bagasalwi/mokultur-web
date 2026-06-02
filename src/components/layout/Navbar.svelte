@@ -33,7 +33,7 @@
   const DASHBOARD_URL = 'https://dashboard.mokultur.com';
 
   let userMenuOpen = false;
-  function toggleUserMenu() { userMenuOpen = !userMenuOpen; }
+  function toggleUserMenu(e: MouseEvent) { e.stopPropagation(); userMenuOpen = !userMenuOpen; }
   function closeUserMenu() { userMenuOpen = false; }
 
   function initials(name: string): string {
@@ -129,8 +129,8 @@
   .navbar-user__item--logout { color: #dc2626; }
 
   .navbar-login-btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 12px; border-radius: 999px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 0 14px; height: 34px; border-radius: 999px;
     background: var(--site-primary, #f1ff32);
     color: var(--site-dark, #0a0a0a);
     text-decoration: none; font-weight: 600; font-size: 13px;
@@ -226,7 +226,7 @@
               </button>
 
               {#if userMenuOpen}
-                <div class="navbar-user__menu" role="menu">
+                <div class="navbar-user__menu" role="menu" on:click|stopPropagation on:keydown>
                   <div class="navbar-user__greet">
                     <small>Halo,</small>
                     <strong>{user.name}</strong>

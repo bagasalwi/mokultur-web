@@ -1,14 +1,15 @@
 import type { Handle } from '@sveltejs/kit';
 import { jwtVerify } from 'jose';
+import { env } from '$env/dynamic/private';
 
 const COOKIE_NAME = 'mokultur_token';
-const SECRET_BYTES = new TextEncoder().encode(process.env.JWT_SECRET ?? '');
+const SECRET_BYTES = new TextEncoder().encode(env.JWT_SECRET ?? '');
 
 export const handle: Handle = async ({ event, resolve }) => {
   event.locals.user = null;
 
   const token = event.cookies.get(COOKIE_NAME);
-  if (token && process.env.JWT_SECRET) {
+  if (token && env.JWT_SECRET) {
     try {
       const { payload } = await jwtVerify(token, SECRET_BYTES);
       if (payload.sub) {

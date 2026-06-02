@@ -1,11 +1,12 @@
 import type { PageServerLoad } from './$types';
 import { listArticles, getPopularTags, getPopularArticles, listWriters, getAd, listCurhatan } from '$lib/api';
+import { fetchTopThreads } from '$lib/threads';
 
-export const load: PageServerLoad = async ({ setHeaders, url }) => {
+export const load: PageServerLoad = async ({ setHeaders, url, fetch }) => {
   const preview = url.searchParams.get('preview_ads') === 'true';
   if (!preview) setHeaders({ 'cache-control': 'public, max-age=60, stale-while-revalidate=300' });
 
-  const [headlinesRes, latestRes, moreRes, tagsRes, popularRes, eventRes, writersRes, techRes, ad0Res, ad1Res, ad2Res, ad3Res, curhatanRes] = await Promise.allSettled([
+  const [headlinesRes, latestRes, moreRes, tagsRes, popularRes, eventRes, writersRes, techRes, ad0Res, ad1Res, ad2Res, ad3Res, curhatanRes, threadsRes] = await Promise.allSettled([
     listArticles({ page: 1, perPage: 6 }),
     listArticles({ page: 1, perPage: 15 }),
     listArticles({ page: 2, perPage: 20 }),
@@ -19,6 +20,7 @@ export const load: PageServerLoad = async ({ setHeaders, url }) => {
     getAd('ad_2', preview),
     getAd('ad_3', preview),
     listCurhatan({ perPage: 6 }),
+    fetchTopThreads(fetch, 4),
   ]);
 
   const headlines = headlinesRes.status === 'fulfilled' ? headlinesRes.value.data : [];
@@ -42,5 +44,6 @@ export const load: PageServerLoad = async ({ setHeaders, url }) => {
     adSidebar: ad2Res.status === 'fulfilled' ? (ad2Res.value?.data ?? null) : null,
     adBottom: ad3Res.status === 'fulfilled' ? (ad3Res.value?.data ?? null) : null,
     homeCurhatan: curhatanRes.status === 'fulfilled' ? curhatanRes.value.data : [],
+    trendingThreads: threadsRes.status === 'fulfilled' ? threadsRes.value : [],
   };
 };

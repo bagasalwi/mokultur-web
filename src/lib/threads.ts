@@ -12,21 +12,33 @@ export type Thread = {
   isPinned: boolean | number;
   viewCount: number;
   replyCount: number;
+  likeCount: number;
   lastReplyAt: string | null;
   createdAt: string | null;
   animeId: number | null;
   animeMalId: number | null;
   animeTitle: string | null;
   animeImg: string | null;
+  articlePostId: number | null;
+  articleTitle: string | null;
+  articleSlug: string | null;
+  articleImg: string | null;
   authorId: number | null;
   authorName: string | null;
   authorUsername: string | null;
   authorImg: string | null;
+  topReply?: ThreadReply | null;
 };
 
 export type ThreadReply = {
   id: number;
+  threadId: number;
   body: string;
+  imagePath: string | null;
+  imageWidth: number | null;
+  imageHeight: number | null;
+  likeCount: number;
+  viewCount: number;
   status: string;
   parentReplyId: number | null;
   createdAt: string | null;
@@ -34,9 +46,11 @@ export type ThreadReply = {
   authorName: string | null;
   authorUsername: string | null;
   authorImg: string | null;
+  likedByMe?: boolean;
+  children?: ThreadReply[];
 };
 
-export type ThreadDetail = Thread & { replies: ThreadReply[] };
+export type ThreadDetail = Thread & { replies: ThreadReply[]; liked?: boolean };
 
 export type AnimeOption = {
   id: number;
@@ -79,11 +93,32 @@ export async function fetchTopThreads(fetch: FetchFn, limit = 5): Promise<Thread
   return json.data;
 }
 
-export async function fetchAnimeOptions(fetch: FetchFn): Promise<AnimeOption[]> {
-  const res = await fetch(`${PUBLIC_API_URL}/api/threads/anime-options`);
+export async function fetchAnimeOptions(fetch: FetchFn, q = ''): Promise<AnimeOption[]> {
+  const qs = q.trim() ? `?q=${encodeURIComponent(q.trim())}` : '';
+  const res = await fetch(`${PUBLIC_API_URL}/api/threads/anime-options${qs}`);
   if (!res.ok) return [];
   const json = await res.json();
   return json.data;
+}
+
+export type ArticleOption = {
+  id: number;
+  title: string;
+  slug: string;
+  img: string | null;
+};
+
+export async function fetchArticleOptions(fetch: FetchFn, q = ''): Promise<ArticleOption[]> {
+  const qs = q.trim() ? `?q=${encodeURIComponent(q.trim())}` : '';
+  const res = await fetch(`${PUBLIC_API_URL}/api/threads/article-options${qs}`);
+  if (!res.ok) return [];
+  const json = await res.json();
+  return json.data;
+}
+
+export function articleUrl(t: { articlePostId: number | null; articleSlug: string | null }): string | null {
+  if (!t.articlePostId) return null;
+  return `/article/${t.articlePostId}/${t.articleSlug ?? ''}`;
 }
 
 export function authorHandle(
@@ -98,7 +133,7 @@ export function threadUrl(t: {
   authorUsername?: string | null;
   authorId?: number | null;
 }): string {
-  return `/threads/@${authorHandle(t)}/${t.id}`;
+  return `/lounge/@${authorHandle(t)}/${t.id}`;
 }
 
 export function imgUrl(path: string | null | undefined): string | null {

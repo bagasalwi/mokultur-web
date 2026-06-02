@@ -2,8 +2,9 @@
   import type { PageData } from './$types';
   import ArticleCard from '$components/articles/ArticleCard.svelte';
   import PopularTags from '$components/common/PopularTags.svelte';
-  import HeroCinematic from '$components/hero/HeroCinematic.svelte';
+  import Hero from '$components/hero/Hero.svelte';
   import EventSection from '$components/home/EventSection.svelte';
+  import MokuThreadsPromo from '$components/home/MokuThreadsPromo.svelte';
   import SocialMediaCard from '$components/common/SocialMediaCard.svelte';
   import PopularArticlesCard from '$components/common/PopularArticlesCard.svelte';
   import WritersCard from '$components/home/WritersCard.svelte';
@@ -70,11 +71,13 @@
     <AdBanner ad={data.adTop} adSlot="ad_0" />
   </div>
 
-  <HeroCinematic articles={data.headlines} />
+  <Hero articles={data.headlines} type={data.settings?.hero_type ?? 'cinematic'} />
 
   <div class="container-xl">
     <AdBanner ad={data.adMid} adSlot="ad_1" />
   </div>
+
+  <MokuThreadsPromo {siteName} threads={data.trendingThreads} />
 
   <EventSection articles={data.eventArticles} />
 
