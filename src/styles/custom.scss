@@ -5276,32 +5276,22 @@ header.sticky-top {
 // =============================================================================
 
 #burgerBtn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.35rem 0.75rem 0.35rem 0.5rem;
-    border-radius: 50px;
-    border: 1.5px solid rgba(0, 0, 0, 0.12);
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    border: none;
     background: transparent;
     color: var(--navbar-text, #1a1a1a);
-    font-size: 0.8rem;
-    font-weight: 600;
-    width: auto;
-    height: auto;
     @include transition-default;
 
     &:hover {
-        background: rgba(0, 0, 0, 0.05);
-        border-color: rgba(0, 0, 0, 0.2);
+        background-color: var(--site-primary, #{$mokultur-yellow});
+        color: #0a0a0a;
     }
 
     &:focus {
         box-shadow: none;
-    }
-
-    .burger-label {
-        font-size: 0.78rem;
-        letter-spacing: 0.02em;
     }
 }
 

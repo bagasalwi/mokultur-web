@@ -30,8 +30,6 @@
   export let categories: Category[] = [];
   export let user: AuthUser | null = null;
 
-  const DASHBOARD_URL = 'https://dashboard.mokultur.com';
-
   let userMenuOpen = false;
   function toggleUserMenu(e: MouseEvent) { e.stopPropagation(); userMenuOpen = !userMenuOpen; }
   function closeUserMenu() { userMenuOpen = false; }
@@ -128,6 +126,7 @@
   .navbar-user__item:hover { background: #f5f5f5; }
   .navbar-user__item--logout { color: #dc2626; }
 
+  /* Login button — desktop only */
   .navbar-login-btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     padding: 0 14px; height: 34px; border-radius: 999px;
@@ -137,6 +136,71 @@
     border: 1px solid rgba(0,0,0,0.08);
   }
   .navbar-login-btn:hover { filter: brightness(0.95); }
+
+  /* Culture Lounge link in sections bar — inherits navbar-text color, italic to differentiate */
+  .navbar-lounge-link {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-style: italic;
+  }
+  .navbar-lounge-link i { font-size: 13px; }
+
+  /* Offcanvas auth section */
+  .bottomsheet-divider {
+    border-color: rgba(255,255,255,0.08); margin: 0 0 1rem;
+  }
+  .bottomsheet-profile {
+    display: flex; align-items: center; gap: 12px;
+    padding: 0 0 14px; margin-bottom: 2px;
+  }
+  .bottomsheet-profile__avatar {
+    width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+    background: var(--site-primary, #f1ff32); color: var(--site-dark, #0a0a0a);
+    font-weight: 700; font-size: 14px; overflow: hidden;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .bottomsheet-profile__avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .bottomsheet-profile__info { display: flex; flex-direction: column; min-width: 0; }
+  .bottomsheet-profile__info strong { color: #fff; font-size: 14px; }
+  .bottomsheet-profile__info small { color: rgba(255,255,255,0.5); font-size: 12px; }
+
+  .bottomsheet-auth-links { display: flex; flex-direction: column; gap: 2px; margin-bottom: 12px; }
+  .bottomsheet-auth-link {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 10px;
+    font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.8);
+    text-decoration: none; background: none; border: none; width: 100%; text-align: left; cursor: pointer;
+  }
+  .bottomsheet-auth-link:hover { background: rgba(255,255,255,0.08); color: #fff; }
+  .bottomsheet-auth-link em { font-style: italic; color: var(--site-primary, #f1ff32); }
+  .bottomsheet-auth-link--logout { color: #f87171; }
+  .bottomsheet-auth-link--logout:hover { background: rgba(248,113,113,0.1); }
+
+  .bottomsheet-guest { padding-bottom: 12px; }
+  .bottomsheet-guest p { color: rgba(255,255,255,0.6); font-size: 13px; margin: 0 0 10px; }
+  .bottomsheet-guest__cta { display: flex; gap: 8px; }
+  .bottomsheet-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 999px;
+    font-weight: 600; font-size: 13px; text-decoration: none; border: 1px solid transparent;
+  }
+  .bottomsheet-btn--primary {
+    background: var(--site-primary, #f1ff32); color: var(--site-dark, #0a0a0a);
+  }
+  .bottomsheet-btn--ghost {
+    background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8);
+    border-color: rgba(255,255,255,0.15);
+  }
+  .bottomsheet-nav__item--lounge {
+    grid-column: 1 / -1;
+    background: color-mix(in srgb, var(--site-primary, #f1ff32) 10%, transparent);
+    border-color: color-mix(in srgb, var(--site-primary, #f1ff32) 25%, transparent);
+    color: var(--site-primary, #f1ff32);
+    justify-content: center; font-weight: 700;
+  }
+  .bottomsheet-nav__item--lounge:hover {
+    background: color-mix(in srgb, var(--site-primary, #f1ff32) 20%, transparent);
+  }
+  .bottomsheet-nav__item--lounge em { font-style: italic; }
 </style>
 
 <header class="sticky-top navbar-times" class:navbar-times--scrolled={scrolled}>
@@ -187,7 +251,7 @@
           {/if}
         </a>
 
-        <!-- Right: Search + Social icons -->
+        <!-- Right: Search + Social icons + User/Login -->
         <div class="d-flex align-items-center gap-2">
           <button
             class="btn btn-sm btn-icon-mokultur"
@@ -226,12 +290,15 @@
               </button>
 
               {#if userMenuOpen}
-                <div class="navbar-user__menu" role="menu" on:click|stopPropagation on:keydown>
+                <div class="navbar-user__menu" role="menu" on:click|stopPropagation on:keydown tabindex="-1">
                   <div class="navbar-user__greet">
                     <small>Halo,</small>
                     <strong>{user.name}</strong>
                   </div>
                   <hr />
+                  <a class="navbar-user__item" href="/lounge" role="menuitem" on:click={closeUserMenu}>
+                    <i class="bi bi-stars"></i> <em>Culture Lounge</em>
+                  </a>
                   <a class="navbar-user__item" href="/account" role="menuitem" on:click={closeUserMenu}>
                     <i class="bi bi-person-gear"></i> Pengaturan Akun
                   </a>
@@ -244,9 +311,10 @@
               {/if}
             </div>
           {:else}
-            <a class="navbar-login-btn" href="/auth/login" aria-label="Masuk">
+            <!-- Login button: desktop only — mobile auth is in offcanvas -->
+            <a class="navbar-login-btn d-none d-lg-flex" href="/auth/login" aria-label="Masuk">
               <i class="bi bi-box-arrow-in-right"></i>
-              <span class="d-none d-md-inline">Masuk</span>
+              <span>Masuk</span>
             </a>
           {/if}
         </div>
@@ -256,22 +324,26 @@
   </div>
 
   <!-- Row 2: Sections bar -->
-  {#if sectionLinks.length > 0}
-    <div class="navbar-sections-bar">
-      <div class="container-xl">
-        <nav class="navbar-sections-nav" aria-label="Sections">
-          {#each sectionLinks as link}
-            <a
-              class="navbar-section-link {isActive(link.href, currentPath) ? 'active' : ''}"
-              href={link.href}
-            >
-              {link.label}
-            </a>
-          {/each}
-        </nav>
-      </div>
+  <div class="navbar-sections-bar">
+    <div class="container-xl">
+      <nav class="navbar-sections-nav" aria-label="Sections">
+        {#each sectionLinks as link}
+          <a
+            class="navbar-section-link {isActive(link.href, currentPath) ? 'active' : ''}"
+            href={link.href}
+          >
+            {link.label}
+          </a>
+        {/each}
+        <a
+          class="navbar-section-link navbar-lounge-link {isActive('/lounge', currentPath) ? 'active' : ''}"
+          href="/lounge"
+        >
+          <i class="bi bi-stars"></i> <em>Culture Lounge</em>
+        </a>
+      </nav>
     </div>
-  {/if}
+  </div>
 </header>
 
 <!-- Mobile Bottom Sheet — outside header to avoid stacking context issues -->
@@ -281,6 +353,47 @@
   </div>
 
   <div class="offcanvas-body">
+    <!-- Auth section -->
+    {#if user}
+      <div class="bottomsheet-profile">
+        <div class="bottomsheet-profile__avatar">
+          {#if user.img}
+            <img src={avatarUrl(user.img)} alt={user.name} />
+          {:else}
+            {initials(user.name)}
+          {/if}
+        </div>
+        <div class="bottomsheet-profile__info">
+          <strong>{user.name}</strong>
+          {#if user.username}<small>@{user.username}</small>{/if}
+        </div>
+      </div>
+      <div class="bottomsheet-auth-links">
+        <a href="/lounge" class="bottomsheet-auth-link" data-bs-dismiss="offcanvas">
+          <i class="bi bi-stars"></i> <em>Culture Lounge</em>
+        </a>
+        <a href="/account" class="bottomsheet-auth-link" data-bs-dismiss="offcanvas">
+          <i class="bi bi-person-gear"></i> Pengaturan Akun
+        </a>
+        <form method="POST" action="/auth/logout">
+          <button type="submit" class="bottomsheet-auth-link bottomsheet-auth-link--logout">
+            <i class="bi bi-box-arrow-right"></i> Keluar
+          </button>
+        </form>
+      </div>
+    {:else}
+      <div class="bottomsheet-guest">
+        <p>Masuk untuk ikut Culture Lounge &amp; diskusi.</p>
+        <div class="bottomsheet-guest__cta">
+          <a href="/auth/login?redirect=/lounge" class="bottomsheet-btn bottomsheet-btn--primary" data-bs-dismiss="offcanvas">
+            <i class="bi bi-box-arrow-in-right"></i> Masuk
+          </a>
+          <a href="/auth/register" class="bottomsheet-btn bottomsheet-btn--ghost" data-bs-dismiss="offcanvas">Daftar</a>
+        </div>
+      </div>
+    {/if}
+    <hr class="bottomsheet-divider" />
+
     <form action="/index-article" method="GET" class="bottomsheet-search">
       <div class="search-field-mokultur bottomsheet-search__field">
         <input
@@ -304,6 +417,11 @@
           data-bs-dismiss="offcanvas"
         >{link.label}</a>
       {/each}
+      <a
+        href="/lounge"
+        class="bottomsheet-nav__item bottomsheet-nav__item--lounge {isActive('/lounge', currentPath) ? 'is-active' : ''}"
+        data-bs-dismiss="offcanvas"
+      ><i class="bi bi-stars"></i> <em>Culture Lounge</em></a>
     </nav>
 
     <div class="bottomsheet-footer">

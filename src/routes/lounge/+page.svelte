@@ -4,7 +4,7 @@
   import { invalidateAll } from '$app/navigation';
   import { onMount, onDestroy } from 'svelte';
   import { PUBLIC_API_URL } from '$env/static/public';
-  import { fetchThreads, formatRelative, initials, imgUrl, threadUrl, type AnimeOption, type ArticleOption, type Thread } from '$lib/threads';
+  import { fetchThreads, formatRelative, initials, imgUrl, threadUrl, authorHandle, type AnimeOption, type ArticleOption, type Thread } from '$lib/threads';
   import ShareMenu from '$components/threads/ShareMenu.svelte';
 
   export let data: PageData;
@@ -137,6 +137,26 @@
   let likeOverride: Record<number, { liked: boolean; count: number }> = {};
   const likeOf = (t: { id: number; likeCount: number }) =>
     likeOverride[t.id] ?? { liked: false, count: t.likeCount };
+
+  // ---- Guest join popup ----
+  let joinPopup = false;
+  let joinDismissTimer: ReturnType<typeof setTimeout>;
+
+  onMount(() => {
+    if (!me && !sessionStorage.getItem('lounge_join_shown')) {
+      const showTimer = setTimeout(() => {
+        joinPopup = true;
+        sessionStorage.setItem('lounge_join_shown', '1');
+        joinDismissTimer = setTimeout(() => { joinPopup = false; }, 5000);
+      }, 1500);
+      return () => { clearTimeout(showTimer); clearTimeout(joinDismissTimer); };
+    }
+  });
+
+  function closeJoinPopup() {
+    joinPopup = false;
+    clearTimeout(joinDismissTimer);
+  }
 </script>
 
 <svelte:head>
@@ -278,22 +298,29 @@
         <ul class="mt-feed">
           {#each items as t (t.id)}
             <li class="mt-card" class:mt-card--pinned={t.isPinned}>
-              <a class="mt-card__link" href={threadUrl(t)}>
-                <div class="mt-card__avatar">
-                  {#if t.authorImg}<img src={imgUrl(t.authorImg)} alt={t.authorName ?? ''} />{:else}<span>{initials(t.authorName)}</span>{/if}
-                </div>
-                <div class="mt-card__body">
-                  <div class="mt-card__head">
-                    <strong>{t.authorName ?? 'User'}</strong>
+              <!-- Author header: link ke profil -->
+              <div class="mt-card__header">
+                <a href="/lounge/@{authorHandle(t)}" class="mt-card__author">
+                  <div class="mt-card__avatar">
+                    {#if t.authorImg}<img src={imgUrl(t.authorImg)} alt={t.authorName ?? ''} />{:else}<span>{initials(t.authorName)}</span>{/if}
+                  </div>
+                  <div class="mt-card__meta">
+                    <span class="mt-card__author-name">{t.authorName ?? 'User'}</span>
                     {#if t.authorUsername}<span class="mt-card__handle">@{t.authorUsername}</span>{/if}
                     <span class="mt-card__time">· {formatRelative(t.createdAt)}</span>
-                    {#if t.isPinned}<span class="mt-pill mt-pill--pin">📌</span>{/if}
-                    {#if t.animeTitle}<span class="mt-pill">{t.animeTitle}</span>{/if}
-                    {#if t.articleTitle}<span class="mt-pill mt-pill--article"><i class="bi bi-newspaper"></i> {t.articleTitle.slice(0, 40)}{t.articleTitle.length > 40 ? '…' : ''}</span>{/if}
                   </div>
-                  {#if t.body}<p class="mt-card__text">{t.body.slice(0, 280)}{t.body.length > 280 ? '…' : ''}</p>{/if}
-                  {#if t.imagePath}<div class="mt-card__media"><img src={imgUrl(t.imagePath)} alt="" loading="lazy" /></div>{/if}
+                </a>
+                <div class="mt-card__pills">
+                  {#if t.isPinned}<span class="mt-pill mt-pill--pin">📌 Pinned</span>{/if}
+                  {#if t.animeTitle}<span class="mt-pill">{t.animeTitle}</span>{/if}
+                  {#if t.articleTitle}<span class="mt-pill mt-pill--article"><i class="bi bi-newspaper"></i> {t.articleTitle.slice(0, 30)}{t.articleTitle.length > 30 ? '…' : ''}</span>{/if}
                 </div>
+              </div>
+
+              <!-- Konten: link ke thread detail -->
+              <a href={threadUrl(t)} class="mt-card__content">
+                {#if t.body}<p class="mt-card__text">{t.body.slice(0, 280)}{t.body.length > 280 ? '…' : ''}</p>{/if}
+                {#if t.imagePath}<div class="mt-card__media"><img src={imgUrl(t.imagePath)} alt="" loading="lazy" /></div>{/if}
               </a>
 
               {#if t.topReply}
@@ -330,7 +357,7 @@
                   <a class="mt-act" href="/auth/login?redirect=/lounge" aria-label="Suka"><i class="bi bi-heart"></i> {likeOf(t).count}</a>
                 {/if}
                 <ShareMenu url={`${origin}${threadUrl(t)}`} title={`Culture Lounge · ${siteName}`} compact />
-                <span class="mt-act mt-act--muted"><i class="bi bi-eye"></i> {t.viewCount}</span>
+                <span class="mt-act mt-act--view"><i class="bi bi-eye"></i> {t.viewCount}</span>
               </div>
             </li>
           {/each}
@@ -391,6 +418,20 @@
     </aside>
   </div>
 </section>
+
+{#if joinPopup}
+  <div class="mt-join-popup" role="dialog" aria-label="Gabung Culture Lounge">
+    <button class="mt-join-popup__close" on:click={closeJoinPopup} aria-label="Tutup">
+      <i class="bi bi-x-lg"></i>
+    </button>
+    <p class="mt-join-popup__title"><i class="bi bi-stars"></i> Culture Lounge</p>
+    <p class="mt-join-popup__body">Masuk untuk ikut ngobrol, post, dan balas thread.</p>
+    <div class="mt-join-popup__cta">
+      <a href="/auth/login?redirect=/lounge" class="mt-btn mt-btn--primary">Masuk</a>
+      <a href="/auth/register" class="mt-btn mt-btn--ghost">Daftar</a>
+    </div>
+  </div>
+{/if}
 
 <style>
   .mt-page { padding: 24px 0 60px; }
@@ -474,26 +515,37 @@
   .mt-empty i { font-size: 40px; display: block; margin-bottom: 10px; }
   .mt-empty p { margin: 0 0 14px; font-size: 15px; }
 
-  .mt-feed { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
-  .mt-card { border-bottom: 1px solid #e5e7eb; transition: background 0.1s; }
-  .mt-card:last-child { border-bottom: none; }
-  .mt-card:hover { background: #fafafa; }
-  .mt-card--pinned { background: #fffef0; }
+  /* Feed: individual cards with gap */
+  .mt-feed { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  .mt-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; overflow: hidden; transition: box-shadow 0.15s, border-color 0.15s; }
+  .mt-card:hover { border-color: #d1d5db; box-shadow: 0 2px 12px rgba(15,23,42,0.07); }
+  .mt-card--pinned { border-color: #fcd34d; background: #fffef0; }
 
-  .mt-card__link { display: flex; gap: 12px; padding: 14px 16px 8px; text-decoration: none; color: inherit; }
+  /* Author header */
+  .mt-card__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 14px 16px 0; }
+  .mt-card__author { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; flex: 1; min-width: 0; }
+  .mt-card__author:hover .mt-card__author-name { text-decoration: underline; }
   .mt-card__avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--site-primary, #f1ff32); color: var(--site-dark, #0a0a0a); font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
   .mt-card__avatar img { width: 100%; height: 100%; object-fit: cover; }
-  .mt-card__body { flex: 1; min-width: 0; }
-  .mt-card__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px; font-size: 13px; color: #6b7280; margin-bottom: 4px; }
-  .mt-card__head strong { color: #111; font-weight: 600; }
-  .mt-card__handle { color: #6b7280; }
-  .mt-card__time { font-size: 12px; }
+  .mt-card__meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px; font-size: 13px; min-width: 0; }
+  .mt-card__author-name { color: #111; font-weight: 600; }
+  .mt-card__handle { color: #6b7280; font-size: 12px; }
+  .mt-card__time { color: #9ca3af; font-size: 12px; }
+  .mt-card__pills { display: flex; flex-wrap: wrap; gap: 4px; flex-shrink: 0; align-items: flex-start; padding-top: 2px; }
 
   .mt-pill { background: #f3f4f6; color: #374151; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 500; }
-  .mt-pill--pin { background: #fef3c7; color: #92400e; padding: 2px 6px; }
+  .mt-pill--pin { background: #fef3c7; color: #92400e; }
   .mt-pill--article { background: #eef2ff; color: #4338ca; }
 
-  .mt-topreply { display: flex; gap: 10px; margin: 0 16px 10px 70px; padding: 10px 12px; border-radius: 12px; background: #f8fafc; border: 1px solid #eef0f3; text-decoration: none; color: inherit; }
+  /* Content area: link ke thread detail */
+  .mt-card__content { display: block; padding: 8px 16px 6px 68px; text-decoration: none; color: inherit; }
+  .mt-card__content:hover { opacity: 0.92; }
+  .mt-card__text { color: #111; font-size: 14.5px; line-height: 1.55; margin: 0 0 8px; white-space: pre-wrap; word-wrap: break-word; }
+  .mt-card__media { border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; max-height: 420px; margin-bottom: 4px; }
+  .mt-card__media img { width: 100%; max-height: 420px; object-fit: cover; display: block; }
+
+  /* Top reply */
+  .mt-topreply { display: flex; gap: 10px; margin: 2px 14px 10px 68px; padding: 10px 12px; border-radius: 12px; background: #f8fafc; border: 1px solid #eef0f3; text-decoration: none; color: inherit; }
   .mt-topreply:hover { background: #f1f5f9; }
   .mt-topreply__avatar { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; overflow: hidden; background: var(--site-primary, #f1ff32); color: var(--site-dark, #0a0a0a); font-weight: 700; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; }
   .mt-topreply__avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -504,18 +556,27 @@
   .mt-topreply__text { margin: 2px 0 0; font-size: 13px; color: #374151; line-height: 1.4; }
   .mt-topreply__hasimg { font-size: 11px; color: #6b7280; }
 
-  .mt-card__text { color: #111; font-size: 14.5px; line-height: 1.5; margin: 4px 0 8px; white-space: pre-wrap; word-wrap: break-word; }
-  .mt-card__media { margin: 4px 0 8px; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; max-height: 420px; }
-  .mt-card__media img { width: 100%; max-height: 420px; object-fit: cover; display: block; }
-
-  .mt-card__actions { display: flex; align-items: center; gap: 6px; padding: 2px 12px 12px 70px; }
+  /* Actions bar */
+  .mt-card__actions { display: flex; align-items: center; gap: 2px; padding: 4px 10px 12px 60px; border-top: 1px solid #f3f4f6; margin-top: 4px; }
   .mt-card__actions form { margin: 0; }
-  .mt-act { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; cursor: pointer; color: #6b7280; font-size: 13px; font-weight: 500; text-decoration: none; padding: 5px 10px; border-radius: 999px; }
-  .mt-act:hover { background: #f3f4f6; color: #111; }
+  .mt-act { display: inline-flex; align-items: center; gap: 5px; background: none; border: none; cursor: pointer; color: #6b7280; font-size: 13px; font-weight: 500; text-decoration: none; padding: 5px 10px; border-radius: 999px; }
+  .mt-act:hover { background: #f3f4f6; color: #374151; }
   .mt-act--like.is-liked { color: #e11d48; }
-  .mt-act--like:hover { color: #e11d48; }
-  .mt-act--muted { margin-left: auto; cursor: default; }
-  .mt-act--muted:hover { background: none; color: #6b7280; }
+  .mt-act--like:hover { color: #e11d48; background: #fff0f3; }
+  .mt-act--view { margin-left: auto; color: #9ca3af; font-size: 12px; cursor: default; }
+  .mt-act--view:hover { background: none; color: #9ca3af; }
+
+  @media (max-width: 540px) {
+    .mt-card__header { padding: 12px 12px 0; gap: 8px; }
+    .mt-card__content { padding: 8px 12px 6px 60px; }
+    .mt-card__actions { padding: 4px 8px 10px 52px; }
+    .mt-topreply { margin: 2px 10px 10px 60px; }
+    .mt-card__avatar { width: 38px; height: 38px; font-size: 12px; }
+    .mt-card__text { font-size: 14px; }
+    .mt-card__media { max-height: 340px; }
+    .mt-card__media img { max-height: 340px; }
+    .mt-act { padding: 5px 8px; font-size: 12.5px; }
+  }
 
   .mt-sentinel { text-align: center; padding: 18px; color: #6b7280; font-size: 13px; }
   .mt-spin { display: inline-block; animation: mt-spin 0.8s linear infinite; }
@@ -556,5 +617,30 @@
     .mt-card__actions { padding: 2px 8px 10px 60px; gap: 2px; }
     .mt-topreply { margin: 0 12px 10px 60px; }
     .mt-act { padding: 5px 8px; }
+  }
+
+  /* Guest join popup */
+  .mt-join-popup {
+    position: fixed; bottom: 24px; right: 24px; z-index: 1060;
+    background: #fff; border: 1px solid #e5e7eb; border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.16);
+    padding: 20px 22px 18px; max-width: 290px; width: calc(100vw - 48px);
+    animation: popup-in 0.3s ease;
+  }
+  .mt-join-popup__close {
+    position: absolute; top: 10px; right: 12px;
+    background: none; border: none; cursor: pointer; color: #9ca3af; font-size: 14px; padding: 4px;
+  }
+  .mt-join-popup__close:hover { color: #374151; }
+  .mt-join-popup__title { font-weight: 700; font-size: 15px; margin: 0 0 6px; color: #111; }
+  .mt-join-popup__title i { color: var(--site-primary, #f1ff32); margin-right: 4px; }
+  .mt-join-popup__body { color: #6b7280; font-size: 13px; margin: 0 0 14px; line-height: 1.4; }
+  .mt-join-popup__cta { display: flex; gap: 8px; }
+  @keyframes popup-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @media (max-width: 540px) {
+    .mt-join-popup { bottom: 16px; right: 16px; left: 16px; max-width: none; width: auto; }
   }
 </style>

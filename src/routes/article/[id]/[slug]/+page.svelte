@@ -8,6 +8,8 @@
   import ArticleRankItem from "$components/common/ArticleRankItem.svelte";
   import { onMount } from "svelte";
   import { PUBLIC_API_URL } from "$env/static/public";
+  import { enhance } from "$app/forms";
+  import { page } from "$app/stores";
 
   export let data: PageData;
 
@@ -27,8 +29,6 @@
   // Comments
   let comments: any[] = [];
   let commentBody = "";
-  let commentSubmitting = false;
-  let commentError = "";
 
   onMount(async () => {
     try {
@@ -168,32 +168,6 @@
     } catch {}
   }
 
-  async function submitComment() {
-    if (!commentBody.trim() || commentSubmitting) return;
-    commentSubmitting = true;
-    commentError = "";
-    try {
-      const res = await fetch(
-        `${PUBLIC_API_URL}/api/articles/${a.id}/comments`,
-        {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ body: commentBody }),
-        },
-      );
-      if (res.ok) {
-        const d = await res.json();
-        comments = [d.data, ...comments];
-        commentBody = "";
-      } else if (res.status === 429) {
-        commentError = "Terlalu banyak komentar. Coba lagi beberapa menit.";
-      } else {
-        commentError = "Gagal mengirim komentar.";
-      }
-    } finally {
-      commentSubmitting = false;
-    }
-  }
 
   function formatDate(d: string | null) {
     if (!d) return "";
@@ -539,33 +513,53 @@
           >
         </div>
 
-        <div class="article-comments__composer">
-          <label
-            class="article-comments__label d-block mb-2"
-            for="commentTextarea">Tulis Komentar</label
+        {#if data.user}
+          <form
+            method="POST"
+            action="?/comment"
+            use:enhance={({ formElement }) => {
+              return async ({ result, update }) => {
+                if (result.type === 'success' && result.data?.data) {
+                  comments = [result.data.data, ...comments];
+                  formElement.reset();
+                  commentBody = '';
+                }
+                await update({ reset: false });
+              };
+            }}
+            class="article-comments__composer"
           >
-          <textarea
-            id="commentTextarea"
-            class="form-control article-comments__textarea mb-0"
-            rows="3"
-            placeholder="Tulis komentar..."
-            bind:value={commentBody}
-          ></textarea>
-          <div class="article-comments__composer-actions">
-            {#if commentError}
-              <span class="text-danger small">{commentError}</span>
-            {:else}
-              <span></span>
-            {/if}
-            <button
-              class="theme-btn theme-btn--dark theme-btn--sm"
-              on:click={submitComment}
-              disabled={commentSubmitting}
+            <label
+              class="article-comments__label d-block mb-2"
+              for="commentTextarea">Tulis Komentar</label
             >
-              {commentSubmitting ? "Mengirim…" : "Kirim Komentar"}
-            </button>
+            <textarea
+              id="commentTextarea"
+              name="body"
+              class="form-control article-comments__textarea mb-0"
+              rows="3"
+              placeholder="Tulis komentar..."
+              bind:value={commentBody}
+            ></textarea>
+            <div class="article-comments__composer-actions">
+              {#if $page.form?.error}
+                <span class="text-danger small">{$page.form.error}</span>
+              {:else}
+                <span></span>
+              {/if}
+              <button type="submit" class="theme-btn theme-btn--dark theme-btn--sm">
+                Kirim Komentar
+              </button>
+            </div>
+          </form>
+        {:else}
+          <div class="article-comments__login">
+            <span class="article-comments__empty">Masuk untuk menulis komentar.</span>
+            <a href="/auth/login?redirect=/article/{a.id}/{a.slug}#komentar" class="theme-btn theme-btn--dark theme-btn--sm">
+              Masuk
+            </a>
           </div>
-        </div>
+        {/if}
 
         {#if comments.length > 0}
           <div class="article-comments__list">

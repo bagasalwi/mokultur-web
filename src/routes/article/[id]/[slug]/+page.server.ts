@@ -1,6 +1,10 @@
 import type { PageServerLoad } from './$types';
 import { getArticle, getPopularTags, getAd, listCurhatan } from '$lib/api';
-import { error, redirect } from '@sveltejs/kit';
+import { error, redirect, fail } from '@sveltejs/kit';
+import { PUBLIC_API_URL } from '$env/static/public';
+import type { Actions } from './$types';
+
+const COOKIE = 'mokultur_token';
 
 export const load: PageServerLoad = async ({ params, request, setHeaders, url }) => {
   const id = Number(params.id);
@@ -50,4 +54,28 @@ export const load: PageServerLoad = async ({ params, request, setHeaders, url })
     if (e.status === 404) throw error(404, 'Artikel tidak ditemukan');
     throw error(500, 'Server error');
   }
+};
+
+export const actions: Actions = {
+  comment: async ({ request, cookies, fetch, locals, params }) => {
+    if (!locals.user) return fail(401, { error: 'Masuk dulu untuk berkomentar.' });
+
+    const fd = await request.formData();
+    const body = String(fd.get('body') ?? '').trim();
+    if (!body) return fail(400, { error: 'Komentar tidak boleh kosong.' });
+
+    const token = cookies.get(COOKIE) ?? '';
+    const res = await fetch(`${PUBLIC_API_URL}/api/articles/${params.id}/comments`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        cookie: `${COOKIE}=${token}`,
+      },
+      body: JSON.stringify({ body }),
+    });
+
+    if (res.status === 429) return fail(429, { error: 'Terlalu banyak komentar. Coba lagi nanti.' });
+    if (!res.ok) return fail(res.status, { error: 'Gagal mengirim komentar.' });
+    return await res.json();
+  },
 };

@@ -65,12 +65,13 @@ type FetchFn = typeof fetch;
 
 export async function fetchThreads(
   fetch: FetchFn,
-  opts: { page?: number; perPage?: number; animeId?: number } = {},
+  opts: { page?: number; perPage?: number; animeId?: number; authorUsername?: string } = {},
 ): Promise<{ data: Thread[]; meta: { total: number; page: number; perPage: number; hasMore: boolean } }> {
   const params = new URLSearchParams();
   if (opts.page) params.set('page', String(opts.page));
   if (opts.perPage) params.set('perPage', String(opts.perPage));
   if (opts.animeId) params.set('animeId', String(opts.animeId));
+  if (opts.authorUsername) params.set('authorUsername', opts.authorUsername);
 
   const qs = params.toString();
   const res = await fetch(`${PUBLIC_API_URL}/api/threads${qs ? `?${qs}` : ''}`);

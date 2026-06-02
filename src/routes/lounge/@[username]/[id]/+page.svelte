@@ -83,21 +83,27 @@
 
 <section class="mt-detail">
   <div class="container-xl mt-detail__wrap">
-    <a href="/lounge" class="mt-back">← Kembali ke feed</a>
+    <div class="mt-breadcrumb">
+      <a href="/lounge" class="mt-breadcrumb__root"><i class="bi bi-stars"></i> Culture Lounge</a>
+      <span class="mt-breadcrumb__sep">/</span>
+      <a href="/lounge/@{handle}" class="mt-breadcrumb__user">@{handle}</a>
+    </div>
 
     <article class="mt-thread">
       <div class="mt-thread__rail">
-        <div class="mt-thread__avatar">
-          {#if thread.authorImg}<img src={imgUrl(thread.authorImg)} alt={thread.authorName ?? ''} />{:else}<span>{initials(thread.authorName)}</span>{/if}
-        </div>
+        <a href="/lounge/@{handle}" class="mt-thread__avatar-link">
+          <div class="mt-thread__avatar">
+            {#if thread.authorImg}<img src={imgUrl(thread.authorImg)} alt={thread.authorName ?? ''} />{:else}<span>{initials(thread.authorName)}</span>{/if}
+          </div>
+        </a>
       </div>
 
       <div class="mt-thread__body">
         <div class="mt-thread__head">
-          <div class="mt-thread__author">
+          <a href="/lounge/@{handle}" class="mt-thread__author">
             <strong>{thread.authorName ?? 'User'}</strong>
             <span class="mt-thread__handle">@{handle}</span>
-          </div>
+          </a>
           <span class="mt-thread__time">· {formatRelative(thread.createdAt)}</span>
           {#if thread.animeTitle}<span class="mt-pill">{thread.animeTitle}</span>{/if}
         </div>
@@ -147,8 +153,14 @@
           </div>
           <div class="mt-reply__body">
             <div class="mt-reply__meta">
-              <strong>{r.authorName ?? 'User'}</strong>
-              {#if r.authorUsername}<span class="mt-reply__handle">@{r.authorUsername}</span>{/if}
+              {#if r.authorUsername}
+                <a href="/lounge/@{r.authorUsername}" class="mt-reply__author-link">
+                  <strong>{r.authorName ?? 'User'}</strong>
+                  <span class="mt-reply__handle">@{r.authorUsername}</span>
+                </a>
+              {:else}
+                <strong>{r.authorName ?? 'User'}</strong>
+              {/if}
               <span>· {formatRelative(r.createdAt)}</span>
             </div>
             {#if r.body}<p class="mt-reply__text">{r.body}</p>{/if}
@@ -185,8 +197,14 @@
                     </div>
                     <div class="mt-reply__body">
                       <div class="mt-reply__meta">
-                        <strong>{c.authorName ?? 'User'}</strong>
-                        {#if c.authorUsername}<span class="mt-reply__handle">@{c.authorUsername}</span>{/if}
+                        {#if c.authorUsername}
+                          <a href="/lounge/@{c.authorUsername}" class="mt-reply__author-link">
+                            <strong>{c.authorName ?? 'User'}</strong>
+                            <span class="mt-reply__handle">@{c.authorUsername}</span>
+                          </a>
+                        {:else}
+                          <strong>{c.authorName ?? 'User'}</strong>
+                        {/if}
                         <span>· {formatRelative(c.createdAt)}</span>
                       </div>
                       {#if c.body}<p class="mt-reply__text">{c.body}</p>{/if}
@@ -269,18 +287,26 @@
 <style>
   .mt-detail { padding: 20px 0 60px; background: linear-gradient(180deg, #fafbff 0%, transparent 320px); }
   .mt-detail__wrap { max-width: 720px; }
-  .mt-back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 14px; font-size: 13px; font-weight: 600; color: #4b5563; text-decoration: none; padding: 6px 12px; border-radius: 999px; background: #fff; border: 1px solid #e5e7eb; }
-  .mt-back:hover { background: #f3f4f6; color: #111; }
+
+  /* Breadcrumb nav */
+  .mt-breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; margin-bottom: 16px; }
+  .mt-breadcrumb__root, .mt-breadcrumb__user { color: #4b5563; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
+  .mt-breadcrumb__root:hover, .mt-breadcrumb__user:hover { color: #111; text-decoration: underline; }
+  .mt-breadcrumb__user { font-weight: 600; }
+  .mt-breadcrumb__sep { color: #9ca3af; }
 
   /* Thread maker — same left rail as replies for alignment */
   .mt-thread { display: flex; gap: 14px; background: #fff; border-radius: 16px; padding: 22px; border: 1px solid #e5e7eb; box-shadow: 0 4px 16px rgba(15,23,42,0.05); position: relative; overflow: hidden; }
   .mt-thread::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--site-primary, #f1ff32), #7dd3fc); }
   .mt-thread__rail { flex-shrink: 0; }
+  .mt-thread__avatar-link { display: block; text-decoration: none; }
+  .mt-thread__avatar-link:hover .mt-thread__avatar { opacity: 0.85; }
   .mt-thread__avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--site-primary, #f1ff32); color: var(--site-dark, #0a0a0a); font-weight: 700; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; overflow: hidden; }
   .mt-thread__avatar img { width: 100%; height: 100%; object-fit: cover; }
   .mt-thread__body { flex: 1; min-width: 0; }
   .mt-thread__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; font-size: 13px; color: #6b7280; margin-bottom: 10px; }
-  .mt-thread__author { display: inline-flex; align-items: baseline; gap: 6px; min-width: 0; }
+  .mt-thread__author { display: inline-flex; align-items: baseline; gap: 6px; min-width: 0; text-decoration: none; color: inherit; }
+  .mt-thread__author:hover strong { text-decoration: underline; }
   .mt-thread__head strong { color: #111; font-weight: 600; font-size: 15px; }
   .mt-thread__handle { color: #6b7280; font-size: 13px; }
   .mt-thread__time { font-size: 12px; }
@@ -318,6 +344,8 @@
   .mt-reply__meta { font-size: 12px; color: #6b7280; margin-bottom: 2px; display: flex; align-items: baseline; gap: 5px; flex-wrap: wrap; }
   .mt-reply__meta strong { color: #111; font-weight: 600; font-size: 13.5px; }
   .mt-reply__handle { color: #6b7280; }
+  .mt-reply__author-link { display: inline-flex; align-items: baseline; gap: 5px; text-decoration: none; color: inherit; }
+  .mt-reply__author-link:hover strong { text-decoration: underline; }
   .mt-reply__text { color: #1f2937; font-size: 14px; line-height: 1.5; margin: 0; white-space: pre-wrap; word-wrap: break-word; }
   .mt-reply__media { margin: 6px 0 0; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; max-height: 320px; }
   .mt-reply__media img { width: 100%; max-height: 320px; object-fit: cover; display: block; }
