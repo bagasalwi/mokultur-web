@@ -7,12 +7,14 @@
 
   function formatDate(d: string | null): string {
     if (!d) return '';
-    return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+    const [year, month, day] = d.slice(0, 10).split('-').map(Number);
+    return new Date(year, month - 1, day).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
   function timeAgo(d: string | null): string {
     if (!d) return '';
-    const diff = Date.now() - new Date(d).getTime();
+    const [year, month, day] = d.slice(0, 10).split('-').map(Number);
+    const diff = Date.now() - new Date(year, month - 1, day).getTime();
     const days = Math.floor(diff / 86400000);
     if (days === 0) return 'Hari ini';
     if (days === 1) return 'Kemarin';
@@ -147,9 +149,6 @@
         {/if}
         <div class="d-flex align-items-center justify-content-between mt-auto">
           <small class="text-muted">{timeAgo(article.publishDate)}</small>
-          {#if article.viewCount}
-            <small class="text-muted"><i class="bi bi-eye me-1"></i>{article.viewCount.toLocaleString('id-ID')}</small>
-          {/if}
         </div>
       </div>
     </a>

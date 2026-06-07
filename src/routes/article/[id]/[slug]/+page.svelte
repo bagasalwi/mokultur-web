@@ -171,7 +171,9 @@
 
   function formatDate(d: string | null) {
     if (!d) return "";
-    return new Date(d).toLocaleDateString("id-ID", {
+    // Slice date part only (YYYY-MM-DD) to avoid UTC→local timezone shift
+    const [year, month, day] = d.slice(0, 10).split("-").map(Number);
+    return new Date(year, month - 1, day).toLocaleDateString("id-ID", {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -289,9 +291,6 @@
               >{formatDate(a.publishDate)}</time
             >
           </span>
-          {#if a.viewCount}
-            <span>👁 {a.viewCount.toLocaleString("id-ID")}</span>
-          {/if}
         </div>
       </div>
 

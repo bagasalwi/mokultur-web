@@ -8,7 +8,8 @@
 
   function timeAgo(d: string | null): string {
     if (!d) return '';
-    const diff = Date.now() - new Date(d).getTime();
+    const [year, month, day] = d.slice(0, 10).split('-').map(Number);
+    const diff = Date.now() - new Date(year, month - 1, day).getTime();
     const days = Math.floor(diff / 86400000);
     if (days === 0) return 'Hari ini';
     if (days === 1) return 'Kemarin';

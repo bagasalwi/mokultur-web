@@ -19,10 +19,5 @@
       <span class="popular-item__cat">{article.category.name}</span>
     {/if}
     <p class="popular-item__title">{article.title}</p>
-    {#if article.viewCount}
-      <span class="popular-item__views">
-        <i class="bi bi-eye"></i> {article.viewCount.toLocaleString('id-ID')}
-      </span>
-    {/if}
   </div>
 </a>

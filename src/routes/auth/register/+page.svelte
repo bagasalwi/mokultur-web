@@ -49,7 +49,7 @@
 
     <a
       class="auth-btn auth-btn--google"
-      href="https://dashboard.mokultur.com/auth/google/redirect?from=public"
+      href="https://api.mokultur.com/api/auth/google"
     >
       <i class="bi bi-google"></i> Daftar dengan Google
     </a>

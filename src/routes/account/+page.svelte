@@ -18,6 +18,18 @@
     avatarPreview = URL.createObjectURL(f);
   }
 
+  let savingProfile = false;
+  let profileSaved = false;
+  let savingAvatar = false;
+  let avatarSaved = false;
+  let savingPassword = false;
+  let passwordSaved = false;
+
+  function flashSuccess(set: (v: boolean) => void) {
+    set(true);
+    setTimeout(() => set(false), 2500);
+  }
+
 </script>
 
 <svelte:head>
@@ -46,9 +58,16 @@
         method="POST"
         action="?/profile"
         class="acc-form"
-        use:enhance={() => async ({ result, update }) => {
-          await update({ reset: false });
-          if (result.type === 'success') await invalidateAll();
+        use:enhance={() => {
+          savingProfile = true;
+          return async ({ result, update }) => {
+            await update({ reset: false });
+            savingProfile = false;
+            if (result.type === 'success') {
+              await invalidateAll();
+              flashSuccess((v) => (profileSaved = v));
+            }
+          };
         }}
       >
         <label class="acc-field">
@@ -91,8 +110,14 @@
         </div>
 
         <div class="acc-actions">
-          <button class="acc-btn acc-btn--primary" type="submit">
-            <i class="bi bi-check2"></i> Simpan Profil
+          <button class="acc-btn acc-btn--primary" type="submit" disabled={savingProfile}>
+            {#if savingProfile}
+              <span class="acc-spinner"></span> Menyimpan...
+            {:else if profileSaved}
+              <i class="bi bi-check2-circle"></i> Tersimpan!
+            {:else}
+              <i class="bi bi-check2"></i> Simpan Profil
+            {/if}
           </button>
         </div>
       </form>
@@ -114,12 +139,17 @@
         action="?/avatar"
         enctype="multipart/form-data"
         class="acc-avatar-form"
-        use:enhance={() => async ({ result, update }) => {
-          await update();
-          if (result.type === 'success') {
-            avatarPreview = null;
-            await invalidateAll();
-          }
+        use:enhance={() => {
+          savingAvatar = true;
+          return async ({ result, update }) => {
+            await update();
+            savingAvatar = false;
+            if (result.type === 'success') {
+              avatarPreview = null;
+              await invalidateAll();
+              flashSuccess((v) => (avatarSaved = v));
+            }
+          };
         }}
       >
         <div class="acc-avatar-row">
@@ -146,9 +176,15 @@
               required
             />
             <small>Akan di-resize 256×256 WebP. Maks 4MB.</small>
-            {#if avatarPreview}
-              <button class="acc-btn acc-btn--primary" type="submit">
-                <i class="bi bi-check2"></i> Upload Avatar
+            {#if avatarPreview || avatarSaved}
+              <button class="acc-btn acc-btn--primary" type="submit" disabled={savingAvatar}>
+                {#if savingAvatar}
+                  <span class="acc-spinner"></span> Mengupload...
+                {:else if avatarSaved}
+                  <i class="bi bi-check2-circle"></i> Berhasil!
+                {:else}
+                  <i class="bi bi-check2"></i> Upload Avatar
+                {/if}
               </button>
             {/if}
           </div>
@@ -164,9 +200,16 @@
         <div class="acc-alert" class:acc-alert--ok={form.success}>{form.error ?? form.success}</div>
       {/if}
 
-      <form method="POST" action="?/password" class="acc-form" use:enhance={() => async ({ result, update, formElement }) => {
-        await update();
-        if (result.type === 'success') formElement.reset();
+      <form method="POST" action="?/password" class="acc-form" use:enhance={() => {
+        savingPassword = true;
+        return async ({ result, update, formElement }) => {
+          await update();
+          savingPassword = false;
+          if (result.type === 'success') {
+            formElement.reset();
+            flashSuccess((v) => (passwordSaved = v));
+          }
+        };
       }}>
         <label class="acc-field">
           <span>Password Lama</span>
@@ -183,8 +226,14 @@
           </label>
         </div>
         <div class="acc-actions">
-          <button class="acc-btn acc-btn--primary" type="submit">
-            <i class="bi bi-key"></i> Ganti Password
+          <button class="acc-btn acc-btn--primary" type="submit" disabled={savingPassword}>
+            {#if savingPassword}
+              <span class="acc-spinner"></span> Memproses...
+            {:else if passwordSaved}
+              <i class="bi bi-check2-circle"></i> Password Diubah!
+            {:else}
+              <i class="bi bi-key"></i> Ganti Password
+            {/if}
           </button>
         </div>
       </form>
@@ -306,5 +355,22 @@
     position: absolute; width: 1px; height: 1px;
     padding: 0; margin: -1px; overflow: hidden;
     clip: rect(0, 0, 0, 0); border: 0;
+  }
+
+  .acc-spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: acc-spin 0.6s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes acc-spin { to { transform: rotate(360deg); } }
+
+  .acc-btn:disabled { opacity: 0.75; cursor: not-allowed; }
+  .acc-btn--primary.acc-btn:not(:disabled):has(.bi-check2-circle) {
+    background: #d1fae5;
+    color: #166534;
   }
 </style>

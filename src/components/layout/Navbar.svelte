@@ -34,6 +34,10 @@
   function toggleUserMenu(e: MouseEvent) { e.stopPropagation(); userMenuOpen = !userMenuOpen; }
   function closeUserMenu() { userMenuOpen = false; }
 
+  let menuOpen = false;
+  function openMenu() { menuOpen = true; document.body.style.overflow = 'hidden'; }
+  function closeMenu() { menuOpen = false; document.body.style.overflow = ''; }
+
   function initials(name: string): string {
     return name.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '').join('') || '?';
   }
@@ -227,15 +231,13 @@
       {:else}
         <!-- Burger (mobile only) -->
         <button
-          id="burgerBtn"
           class="btn navbar-burger d-lg-none"
           type="button"
-          data-bs-toggle="offcanvas"
-          data-bs-target="#offcanvasMokultur"
-          aria-controls="offcanvasMokultur"
+          on:click={openMenu}
           aria-label="Menu"
+          aria-expanded={menuOpen}
         >
-          <span class="burger-icon" id="burgerIcon">
+          <span class="burger-icon" class:is-open={menuOpen}>
             <span class="burger-bar"></span>
             <span class="burger-bar"></span>
             <span class="burger-bar"></span>
@@ -346,8 +348,13 @@
   </div>
 </header>
 
-<!-- Mobile Bottom Sheet — outside header to avoid stacking context issues -->
-<div class="offcanvas offcanvas-bottom offcanvas-bottomsheet" tabindex="-1" id="offcanvasMokultur" aria-labelledby="offcanvasLabel">
+<!-- Backdrop -->
+{#if menuOpen}
+  <div class="bottomsheet-backdrop" on:click={closeMenu} on:keydown role="presentation" aria-hidden="true"></div>
+{/if}
+
+<!-- Mobile Bottom Sheet -->
+<div class="offcanvas-bottomsheet" class:is-open={menuOpen} tabindex="-1" aria-hidden={!menuOpen} aria-labelledby="offcanvasLabel">
   <div class="bottomsheet-handle-wrap">
     <div class="bottomsheet-handle"></div>
   </div>
@@ -369,10 +376,10 @@
         </div>
       </div>
       <div class="bottomsheet-auth-links">
-        <a href="/lounge" class="bottomsheet-auth-link" data-bs-dismiss="offcanvas">
+        <a href="/lounge" class="bottomsheet-auth-link" on:click={closeMenu}>
           <i class="bi bi-stars"></i> <em>Culture Lounge</em>
         </a>
-        <a href="/account" class="bottomsheet-auth-link" data-bs-dismiss="offcanvas">
+        <a href="/account" class="bottomsheet-auth-link" on:click={closeMenu}>
           <i class="bi bi-person-gear"></i> Pengaturan Akun
         </a>
         <form method="POST" action="/auth/logout">
@@ -385,10 +392,10 @@
       <div class="bottomsheet-guest">
         <p>Masuk untuk ikut Culture Lounge &amp; diskusi.</p>
         <div class="bottomsheet-guest__cta">
-          <a href="/auth/login?redirect=/lounge" class="bottomsheet-btn bottomsheet-btn--primary" data-bs-dismiss="offcanvas">
+          <a href="/auth/login?redirect=/lounge" class="bottomsheet-btn bottomsheet-btn--primary" on:click={closeMenu}>
             <i class="bi bi-box-arrow-in-right"></i> Masuk
           </a>
-          <a href="/auth/register" class="bottomsheet-btn bottomsheet-btn--ghost" data-bs-dismiss="offcanvas">Daftar</a>
+          <a href="/auth/register" class="bottomsheet-btn bottomsheet-btn--ghost" on:click={closeMenu}>Daftar</a>
         </div>
       </div>
     {/if}
@@ -414,13 +421,13 @@
         <a
           href={link.href}
           class="bottomsheet-nav__item {isActive(link.href, currentPath) ? 'is-active' : ''}"
-          data-bs-dismiss="offcanvas"
+          on:click={closeMenu}
         >{link.label}</a>
       {/each}
       <a
         href="/lounge"
         class="bottomsheet-nav__item bottomsheet-nav__item--lounge {isActive('/lounge', currentPath) ? 'is-active' : ''}"
-        data-bs-dismiss="offcanvas"
+        on:click={closeMenu}
       ><i class="bi bi-stars"></i> <em>Culture Lounge</em></a>
     </nav>
 
