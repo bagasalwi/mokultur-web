@@ -8099,7 +8099,8 @@ button.emoji-picker {
 
 .article-comments__header,
 .article-comments__composer,
-.article-comments__list {
+.article-comments__list,
+.article-comments__login {
     padding: 1.15rem;
 }
 
@@ -8140,6 +8141,7 @@ button.emoji-picker {
 
 .article-comments__login {
     margin-top: 0;
+    border-bottom: 1px solid rgba(17, 17, 17, 0.08);
 }
 
 .article-comments__list {
