@@ -5,6 +5,7 @@
   import { page } from '$app/stores';
   import Navbar from '$components/layout/Navbar.svelte';
   import Footer from '$components/layout/Footer.svelte';
+  import ChatWidget from '$components/chat/ChatWidget.svelte';
   import NavProgress from '$components/common/NavProgress.svelte';
   import type { LayoutData } from './$types';
 
@@ -99,3 +100,5 @@
 </main>
 
 <Footer settings={data.settings} footerItems={data.navFooter} socials={data.socials} categories={data.categories} />
+
+<ChatWidget />
