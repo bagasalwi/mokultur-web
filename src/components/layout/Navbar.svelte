@@ -3,6 +3,7 @@
   import { tick, onMount } from 'svelte';
   import { PUBLIC_API_URL } from '$env/static/public';
   import type { SiteSettings, SocialMediaItem, NavbarItem, Category } from '$lib/api';
+  import { LOUNGE_ENABLED } from '$lib/features';
 
   function avatarUrl(img: string | null | undefined): string | null {
     if (!img) return null;
@@ -298,9 +299,11 @@
                     <strong>{user.name}</strong>
                   </div>
                   <hr />
-                  <a class="navbar-user__item" href="/lounge" role="menuitem" on:click={closeUserMenu}>
-                    <i class="bi bi-stars"></i> <em>Culture Lounge</em>
-                  </a>
+                  {#if LOUNGE_ENABLED}
+                    <a class="navbar-user__item" href="/lounge" role="menuitem" on:click={closeUserMenu}>
+                      <i class="bi bi-stars"></i> <em>Culture Lounge</em>
+                    </a>
+                  {/if}
                   <a class="navbar-user__item" href="/account" role="menuitem" on:click={closeUserMenu}>
                     <i class="bi bi-person-gear"></i> Pengaturan Akun
                   </a>
@@ -337,12 +340,14 @@
             {link.label}
           </a>
         {/each}
-        <a
-          class="navbar-section-link navbar-lounge-link {isActive('/lounge', currentPath) ? 'active' : ''}"
-          href="/lounge"
-        >
-          <i class="bi bi-stars"></i> <em>Culture Lounge</em>
-        </a>
+        {#if LOUNGE_ENABLED}
+          <a
+            class="navbar-section-link navbar-lounge-link {isActive('/lounge', currentPath) ? 'active' : ''}"
+            href="/lounge"
+          >
+            <i class="bi bi-stars"></i> <em>Culture Lounge</em>
+          </a>
+        {/if}
       </nav>
     </div>
   </div>
@@ -376,9 +381,11 @@
         </div>
       </div>
       <div class="bottomsheet-auth-links">
-        <a href="/lounge" class="bottomsheet-auth-link" on:click={closeMenu}>
-          <i class="bi bi-stars"></i> <em>Culture Lounge</em>
-        </a>
+        {#if LOUNGE_ENABLED}
+          <a href="/lounge" class="bottomsheet-auth-link" on:click={closeMenu}>
+            <i class="bi bi-stars"></i> <em>Culture Lounge</em>
+          </a>
+        {/if}
         <a href="/account" class="bottomsheet-auth-link" on:click={closeMenu}>
           <i class="bi bi-person-gear"></i> Pengaturan Akun
         </a>
@@ -390,9 +397,9 @@
       </div>
     {:else}
       <div class="bottomsheet-guest">
-        <p>Masuk untuk ikut Culture Lounge &amp; diskusi.</p>
+        <p>{LOUNGE_ENABLED ? 'Masuk untuk ikut Culture Lounge & diskusi.' : 'Masuk untuk pengalaman yang lebih personal.'}</p>
         <div class="bottomsheet-guest__cta">
-          <a href="/auth/login?redirect=/lounge" class="bottomsheet-btn bottomsheet-btn--primary" on:click={closeMenu}>
+          <a href={LOUNGE_ENABLED ? '/auth/login?redirect=/lounge' : '/auth/login'} class="bottomsheet-btn bottomsheet-btn--primary" on:click={closeMenu}>
             <i class="bi bi-box-arrow-in-right"></i> Masuk
           </a>
           <a href="/auth/register" class="bottomsheet-btn bottomsheet-btn--ghost" on:click={closeMenu}>Daftar</a>
@@ -424,11 +431,13 @@
           on:click={closeMenu}
         >{link.label}</a>
       {/each}
-      <a
-        href="/lounge"
-        class="bottomsheet-nav__item bottomsheet-nav__item--lounge {isActive('/lounge', currentPath) ? 'is-active' : ''}"
-        on:click={closeMenu}
-      ><i class="bi bi-stars"></i> <em>Culture Lounge</em></a>
+      {#if LOUNGE_ENABLED}
+        <a
+          href="/lounge"
+          class="bottomsheet-nav__item bottomsheet-nav__item--lounge {isActive('/lounge', currentPath) ? 'is-active' : ''}"
+          on:click={closeMenu}
+        ><i class="bi bi-stars"></i> <em>Culture Lounge</em></a>
+      {/if}
     </nav>
 
     <div class="bottomsheet-footer">

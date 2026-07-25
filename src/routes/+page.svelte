@@ -5,6 +5,7 @@
   import Hero from '$components/hero/Hero.svelte';
   import EventSection from '$components/home/EventSection.svelte';
   import MokuThreadsPromo from '$components/home/MokuThreadsPromo.svelte';
+  import { LOUNGE_ENABLED } from '$lib/features';
   import SocialMediaCard from '$components/common/SocialMediaCard.svelte';
   import PopularArticlesCard from '$components/common/PopularArticlesCard.svelte';
   import WritersCard from '$components/home/WritersCard.svelte';
@@ -77,7 +78,9 @@
     <AdBanner ad={data.adMid} adSlot="ad_1" />
   </div>
 
-  <MokuThreadsPromo {siteName} threads={data.trendingThreads} />
+  {#if LOUNGE_ENABLED}
+    <MokuThreadsPromo {siteName} threads={data.trendingThreads} />
+  {/if}
 
   <EventSection articles={data.eventArticles} />
 

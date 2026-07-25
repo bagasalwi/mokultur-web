@@ -1,11 +1,19 @@
-import type { Handle } from '@sveltejs/kit';
+import { redirect, type Handle } from '@sveltejs/kit';
 import { jwtVerify } from 'jose';
 import { env } from '$env/dynamic/private';
+import { LOUNGE_ENABLED } from '$lib/features';
 
 const COOKIE_NAME = 'mokultur_token';
 const SECRET_BYTES = new TextEncoder().encode(env.JWT_SECRET ?? '');
 
 export const handle: Handle = async ({ event, resolve }) => {
+  if (!LOUNGE_ENABLED) {
+    const path = event.url.pathname;
+    if (path === '/lounge' || path.startsWith('/lounge/') || path === '/forum' || path.startsWith('/forum/')) {
+      throw redirect(302, '/');
+    }
+  }
+
   event.locals.user = null;
 
   const token = event.cookies.get(COOKIE_NAME);

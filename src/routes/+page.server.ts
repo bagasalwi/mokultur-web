@@ -1,6 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { listArticles, getPopularTags, getPopularArticles, listWriters, getAd, listCurhatan } from '$lib/api';
 import { fetchTopThreads } from '$lib/threads';
+import { LOUNGE_ENABLED } from '$lib/features';
 
 export const load: PageServerLoad = async ({ setHeaders, url, fetch }) => {
   const preview = url.searchParams.get('preview_ads') === 'true';
@@ -20,7 +21,7 @@ export const load: PageServerLoad = async ({ setHeaders, url, fetch }) => {
     getAd('ad_2', preview),
     getAd('ad_3', preview),
     listCurhatan({ perPage: 6 }),
-    fetchTopThreads(fetch, 4),
+    LOUNGE_ENABLED ? fetchTopThreads(fetch, 4) : Promise.resolve([]),
   ]);
 
   const headlines = headlinesRes.status === 'fulfilled' ? headlinesRes.value.data : [];
