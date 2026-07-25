@@ -4,6 +4,7 @@
   import PopularTags from '$components/common/PopularTags.svelte';
   import Hero from '$components/hero/Hero.svelte';
   import EventSection from '$components/home/EventSection.svelte';
+  import ReelsSection from '$components/home/ReelsSection.svelte';
   import MokuThreadsPromo from '$components/home/MokuThreadsPromo.svelte';
   import { LOUNGE_ENABLED } from '$lib/features';
   import SocialMediaCard from '$components/common/SocialMediaCard.svelte';
@@ -83,6 +84,8 @@
   {/if}
 
   <EventSection articles={data.eventArticles} />
+
+  <ReelsSection reels={data.reels} profile={data.igProfile} />
 
   {#if data.settings?.curhat_enabled && data.homeCurhatan.length > 0}
     <section class="container-xl py-4">

@@ -367,3 +367,30 @@ export function listPages(): Promise<{ data: Pick<PageItem, 'id' | 'name' | 'slu
   return apiFetch<{ data: Pick<PageItem, 'id' | 'name' | 'slug'>[] }>('/api/pages');
 }
 
+// ── Instagram Reels ───────────────────────────────────────────────────────────
+
+export interface Reel {
+  id: number;
+  shortcode: string;
+  permalink: string;
+  thumbnail: string | null;
+  caption: string | null;
+  viewCount: number;
+  likeCount: number;
+  commentCount: number;
+  postedAt: string | null;
+}
+
+export interface IgProfile {
+  username: string;
+  fullName: string | null;
+  avatar: string | null;
+  followers: number;
+  totalPosts: number;
+  isVerified: boolean;
+}
+
+export function listReels(): Promise<{ profile: IgProfile | null; data: Reel[] }> {
+  return apiFetch<{ profile: IgProfile | null; data: Reel[] }>('/api/reels');
+}
+
