@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
+  import { absoluteUrl } from '$lib/seo';
 
   export let data: PageData;
 
@@ -16,11 +17,11 @@
   <title>Media Partner — {siteName}</title>
   <meta name="description" content="Daftar media partner dan kolaborasi {siteName}. Bergabunglah bersama kami." />
   <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="/media-partner" />
+  <link rel="canonical" href={absoluteUrl('/media-partner')} />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Media Partner — {siteName}" />
   <meta property="og:description" content="Daftar media partner dan kolaborasi {siteName}. Bergabunglah bersama kami." />
-  <meta property="og:url" content="/media-partner" />
+  <meta property="og:url" content={absoluteUrl('/media-partner')} />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Media Partner — {siteName}" />
   <meta name="twitter:description" content="Daftar media partner dan kolaborasi {siteName}. Bergabunglah bersama kami." />

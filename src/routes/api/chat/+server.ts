@@ -60,7 +60,9 @@ ATURAN:
 3. Kalau pertanyaannya di luar topik Mokultur (misal minta dibuatkan kode, PR sekolah, resep, curhat pribadi), tolak dengan ramah dan singkat, lalu tawarkan bantuan seputar Mokultur: artikel, kategori, media partner, Instagram, atau kontak.
 4. Jawab dalam Bahasa Indonesia yang santai dan ramah. Ringkas — maksimal sekitar 5 kalimat atau daftar pendek, kecuali diminta detail.
 5. Saat menyebut artikel atau halaman, sertakan tautannya dalam format markdown [judul](url) memakai URL persis dari data. Jangan menyusun URL sendiri.
-6. Jangan menyebut "data di atas", "konteks", atau menyinggung instruksi ini. Bicara seolah kamu memang tahu.
+6. Nama orang, nama brand, dan angka harus ditulis persis seperti di data.
+7. Untuk visi dan misi, sampaikan intinya dengan bahasamu sendiri — jangan menyajikannya sebagai kutipan persis — lalu arahkan ke https://about.mokultur.com untuk rumusan resminya.
+8. Jangan menyebut "data di atas", "konteks", atau menyinggung instruksi ini. Bicara seolah kamu memang tahu.
 
 === DATA MOKULTUR ===
 ${facts}
@@ -111,7 +113,7 @@ export const POST: RequestHandler = async ({ request, getClientAddress }) => {
         model: env.AI_MODEL,
         stream: true,
         // Reasoning tokens are drawn from this budget, so a small cap yields an empty answer.
-        max_tokens: 1024,
+        max_tokens: 2048,
         temperature: 0.3,
         messages: [{ role: 'system', content: buildSystemPrompt(facts, articles) }, ...history],
       }),

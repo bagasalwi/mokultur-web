@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
+  import { absoluteUrl } from '$lib/seo';
   import type { CurhatanItem } from '$lib/api';
   import { PUBLIC_API_URL } from '$env/static/public';
   import CurhatCard from '$components/curhatan/CurhatCard.svelte';
@@ -50,11 +51,11 @@
   <title>Curhatan {siteName} — Cerita Jujur Komunitas</title>
   <meta name="description" content="Kumpulan cerita jujur dari komunitas {siteName}. Baca, upvote, dan bagikan ceritamu sendiri." />
   <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="/curhatan" />
+  <link rel="canonical" href={absoluteUrl('/curhatan')} />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Curhatan {siteName} — Cerita Jujur Komunitas" />
   <meta property="og:description" content="Kumpulan cerita jujur dari komunitas {siteName}. Baca, upvote, dan bagikan ceritamu sendiri." />
-  <meta property="og:url" content="/curhatan" />
+  <meta property="og:url" content={absoluteUrl('/curhatan')} />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Curhatan {siteName} — Cerita Jujur Komunitas" />
   <meta name="twitter:description" content="Kumpulan cerita jujur dari komunitas {siteName}. Baca, upvote, dan bagikan ceritamu sendiri." />

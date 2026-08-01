@@ -59,6 +59,8 @@
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: siteName,
+    // Helps Google settle on a single site name in search results.
+    alternateName: 'Mokultur ID',
     url: origin,
     potentialAction: {
       '@type': 'SearchAction',
@@ -74,6 +76,8 @@
   {/if}
   <meta property="og:locale" content="id_ID" />
   <meta property="og:site_name" content={siteName} />
+  <meta name="twitter:site" content="@mokultur" />
+  <meta name="twitter:creator" content="@mokultur" />
   {@html `<script type="application/ld+json">${orgSchema}<\/script>`}
   {@html `<script type="application/ld+json">${websiteSchema}<\/script>`}
   {@html `<style>

@@ -1,5 +1,6 @@
 import { PUBLIC_API_URL } from '$env/static/public';
 import { getSettings, listCategories, listArticles, listWriters, type ArticleListItem } from '$lib/api';
+import { getAboutFacts } from '$lib/chat/about';
 
 /**
  * Builds the grounding context injected into the chat system prompt.
@@ -18,14 +19,6 @@ async function fetchJson<T>(path: string): Promise<T> {
   const res = await fetch(`${PUBLIC_API_URL}${path}`, { signal: AbortSignal.timeout(8000) });
   if (!res.ok) throw new Error(`${path} → HTTP ${res.status}`);
   return res.json() as Promise<T>;
-}
-
-interface AboutSection {
-  data?: {
-    headline?: { id?: string };
-    body1?: { id?: string };
-    body2?: { id?: string };
-  };
 }
 
 interface MediaPartners {
@@ -49,7 +42,7 @@ export async function getSiteFacts(): Promise<string> {
   const [settingsRes, categoriesRes, aboutRes, partnersRes, reelsRes, writersRes] = await Promise.allSettled([
     getSettings(),
     listCategories(),
-    fetchJson<AboutSection>('/api/about/about-section'),
+    getAboutFacts(),
     fetchJson<MediaPartners>('/api/media-partners'),
     fetchJson<ReelsPayload>('/api/reels'),
     listWriters(1, 50),
@@ -77,10 +70,8 @@ export async function getSiteFacts(): Promise<string> {
     );
   }
 
-  if (aboutRes.status === 'fulfilled') {
-    const a = aboutRes.value.data;
-    const about = [a?.headline?.id, a?.body1?.id, a?.body2?.id].filter(Boolean).join(' ');
-    if (about) parts.push(`## Tentang Mokultur\n${about}`);
+  if (aboutRes.status === 'fulfilled' && aboutRes.value) {
+    parts.push(aboutRes.value);
   }
 
   if (categoriesRes.status === 'fulfilled') {

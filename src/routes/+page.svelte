@@ -7,6 +7,7 @@
   import ReelsSection from '$components/home/ReelsSection.svelte';
   import MokuThreadsPromo from '$components/home/MokuThreadsPromo.svelte';
   import { LOUNGE_ENABLED } from '$lib/features';
+  import { absoluteUrl } from '$lib/seo';
   import SocialMediaCard from '$components/common/SocialMediaCard.svelte';
   import PopularArticlesCard from '$components/common/PopularArticlesCard.svelte';
   import WritersCard from '$components/home/WritersCard.svelte';
@@ -46,19 +47,19 @@
 
 <svelte:head>
   <title>{siteName} - Berita, Review &amp; Budaya Pop Indonesia</title>
-  <meta name="description" content="Berita, ulasan, dan wawasan budaya pop terkini dari {siteName}." />
-  <link rel="canonical" href="/" />
+  <meta name="description" content="Berita, ulasan, dan liputan event seputar anime, manga, cosplay, game, teknologi, dan film. {siteName} — media kultur interaktifnya Indonesia sejak 2021." />
+  <link rel="canonical" href={absoluteUrl('/')} />
   <meta name="robots" content="index, follow" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="{siteName} - Berita, Review & Budaya Pop Indonesia" />
-  <meta property="og:description" content="Berita, ulasan, dan wawasan budaya pop terkini dari {siteName}." />
-  <meta property="og:url" content="/" />
+  <meta property="og:description" content="Berita, ulasan, dan liputan event seputar anime, manga, cosplay, game, teknologi, dan film. {siteName} — media kultur interaktifnya Indonesia sejak 2021." />
+  <meta property="og:url" content={absoluteUrl('/')} />
   {#if data.headlines[0]?.image}
     <meta property="og:image" content={data.headlines[0].image} />
   {/if}
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="{siteName} - Berita, Review & Budaya Pop Indonesia" />
-  <meta name="twitter:description" content="Berita, ulasan, dan wawasan budaya pop terkini dari {siteName}." />
+  <meta name="twitter:description" content="Berita, ulasan, dan liputan event seputar anime, manga, cosplay, game, teknologi, dan film. {siteName} — media kultur interaktifnya Indonesia sejak 2021." />
   {#if data.headlines[0]?.image}
     <meta name="twitter:image" content={data.headlines[0].image} />
   {/if}
@@ -69,6 +70,14 @@
 </svelte:head>
 
 <div class="home-page">
+  <!--
+    The homepage is a feed, not a single subject, so the h1 names the publication
+    rather than any one story. Hidden visually because the logo already carries
+    this role for sighted users, but it gives crawlers and screen readers the
+    top-level heading the page was missing entirely.
+  -->
+  <h1 class="visually-hidden">{siteName} — Berita, Review &amp; Budaya Pop Indonesia: Anime, Manga, Cosplay, Game, Teknologi, dan Film</h1>
+
   <div class="container-xl">
     <AdBanner ad={data.adTop} adSlot="ad_0" />
   </div>

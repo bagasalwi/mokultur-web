@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
+  import { absoluteUrl } from '$lib/seo';
   import ArticleCard from '$components/articles/ArticleCard.svelte';
   import Pagination from '$components/common/Pagination.svelte';
   import PopularTags from '$components/common/PopularTags.svelte';
@@ -31,11 +32,11 @@
   <meta name="description" content={metaDesc} />
   <meta name="robots" content={isSearch ? 'noindex, follow' : 'index, follow'} />
   {#if !isSearch}
-    <link rel="canonical" href="/index-article" />
+    <link rel="canonical" href={absoluteUrl('/index-article')} />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={metaTitle} />
     <meta property="og:description" content={metaDesc} />
-    <meta property="og:url" content="/index-article" />
+    <meta property="og:url" content={absoluteUrl('/index-article')} />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={metaTitle} />
     <meta name="twitter:description" content={metaDesc} />

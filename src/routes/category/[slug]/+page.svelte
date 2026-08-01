@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import Pagination from '$components/common/Pagination.svelte';
+  import { absoluteUrl, buildBreadcrumb } from '$lib/seo';
 
   export let data: PageData;
 
@@ -36,28 +37,26 @@
 </script>
 
 <svelte:head>
-  <title>
-    {isSearch ? `Cari "${data.search}" di ${data.category.name}` : data.category.name} - {data.settings?.site_name ?? 'Mokultur'}
-  </title>
+  <title>{isSearch ? `Cari "${data.search}" di ${data.category.name}` : data.category.name} - {data.settings?.site_name ?? 'Mokultur'}</title>
   <meta name="description" content={data.category.description ?? `Artikel kategori ${data.category.name}`} />
   {#if !isSearch}
-    <link rel="canonical" href="/category/{data.category.slug}" />
+    <link rel="canonical" href={absoluteUrl(`/category/${data.category.slug}`)} />
     <meta name="robots" content="index, follow" />
   {:else}
     <meta name="robots" content="noindex, follow" />
   {/if}
   {#if !isSearch}
     {#if data.meta.page > 1}
-      <link rel="prev" href="/category/{data.category.slug}?page={data.meta.page - 1}" />
+      <link rel="prev" href={absoluteUrl(`/category/${data.category.slug}?page=${data.meta.page - 1}`)} />
     {/if}
     {#if data.meta.page < data.meta.totalPages}
-      <link rel="next" href="/category/{data.category.slug}?page={data.meta.page + 1}" />
+      <link rel="next" href={absoluteUrl(`/category/${data.category.slug}?page=${data.meta.page + 1}`)} />
     {/if}
   {/if}
   <meta property="og:type" content="website" />
   <meta property="og:title" content={data.seo?.og.title ?? data.category.name} />
   <meta property="og:description" content={data.seo?.og.description ?? (data.category.description ?? `Artikel kategori ${data.category.name}`)} />
-  <meta property="og:url" content={data.seo?.og.url ?? `/category/${data.category.slug}`} />
+  <meta property="og:url" content={data.seo?.og.url ?? absoluteUrl(`/category/${data.category.slug}`)} />
   {#if data.seo?.og.image}<meta property="og:image" content={data.seo.og.image} />{/if}
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={data.seo?.twitter.title ?? data.category.name} />
@@ -68,17 +67,22 @@
     '@type': isSearch ? 'SearchResultsPage' : 'CollectionPage',
     name: data.seo?.title ?? data.category.name,
     description: data.category.description ?? undefined,
-    url: data.seo?.canonical ?? `/category/${data.category.slug}`,
+    url: data.seo?.canonical ?? absoluteUrl(`/category/${data.category.slug}`),
     mainEntity: {
       '@type': 'ItemList',
       itemListElement: data.articles.slice(0, 10).map((a, i) => ({
         '@type': 'ListItem',
         position: i + 1,
-        url: `/article/${a.id}/${a.slug}`,
+        url: absoluteUrl(`/article/${a.id}/${a.slug}`),
         name: a.title,
       })),
     },
   })}<\/script>`}
+  {#if !isSearch}
+    {@html `<script type="application/ld+json">${JSON.stringify(
+      buildBreadcrumb([{ name: data.category.name, path: `/category/${data.category.slug}` }])
+    )}<\/script>`}
+  {/if}
 </svelte:head>
 
 <section class="section-md container-xl archive-page">

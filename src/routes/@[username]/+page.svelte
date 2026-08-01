@@ -3,6 +3,7 @@
   import type { ArticleListItem } from '$lib/api';
   import ArticleCard from '$components/articles/ArticleCard.svelte';
   import Pagination from '$components/common/Pagination.svelte';
+  import { absoluteUrl, buildBreadcrumb } from '$lib/seo';
 
   export let data: PageData;
 
@@ -70,12 +71,12 @@
   <title>@{username} - {siteName}</title>
   <meta name="description" content={user.description ?? `Lihat profil, artikel, dan pencapaian dari ${user.name} di ${siteName}.`} />
   <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="/@{username}" />
+  <link rel="canonical" href={absoluteUrl(`/@${username}`)} />
   <meta property="og:type" content="profile" />
   <meta property="og:title" content="@{username} — {siteName}" />
   <meta property="og:description" content={user.description ?? `Lihat profil, artikel, dan pencapaian dari ${user.name} di ${siteName}.`} />
   {#if user.img}<meta property="og:image" content={user.img} />{/if}
-  <meta property="og:url" content="/@{username}" />
+  <meta property="og:url" content={absoluteUrl(`/@${username}`)} />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="@{username} — {siteName}" />
   <meta name="twitter:description" content={user.description ?? `Lihat profil, artikel, dan pencapaian dari ${user.name} di ${siteName}.`} />
@@ -84,11 +85,14 @@
     '@context': 'https://schema.org',
     '@type': 'Person',
     name: user.name,
-    url: `/@${username}`,
+    url: absoluteUrl(`/@${username}`),
     ...(user.img ? { image: user.img } : {}),
     ...(user.description ? { description: user.description } : {}),
     ...(user.instagram || user.facebook ? { sameAs: [user.instagram, user.facebook].filter(Boolean) } : {}),
   })}<\/script>`}
+  {@html `<script type="application/ld+json">${JSON.stringify(
+    buildBreadcrumb([{ name: `@${username}`, path: `/@${username}` }])
+  )}<\/script>`}
 </svelte:head>
 
 <section class="section-top container-xl creator-profile-page">

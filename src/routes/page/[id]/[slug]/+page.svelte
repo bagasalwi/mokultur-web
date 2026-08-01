@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
+  import { absoluteUrl } from '$lib/seo';
   import PopularTags from '$components/common/PopularTags.svelte';
   import SocialMediaCard from '$components/common/SocialMediaCard.svelte';
 
@@ -15,7 +16,7 @@
 <svelte:head>
   <title>{p.name} — {siteName}</title>
   <meta name="description" content={metaDesc} />
-  <link rel="canonical" href="/page/{p.id}/{p.slug}" />
+  <link rel="canonical" href={absoluteUrl(`/page/${p.id}/${p.slug}`)} />
   <meta name="robots" content="index, follow" />
 </svelte:head>
 

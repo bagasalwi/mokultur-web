@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { PageData } from "./$types";
+  import { absoluteUrl } from '$lib/seo';
 
   export let data: PageData;
 
@@ -82,11 +83,11 @@
   <title>Kontak & Kolaborasi — {siteName}</title>
   <meta name="description" content="Hubungi {siteName} untuk kolaborasi konten, press release, event coverage, dan paid partnership." />
   <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="/contact" />
+  <link rel="canonical" href={absoluteUrl('/contact')} />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Kontak & Kolaborasi — {siteName}" />
   <meta property="og:description" content="Hubungi {siteName} untuk kolaborasi konten, press release, event coverage, dan paid partnership." />
-  <meta property="og:url" content="/contact" />
+  <meta property="og:url" content={absoluteUrl('/contact')} />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Kontak & Kolaborasi — {siteName}" />
   <meta name="twitter:description" content="Hubungi {siteName} untuk kolaborasi konten, press release, event coverage, dan paid partnership." />
