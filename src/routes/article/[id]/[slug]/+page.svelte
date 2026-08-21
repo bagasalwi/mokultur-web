@@ -6,6 +6,7 @@
   import AdBanner from "$components/common/AdBanner.svelte";
   import CurhatPromoCard from "$components/curhatan/CurhatPromoCard.svelte";
   import ArticleRankItem from "$components/common/ArticleRankItem.svelte";
+  import ShareSheet from "$components/common/ShareSheet.svelte";
   import { onMount } from "svelte";
   import { PUBLIC_API_URL } from "$env/static/public";
   import { enhance } from "$app/forms";
@@ -22,9 +23,6 @@
   let liked = false;
   let likeCount = 0;
   let likeLoading = false;
-
-  // Copy feedback
-  let copyFeedback = false;
 
   // Comments
   let comments: any[] = [];
@@ -158,17 +156,6 @@
     }
   }
 
-  async function copyLink() {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      copyFeedback = true;
-      setTimeout(() => {
-        copyFeedback = false;
-      }, 2000);
-    } catch {}
-  }
-
-
   function formatDate(d: string | null) {
     if (!d) return "";
     // Slice date part only (YYYY-MM-DD) to avoid UTC→local timezone shift
@@ -179,13 +166,6 @@
       year: "numeric",
     });
   }
-
-  $: shareUrl =
-    typeof window !== "undefined"
-      ? window.location.href
-      : `/article/${a.id}/${a.slug}`;
-  $: waUrl = `https://wa.me/?text=${encodeURIComponent(a.title + " " + shareUrl)}`;
-  $: fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
 </script>
 
 <svelte:head>
@@ -334,38 +314,11 @@
             <span>{likeCount}</span>
           </button>
 
-          <button
-            class="share-social-card__button share-social-card__button--copy {copyFeedback
-              ? 'is-copied'
-              : ''}"
-            on:click={copyLink}
-            title="Copy Link"
-          >
-            <i class="bi {copyFeedback ? 'bi-check-lg' : 'bi-link-45deg'}"></i>
-            <span>Copy Link</span>
-          </button>
-
-          <a
-            href={waUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="share-social-card__button share-social-card__button--whatsapp"
-            title="Share ke WhatsApp"
-          >
-            <i class="bi bi-whatsapp"></i>
-            <span>WhatsApp</span>
-          </a>
-
-          <a
-            href={fbUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="share-social-card__button share-social-card__button--facebook"
-            title="Share ke Facebook"
-          >
-            <i class="bi bi-facebook"></i>
-            <span>Facebook</span>
-          </a>
+          <ShareSheet
+            url={seo.canonical}
+            title={`${a.title} — ${siteName}`}
+            triggerClass="share-social-card__button"
+          />
 
           <a
             href="#komentar"

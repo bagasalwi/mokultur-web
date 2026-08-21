@@ -5,6 +5,8 @@
   import Hero from '$components/hero/Hero.svelte';
   import EventSection from '$components/home/EventSection.svelte';
   import ReelsSection from '$components/home/ReelsSection.svelte';
+  import AnimeSeasonSection from '$components/home/AnimeSeasonSection.svelte';
+  import AiringTodaySection from '$components/anime/AiringTodaySection.svelte';
   import MokuThreadsPromo from '$components/home/MokuThreadsPromo.svelte';
   import { LOUNGE_ENABLED } from '$lib/features';
   import { absoluteUrl } from '$lib/seo';
@@ -31,6 +33,11 @@
     'feature-tile': 'col-12 col-md-6 col-lg-4',
     'borderless-feed': 'col-12 col-md-6',
   };
+
+  // Each anime section hides itself when its data is empty — an empty schedule
+  // is a normal day, not an error. The two-column split only makes sense when
+  // both actually render; otherwise the survivor takes the full width.
+  $: splitAnimeRow = data.seasonAnime.length > 0 && data.airingToday.length > 0;
 
   $: homeSchema = {
     '@context': 'https://schema.org',
@@ -91,6 +98,22 @@
   {#if LOUNGE_ENABLED}
     <MokuThreadsPromo {siteName} threads={data.trendingThreads} />
   {/if}
+
+  <section class="section-md py-4">
+    <div class="container-xl">
+      <div class="home-anime-row" class:home-anime-row--split={splitAnimeRow}>
+        <AnimeSeasonSection anime={data.seasonAnime} season={data.animeSeason} year={data.animeSeasonYear} />
+        <AiringTodaySection anime={data.airingToday} day={data.airingDay}>
+          <!-- Same shape as the Event/Tech sections, but the surface variant:
+               --ghost is white-on-transparent for dark headers and would be
+               unreadable on this section's light background. -->
+          <a slot="action" href="/anime" class="theme-btn theme-btn--surface theme-btn--sm flex-shrink-0">
+            Lihat Semua <i class="bi bi-arrow-right"></i>
+          </a>
+        </AiringTodaySection>
+      </div>
+    </div>
+  </section>
 
   <EventSection articles={data.eventArticles} />
 
@@ -179,3 +202,32 @@
     </section>
   {/if}
 </div>
+
+<style>
+  /* Stacked by default; side by side from md up. */
+  .home-anime-row {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .home-anime-row--split {
+      /* minmax(0, …) rather than a plain 50%: percentages plus the gap
+         overflow the container, and without the zero minimum a long anime
+         title widens its own column and breaks the split. */
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+      gap: 0 2rem;
+      align-items: start;
+    }
+
+    /* Each section hands its heading and its carousel to the parent's rows, so
+       the two cards start at the same y even when one heading wraps its button
+       onto a second line and the other does not. */
+    .home-anime-row--split > :global(*) {
+      display: grid;
+      grid-row: span 2;
+      grid-template-rows: subgrid;
+    }
+  }
+</style>

@@ -7,6 +7,8 @@
   import Footer from '$components/layout/Footer.svelte';
   import ChatWidget from '$components/chat/ChatWidget.svelte';
   import NavProgress from '$components/common/NavProgress.svelte';
+  import CookieConsent from '$components/common/CookieConsent.svelte';
+  import Analytics from '$components/common/Analytics.svelte';
   import type { LayoutData } from './$types';
 
   export let data: LayoutData;
@@ -106,3 +108,10 @@
 <Footer settings={data.settings} footerItems={data.navFooter} socials={data.socials} categories={data.categories} />
 
 <ChatWidget />
+
+<CookieConsent />
+<Analytics
+  measurementId={data.settings?.google_analytics ?? null}
+  adsenseEnabled={data.settings?.adsense_enabled ?? false}
+  adsensePublisherId={data.settings?.adsense_publisher_id ?? null}
+/>

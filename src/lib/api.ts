@@ -210,6 +210,9 @@ export interface SiteSettings {
   contact_email: string | null;
   contact_whatsapp: string | null;
   curhat_enabled: boolean;
+  google_analytics: string | null;
+  adsense_enabled: boolean;
+  adsense_publisher_id: string | null;
 }
 
 export function getSettings() {
@@ -394,3 +397,198 @@ export function listReels(): Promise<{ profile: IgProfile | null; data: Reel[] }
   return apiFetch<{ profile: IgProfile | null; data: Reel[] }>('/api/reels');
 }
 
+
+// ── Talents ───────────────────────────────────────────────────────────────────
+
+export type TalentTier = 'verified' | 'general' | 'partner';
+
+/** Derived server-side so the listing, detail page and share image always agree. */
+export interface TalentBadge {
+  id: string;
+  label: string;
+  icon: string;
+  tone: 'primary' | 'accent' | 'muted';
+}
+
+export interface TalentListItem {
+  slug: string;
+  alias: string;
+  tagline: string | null;
+  bioShort: string | null;
+  avatar: string;
+  themeColor: string;
+  instagramUsername: string | null;
+  igFollowers: number;
+  talentTier: TalentTier;
+  isFeatured: boolean;
+  collabCount: number;
+  badges: TalentBadge[];
+}
+
+export interface TalentStats {
+  talentCount: number;
+  totalFollowers: number;
+  totalReels: number;
+}
+
+/** Platform, display name and icon all resolved server-side. */
+export interface TalentSocialLink {
+  platform: 'instagram' | 'youtube' | 'x' | 'facebook' | 'threads' | 'other';
+  platformLabel: string;
+  icon: string;
+  label: string;
+  url: string;
+}
+
+/** A reel made with Mokultur. Title falls back to the scraped caption. */
+export interface TalentReel {
+  url: string;
+  title: string | null;
+  thumbnail: string | null;
+  viewCount: number;
+  likeCount: number;
+  postedAt: string | null;
+}
+
+export interface TalentRate {
+  label: string;
+  price: number | null;
+  currency: string;
+  unit: string | null;
+  notes: string | null;
+}
+
+export interface TalentWork {
+  slug: string;
+  title: string;
+  client: string | null;
+  type: string | null;
+  url: string | null;
+  thumbnail: string | null;
+  description: string | null;
+  publishedAt: string | null;
+}
+
+export interface TalentDetail extends TalentListItem {
+  realName: string;
+  heroImage: string | null;
+  instagram: { username: string; url: string; followers: number; syncedAt: string | null } | null;
+  contact: { label: string | null; url: string | null } | null;
+  achievements: { slug: string; title: string; year: number; description: string | null }[];
+  socialLinks: TalentSocialLink[];
+  gallery: { slug: string; url: string; caption: string; year: number; width: number | null; height: number | null }[];
+  works: TalentWork[];
+  rates: TalentRate[];
+  schedule: { slug: string; eventName: string; date: string; status: string; location: string }[];
+  collabReels: TalentReel[];
+}
+
+export function listTalents(): Promise<{ data: TalentListItem[]; featured: TalentListItem[]; stats: TalentStats }> {
+  return apiFetch<{ data: TalentListItem[]; featured: TalentListItem[]; stats: TalentStats }>('/api/talents');
+}
+
+export function getTalent(slug: string): Promise<{ data: TalentDetail }> {
+  return apiFetch<{ data: TalentDetail }>(`/api/talents/${encodeURIComponent(slug)}`);
+}
+
+// ── Anime ─────────────────────────────────────────────────────────────────────
+
+export interface AnimeGenreOption {
+  slug: string;
+  name: string;
+}
+
+export interface AnimeCard {
+  malId: number;
+  title: string;
+  titleEn: string | null;
+  image: string | null;
+  score: number | null;
+  rank: number | null;
+  popularity: number | null;
+  mediaType: string | null;
+  numEpisodes: number | null;
+  season: string | null;
+  seasonYear: number | null;
+  airing: boolean;
+  broadcastTime: string | null;
+  /** Same slot converted to WIB by the API, day shift included. */
+  broadcastTimeWib: string | null;
+  malUrl: string;
+  genres: AnimeGenreOption[];
+}
+
+export interface AnimeEpisodeCard extends AnimeCard {
+  latestEpisode: { number: number; title: string | null; airedAt: string | null; url: string | null };
+}
+
+export interface AnimeDetail extends AnimeCard {
+  synopsis: string | null;
+  status: string | null;
+  broadcast: { day: string | null; time: string | null } | null;
+  studios: string[];
+  episodes: { number: number; title: string | null; airedAt: string | null; url: string | null; filler: boolean; recap: boolean }[];
+  cachedAt: string | null;
+}
+
+export function getCurrentSeasonTop(limit = 5): Promise<{ season: string; year: number; data: AnimeCard[] }> {
+  return apiFetch<{ season: string; year: number; data: AnimeCard[] }>(`/api/anime/season/current/top?limit=${limit}`);
+}
+
+/**
+ * URL of the server-rendered 1080×1350 share image for a top-5 list.
+ *
+ * Points straight at the API rather than proxying through SvelteKit: the
+ * endpoint already sends content-disposition: attachment, so a plain link
+ * downloads it.
+ */
+export function animeShareImageUrl(params: {
+  list: 'season' | 'episodes' | 'genre' | 'season-year';
+  year?: number | null;
+  genre?: string | null;
+  season?: string | null;
+  count?: 3 | 5;
+}): string {
+  const q = new URLSearchParams({ list: params.list });
+  if (params.year) q.set('year', String(params.year));
+  if (params.genre) q.set('genre', params.genre);
+  if (params.season) q.set('season', params.season);
+  if (params.count === 3) q.set('count', '3');
+
+  return `${BASE}/api/anime/share.png?${q}`;
+}
+
+export function getAiringToday(): Promise<{ day: string; timezone: string; data: AnimeCard[] }> {
+  return apiFetch<{ day: string; timezone: string; data: AnimeCard[] }>('/api/anime/airing/today');
+}
+
+export function getLatestEpisodes(limit = 5): Promise<{ data: AnimeEpisodeCard[] }> {
+  return apiFetch<{ data: AnimeEpisodeCard[] }>(`/api/anime/episodes/latest?limit=${limit}`);
+}
+
+export function getTopAnime(params: { year: number; season?: string; genre?: string; limit?: number }) {
+  const q = new URLSearchParams({ year: String(params.year), limit: String(params.limit ?? 5) });
+  if (params.season) q.set('season', params.season);
+  if (params.genre) q.set('genre', params.genre);
+  return apiFetch<{
+    year: number;
+    season: string | null;
+    genre: AnimeGenreOption | string | null;
+    data: AnimeCard[];
+    /** True when the year was never cached and a sync has just been queued. */
+    syncing?: boolean;
+  }>(`/api/anime/top?${q}`);
+}
+
+export function listAnimeGenres(): Promise<{ data: AnimeGenreOption[] }> {
+  return apiFetch<{ data: AnimeGenreOption[] }>('/api/anime/genres');
+}
+
+/** `data` is the full selectable range; `available` is what is already cached. */
+export function listAnimeYears(): Promise<{ data: number[]; available: number[] }> {
+  return apiFetch<{ data: number[]; available: number[] }>('/api/anime/years');
+}
+
+export function getAnime(malId: number): Promise<{ data: AnimeDetail }> {
+  return apiFetch<{ data: AnimeDetail }>(`/api/anime/${malId}`);
+}

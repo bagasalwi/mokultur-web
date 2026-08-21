@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { clearConsent } from '$lib/consent';
   import type { SiteSettings, NavbarItem, SocialMediaItem, Category } from '$lib/api';
 
   export let settings: SiteSettings | null = null;
@@ -106,7 +107,12 @@
     <!-- Copyright bar -->
     <div class="border-top py-3" style="border-color: rgba(255,255,255,0.1) !important;">
       <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
-        <small class="text-white-50">&copy;{year} {siteName}. All rights reserved.</small>
+        <small class="text-white-50">
+          &copy;{year} {siteName}. All rights reserved.
+          <button type="button" class="footer-cookie-btn" on:click={clearConsent}>
+            Pengaturan Cookie
+          </button>
+        </small>
         {#if socials.length > 0}
           <div class="d-flex align-items-center gap-2">
             {#each socials as s}
@@ -120,3 +126,20 @@
     </div>
   </div>
 </footer>
+
+<style>
+  .footer-cookie-btn {
+    background: none;
+    border: 0;
+    padding: 0;
+    margin-left: 0.5rem;
+    color: inherit;
+    text-decoration: underline;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .footer-cookie-btn:hover {
+    color: #fff;
+  }
+</style>

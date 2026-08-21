@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import { absoluteUrl } from '$lib/seo';
+  import { absoluteUrl, buildBreadcrumb } from '$lib/seo';
   import PopularTags from '$components/common/PopularTags.svelte';
   import SocialMediaCard from '$components/common/SocialMediaCard.svelte';
 
@@ -9,15 +9,27 @@
   $: p = data.page;
   $: siteName = data.settings?.site_name ?? 'Mokultur';
   $: metaDesc = p.description
-    ? p.description.replace(/<[^>]+>/g, '').substring(0, 157)
+    ? p.description.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().substring(0, 157)
     : `${p.name} — ${siteName}`;
+  $: pageTitle = `${p.name} — ${siteName}`;
+  $: pageUrl = absoluteUrl(`/page/${p.id}/${p.slug}`);
 </script>
 
 <svelte:head>
-  <title>{p.name} — {siteName}</title>
+  <title>{pageTitle}</title>
   <meta name="description" content={metaDesc} />
-  <link rel="canonical" href={absoluteUrl(`/page/${p.id}/${p.slug}`)} />
+  <link rel="canonical" href={pageUrl} />
   <meta name="robots" content="index, follow" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content={pageTitle} />
+  <meta property="og:description" content={metaDesc} />
+  <meta property="og:url" content={pageUrl} />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content={pageTitle} />
+  <meta name="twitter:description" content={metaDesc} />
+  {@html `<script type="application/ld+json">${JSON.stringify(
+    buildBreadcrumb([{ name: p.name, path: `/page/${p.id}/${p.slug}` }])
+  )}<\/script>`}
 </svelte:head>
 
 <div class="container-xl py-5">
