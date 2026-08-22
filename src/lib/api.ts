@@ -605,6 +605,8 @@ export type TasteAnswers = {
   pace: number;
   world: number;
   heart: number;
+  stakes: number;
+  humor: number;
   fame: number;
   length: number;
   era: number;

@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { getAiringToday, getCurrentSeasonTop, getLatestEpisodes, getTopAnime, listAnimeGenres, listAnimeYears } from '$lib/api';
+import { getAiringToday, getCurrentSeasonTop, getLatestEpisodes, getTopAnime, listAnimeGenres, listAnimeYears, listArticles } from '$lib/api';
 
 const TOP_LIMIT = 5;
 /** The hero carousel shows more than the ranked grids — one anime per slide. */
@@ -17,7 +17,7 @@ export const load: PageServerLoad = async ({ url, setHeaders }) => {
   const wantsGenre = Boolean(genre) && Number.isInteger(genreYear);
   const wantsSeason = Boolean(season) && Number.isInteger(seasonYear);
 
-  const [seasonTopRes, latestRes, genresRes, yearsRes, genreRes, seasonRes, airingRes] = await Promise.allSettled([
+  const [seasonTopRes, latestRes, genresRes, yearsRes, genreRes, seasonRes, airingRes, articlesRes] = await Promise.allSettled([
     getCurrentSeasonTop(SEASON_TOP_LIMIT),
     getLatestEpisodes(TOP_LIMIT),
     listAnimeGenres(),
@@ -25,6 +25,7 @@ export const load: PageServerLoad = async ({ url, setHeaders }) => {
     wantsGenre ? getTopAnime({ year: genreYear, genre, limit: TOP_LIMIT }) : Promise.resolve(null),
     wantsSeason ? getTopAnime({ year: seasonYear, season, limit: TOP_LIMIT }) : Promise.resolve(null),
     getAiringToday(),
+    listArticles({ page: 1, perPage: 8, category: 'anime' }),
   ]);
 
   const seasonTop = seasonTopRes.status === 'fulfilled' ? seasonTopRes.value : null;
@@ -41,5 +42,6 @@ export const load: PageServerLoad = async ({ url, setHeaders }) => {
     seasonResults: seasonRes.status === 'fulfilled' ? (seasonRes.value?.data ?? null) : null,
     airingToday: airingRes.status === 'fulfilled' ? airingRes.value.data : [],
     airingDay: airingRes.status === 'fulfilled' ? airingRes.value.day : null,
+    animeArticles: articlesRes.status === 'fulfilled' ? articlesRes.value.data : [],
   };
 };

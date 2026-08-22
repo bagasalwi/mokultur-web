@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import { onDestroy } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import { browser } from '$app/environment';
   import { goto } from '$app/navigation';
   import { navigating, page as pageStore } from '$app/stores';
@@ -11,54 +11,91 @@
 
   export let data: PageData;
 
-  type Axis = 'mood' | 'pace' | 'world' | 'heart' | 'fame' | 'length' | 'era';
+  type Axis =
+    | 'mood'
+    | 'pace'
+    | 'world'
+    | 'heart'
+    | 'stakes'
+    | 'humor'
+    | 'fame'
+    | 'length'
+    | 'era';
 
-  const QUESTIONS: { axis: Axis; question: string; positive: string; negative: string }[] = [
-    {
-      axis: 'mood',
-      question: 'Habis hari yang berat, kamu pilih tontonan yang…',
-      negative: 'Ringan dan bikin ketawa',
-      positive: 'Gelap dan bikin mikir',
-    },
-    {
-      axis: 'pace',
-      question: 'Tempo cerita yang paling nyaman buat kamu?',
-      negative: 'Pelan, biar meresap',
-      positive: 'Cepat, penuh aksi',
-    },
-    {
-      axis: 'world',
-      question: 'Dunia yang paling menarik?',
-      negative: 'Dunia nyata, orang biasa',
-      positive: 'Dunia lain, sihir, fantasi',
-    },
-    {
-      axis: 'heart',
-      question: 'Seberapa penting urusan perasaan tokohnya?',
-      negative: 'Nggak usah drama-drama',
-      positive: 'Justru itu yang bikin nempel',
-    },
-    {
-      axis: 'fame',
-      question: 'Kalau soal judul…',
-      negative: 'Suka yang belum banyak orang tahu',
-      positive: 'Yang ramai dibicarakan dulu',
-    },
-    {
-      axis: 'length',
-      question: 'Panjang cerita yang kamu sanggupi?',
-      negative: 'Pendek, sekali duduk selesai',
-      positive: 'Panjang, biar puas',
-    },
-    {
-      axis: 'era',
-      question: 'Kamu lebih sering nonton…',
-      negative: 'Judul lama yang sudah teruji',
-      positive: 'Yang baru keluar',
-    },
+  type Question = { axis: Axis; question: string; positive: string; negative: string };
+
+  /**
+   * Several phrasings per axis, and only four axes are asked each run.
+   *
+   * Asking all nine every time made the quiz long and identical on a second
+   * play, so nobody played twice. Drawing four of nine keeps it under a minute
+   * and gives 126 different question sets; the phrasings mean even a repeat of
+   * the same axis does not read the same way. Axes left unasked stay neutral,
+   * which the matcher already handles.
+   */
+  const QUESTION_POOL: Question[] = [
+    // mood
+    { axis: 'mood', question: 'Habis hari yang berat, kamu pilih tontonan yang…', negative: 'Ringan dan bikin ketawa', positive: 'Gelap dan bikin mikir' },
+    { axis: 'mood', question: 'Ending seperti apa yang kamu tahan?', negative: 'Yang bikin hati anget', positive: 'Yang bikin nyesek berhari-hari' },
+    { axis: 'mood', question: 'Cerita paling berkesan buat kamu biasanya…', negative: 'Menghibur dan bikin senyum', positive: 'Berat dan menohok' },
+
+    // pace
+    { axis: 'pace', question: 'Tempo cerita yang paling nyaman buat kamu?', negative: 'Pelan, biar meresap', positive: 'Cepat, penuh aksi' },
+    { axis: 'pace', question: 'Episode pertama yang bikin kamu lanjut itu…', negative: 'Yang tenang dan bikin penasaran pelan-pelan', positive: 'Yang langsung tancap gas' },
+
+    // world
+    { axis: 'world', question: 'Dunia yang paling menarik?', negative: 'Dunia nyata, orang biasa', positive: 'Dunia lain, sihir, fantasi' },
+    { axis: 'world', question: 'Kamu lebih gampang nyambung sama cerita yang…', negative: 'Bisa kejadian di sekitar kamu', positive: 'Jauh dari kenyataan' },
+
+    // heart
+    { axis: 'heart', question: 'Seberapa penting urusan perasaan tokohnya?', negative: 'Nggak usah drama-drama', positive: 'Justru itu yang bikin nempel' },
+    { axis: 'heart', question: 'Kalau ada subplot romansa, kamu…', negative: 'Skip, fokus ceritanya aja', positive: 'Malah paling ditunggu' },
+
+    // stakes
+    { axis: 'stakes', question: 'Taruhan cerita yang bikin kamu betah?', negative: 'Urusan sehari-hari yang dekat', positive: 'Nasib dunia dipertaruhkan' },
+    { axis: 'stakes', question: 'Kamu lebih suka konflik yang…', negative: 'Kecil tapi terasa personal', positive: 'Besar dan berskala luas' },
+
+    // humor
+    { axis: 'humor', question: 'Porsi komedi yang pas buat kamu?', negative: 'Serius aja, nggak perlu becanda', positive: 'Wajib ada yang bikin ketawa' },
+    { axis: 'humor', question: 'Tokoh favorit kamu biasanya…', negative: 'Yang serius dan penuh beban', positive: 'Yang celetukannya bikin ngakak' },
+
+    // fame
+    { axis: 'fame', question: 'Kalau soal judul…', negative: 'Suka yang belum banyak orang tahu', positive: 'Yang ramai dibicarakan dulu' },
+    { axis: 'fame', question: 'Rekomendasi paling berguna buat kamu itu…', negative: 'Judul yang jarang disebut orang', positive: 'Judul yang semua orang sudah nonton' },
+
+    // length
+    { axis: 'length', question: 'Panjang cerita yang kamu sanggupi?', negative: 'Pendek, sekali duduk selesai', positive: 'Panjang, biar puas' },
+    { axis: 'length', question: 'Kamu lebih sering menyelesaikan…', negative: 'Yang cuma belasan episode', positive: 'Yang ratusan episode pun hayo' },
+
+    // era
+    { axis: 'era', question: 'Kamu lebih sering nonton…', negative: 'Judul lama yang sudah teruji', positive: 'Yang baru keluar' },
+    { axis: 'era', question: 'Kalau disuruh milih tontonan malam ini…', negative: 'Klasik yang belum sempat kamu tonton', positive: 'Yang lagi tayang musim ini' },
   ];
 
-  let answers: Record<Axis, number> = { mood: 0, pace: 0, world: 0, heart: 0, fame: 0, length: 0, era: 0 };
+  const QUESTION_COUNT = 4;
+
+  function pickQuestions(): Question[] {
+    const byAxis = new Map<Axis, Question[]>();
+    for (const q of QUESTION_POOL) {
+      if (!byAxis.has(q.axis)) byAxis.set(q.axis, []);
+      byAxis.get(q.axis)!.push(q);
+    }
+
+    // Four distinct axes, then one phrasing from each — so a run never asks the
+    // same thing twice in different words.
+    const axes = [...byAxis.keys()].sort(() => Math.random() - 0.5).slice(0, QUESTION_COUNT);
+
+    return axes.map((axis) => {
+      const options = byAxis.get(axis)!;
+      return options[Math.floor(Math.random() * options.length)];
+    });
+  }
+
+  let QUESTIONS: Question[] = [];
+
+  const BLANK: Record<Axis, number> = { mood: 0, pace: 0, world: 0, heart: 0, stakes: 0, humor: 0, fame: 0, length: 0, era: 0 };
+
+  let answers: Record<Axis, number> = { ...BLANK };
   let step = 0;
 
   /**
@@ -73,7 +110,7 @@
   $: canonical = absoluteUrl('/anime/selera');
   $: pageTitle = buildPageTitle('Know Your Taste of Anime', siteName);
   $: description =
-    'Jawab 7 pertanyaan, dapat 6 rekomendasi anime yang cocok sama seleramu — bukan sekadar daftar yang lagi populer.';
+    'Jawab 4 pertanyaan, dapat 6 rekomendasi anime yang cocok sama seleramu. Pertanyaannya berganti tiap kali main.';
   $: resultUrl = $pageStore.url.href;
 
   function choose(axis: Axis, value: number) {
@@ -97,7 +134,8 @@
   }
 
   function restart() {
-    answers = { mood: 0, pace: 0, world: 0, heart: 0, fame: 0, length: 0, era: 0 };
+    answers = { ...BLANK };
+    QUESTIONS = pickQuestions();
     step = 0;
     stopCooking();
     goto('/anime/selera');
@@ -201,6 +239,12 @@
     }
   }
 
+  // Chosen in the browser, not during SSR: a server-side Math.random would
+  // render one set of questions and hydrate a different one.
+  onMount(() => {
+    if (!QUESTIONS.length) QUESTIONS = pickQuestions();
+  });
+
   onDestroy(stopCooking);
 
   $: shownLabel = aiLabel ?? data.result?.profile.label ?? '';
@@ -247,11 +291,14 @@
       <span class="badge badge-main mb-3">Kuis</span>
       <h1 class="taste__title">Know Your Taste of Anime</h1>
       <p class="taste__desc">
-        Tujuh pertanyaan, enam rekomendasi. Bukan daftar yang lagi ramai — yang cocok sama seleramu.
+        Empat pertanyaan, enam rekomendasi. Pertanyaannya beda tiap kali main — jadi coba lagi kalau penasaran.
       </p>
     </header>
 
     <div class="taste__card">
+      {#if !QUESTIONS.length}
+        <p class="taste__step">Menyiapkan pertanyaan…</p>
+      {:else}
       <div class="taste__progress" aria-hidden="true">
         {#each QUESTIONS as _, i}
           <span class="taste__dot" class:is-done={i <= step}></span>
@@ -278,7 +325,7 @@
           </button>
         </div>
       {/key}
-
+      {/if}
     </div>
   {:else if data.result}
     <header class="taste__hero taste__hero--result">

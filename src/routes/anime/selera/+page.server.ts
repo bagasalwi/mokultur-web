@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { getAnimeTaste, type TasteAnswers } from '$lib/api';
 
-const AXES = ['mood', 'pace', 'world', 'heart', 'fame', 'length', 'era'] as const;
+const AXES = ['mood', 'pace', 'world', 'heart', 'stakes', 'humor', 'fame', 'length', 'era'] as const;
 
 function readAnswer(value: string | null): number {
   const n = Number(value);

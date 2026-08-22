@@ -8,6 +8,7 @@
   import AiringTodaySection from '$components/anime/AiringTodaySection.svelte';
   import SectionHead from '$components/ui/SectionHead.svelte';
   import TastePromoCard from '$components/anime/TastePromoCard.svelte';
+  import ArticleCard from '$components/common/ArticleCard.svelte';
   import AnimeShare from '$components/anime/AnimeShare.svelte';
   import { page } from '$app/stores';
   import { replaceState } from '$app/navigation';
@@ -144,13 +145,24 @@
 
   <!-- Hero: top season berjalan -->
   {#if data.seasonTop.length}
-    <section class="mb-5" aria-label={`Top anime ${seasonHeading}`}>
-      <Carousel items={data.seasonTop} label={`Yang terbaik ${seasonHeading}`} let:item>
-        <AnimeSlide anime={item} eyebrow={`Yang Terbaik · ${seasonHeading}`} />
-      </Carousel>
-      <div class="d-flex justify-content-end mt-3">
-        <AnimeShare list="season" url={absoluteUrl('/anime')} title={`Top 5 Anime ${seasonHeading} — ${siteName}`} />
+    <section class="mb-5 anime-pair" aria-label={`Top anime ${seasonHeading}`}>
+      <div class="anime-pair__main">
+        <Carousel items={data.seasonTop} label={`Yang terbaik ${seasonHeading}`} let:item>
+          <AnimeSlide anime={item} eyebrow={`Yang Terbaik · ${seasonHeading}`} />
+        </Carousel>
+        <div class="d-flex justify-content-end mt-3">
+          <AnimeShare list="season" url={absoluteUrl('/anime')} title={`Top 5 Anime ${seasonHeading} — ${siteName}`} />
+        </div>
       </div>
+
+      <!-- Paired with the season carousel, the same way the homepage row does
+           it: both answer "what do I watch now", so splitting them across the
+           page made the reader scroll past one to reach the other. -->
+      {#if data.airingToday.length}
+        <div class="anime-pair__side">
+          <AiringTodaySection anime={data.airingToday} day={data.airingDay} />
+        </div>
+      {/if}
     </section>
   {/if}
 
@@ -160,7 +172,30 @@
     <TastePromoCard />
   </section>
 
-  <AiringTodaySection anime={data.airingToday} day={data.airingDay} />
+  <!-- Liputan anime dari redaksi sendiri: the reason this page is not just a
+       MyAnimeList mirror. -->
+  {#if data.animeArticles.length}
+    <section class="mb-5">
+      <SectionHead title="Berita Anime" sub="Liputan dan ulasan anime dari redaksi Mokultur.">
+        <a slot="action" href="/category/anime" class="theme-btn theme-btn--surface theme-btn--sm flex-shrink-0">
+          Lihat Semua <i class="bi bi-arrow-right"></i>
+        </a>
+      </SectionHead>
+
+      <div class="anime-articles">
+        {#each data.animeArticles as article (article.id)}
+          <ArticleCard
+            id={article.id}
+            slug={article.slug}
+            title={article.title}
+            image={article.image}
+            publishDate={article.publishDate}
+            categoryName={article.category?.name ?? null}
+          />
+        {/each}
+      </div>
+    </section>
+  {/if}
 
   <!-- Episode terbaru berskor tinggi -->
   <section class="mb-5">
@@ -343,6 +378,40 @@
 </div>
 
 <style>
+  .anime-articles {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  @media (max-width: 991.98px) {
+    .anime-articles {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .anime-articles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+  }
+
+  .anime-pair {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .anime-pair {
+      /* minmax(0, …) so a long anime title cannot widen its own column and
+         break the split — same reasoning as the homepage row. */
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 0 2rem;
+      align-items: start;
+    }
+  }
+
   .anime-taste-slot {
     max-width: 46rem;
   }
@@ -354,13 +423,19 @@
     margin-top: 1rem;
   }
 
+  /* A filled dark pill, not primary-coloured text: the brand primary is a
+     bright yellow that all but disappears as small caps on a white page. */
   .anime-head__eyebrow {
-    margin: 0 0 0.15rem;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.16em;
+    display: inline-block;
+    margin: 0 0 0.5rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--site-primary, #55ad9b);
+    background: var(--site-dark, #0d0d0d);
+    color: var(--site-primary, #f1ff32);
   }
 
   .anime-head__title {

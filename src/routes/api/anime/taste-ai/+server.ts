@@ -53,6 +53,8 @@ const AXIS_COPY: Record<string, [string, string]> = {
   pace: ['suka tempo pelan dan tenang', 'suka tempo cepat penuh aksi'],
   world: ['lebih suka cerita berlatar dunia nyata', 'lebih suka dunia fantasi'],
   heart: ['tidak butuh drama percintaan', 'suka cerita yang penuh perasaan'],
+  stakes: ['suka konflik personal sehari-hari', 'suka cerita bertaruhan besar'],
+  humor: ['lebih suka cerita serius', 'butuh cerita yang bikin ketawa'],
   fame: ['suka judul yang belum banyak orang tahu', 'suka judul yang ramai dibicarakan'],
   length: ['suka cerita pendek yang padat', 'betah dengan cerita panjang'],
   era: ['suka judul klasik yang sudah teruji', 'suka judul keluaran terbaru'],
