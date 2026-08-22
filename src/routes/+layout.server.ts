@@ -17,8 +17,11 @@ export const load: LayoutServerLoad = async ({ locals }) => {
     const [settingsRes, categoriesRes, navHeaderRes, navFooterRes, socialsRes] = await Promise.allSettled([
       getSettings(),
       listCategories(),
-      getNavbar('header', 10),
-      getNavbar('footer', 10),
+      // 20 is the API's own ceiling. At 10 an eleventh menu item simply
+      // vanished from the site with no error anywhere — the header already
+      // holds nine.
+      getNavbar('header', 20),
+      getNavbar('footer', 20),
       getSocialMedia(),
     ]);
 

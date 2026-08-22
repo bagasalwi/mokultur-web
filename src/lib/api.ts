@@ -184,8 +184,12 @@ export function getSocialMedia() {
 
 // ---- Popular Articles ----
 
-export function getPopularArticles(limit = 5) {
-  return apiFetch<{ data: ArticleListItem[] }>(`/api/articles/popular?limit=${limit}`);
+export type PopularRange = 'today' | 'week' | 'month' | 'all';
+
+export function getPopularArticles(limit = 5, range: PopularRange = 'week') {
+  return apiFetch<{ data: ArticleListItem[]; range: PopularRange }>(
+    `/api/articles/popular?limit=${limit}&range=${range}`
+  );
 }
 
 // ---- Settings ----
@@ -397,6 +401,59 @@ export function listReels(): Promise<{ profile: IgProfile | null; data: Reel[] }
   return apiFetch<{ profile: IgProfile | null; data: Reel[] }>('/api/reels');
 }
 
+
+// ── Events ────────────────────────────────────────────────────────────────────
+
+export type EventStatus = 'upcoming' | 'ongoing' | 'done' | 'postponed' | 'cancelled';
+export type EventFilter = 'upcoming' | 'past' | 'all';
+
+/**
+ * Named EventItem, not Event: `Event` is a DOM global that components already
+ * use in their handler signatures, and shadowing it produces type errors that
+ * read like nonsense.
+ */
+export interface EventItem {
+  slug: string;
+  name: string;
+  poster: string | null;
+  startDate: string;
+  endDate: string | null;
+  startTime: string | null;
+  location: string | null;
+  city: string | null;
+  ticketUrl: string | null;
+  status: EventStatus;
+  /** Whole days until it opens; negative once it has started. */
+  daysUntil: number | null;
+}
+
+export interface EventArticle {
+  id: number;
+  title: string;
+  slug: string;
+  description: string | null;
+  image: string | null;
+  publishDate: string | null;
+  catName: string | null;
+  catSlug: string | null;
+  authorName: string | null;
+}
+
+export interface EventDetail extends EventItem {
+  description: string | null;
+  endDateEffective: string;
+  articles: EventArticle[];
+}
+
+export function listEvents(filter: EventFilter = 'upcoming', limit = 50) {
+  return apiFetch<{ data: EventItem[]; filter: EventFilter; today: string }>(
+    `/api/events?filter=${filter}&limit=${limit}`
+  );
+}
+
+export function getEvent(slug: string) {
+  return apiFetch<{ data: EventDetail }>(`/api/events/${encodeURIComponent(slug)}`);
+}
 
 // ── Talents ───────────────────────────────────────────────────────────────────
 

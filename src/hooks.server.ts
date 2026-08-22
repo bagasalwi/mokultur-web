@@ -48,5 +48,15 @@ export const handle: Handle = async ({ event, resolve }) => {
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  /*
+   * Set here rather than in nginx.
+   *
+   * The vhost declares HSTS at server level, but `location /` has its own
+   * add_header (X-Cache-Status), and nginx drops every inherited add_header the
+   * moment a block declares one of its own — so the server-level set never
+   * reached a visitor. Keeping all of these in one place stops them from
+   * silently disappearing again.
+   */
+  response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   return response;
 };

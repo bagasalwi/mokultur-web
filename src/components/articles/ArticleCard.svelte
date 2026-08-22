@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { imgSrcset, imgUrl } from '$lib/img';
   import type { ArticleListItem } from '$lib/api';
 
   export let article: ArticleListItem;
@@ -36,7 +37,7 @@
     <a {href} class="article-card-link text-decoration-none d-flex w-100 h-100">
       {#if article.image}
         <div class="article-card--horizontal__img">
-          <img src={article.image} alt={article.title} loading="lazy" decoding="async" on:error={imgFallback} />
+          <img src={imgUrl(article.image, 320)} srcset={imgSrcset(article.image, 160)} sizes="160px" alt={article.title} loading="lazy" decoding="async" on:error={imgFallback} />
         </div>
       {/if}
       <div class="article-card--horizontal__body">
@@ -63,7 +64,7 @@
   <article class="d-flex gap-2 mb-3">
     {#if article.image}
       <a {href} class="flex-shrink-0">
-        <img src={article.image} alt={article.title} loading="lazy" decoding="async"
+        <img src={imgUrl(article.image, 160)} srcset={imgSrcset(article.image, 64)} sizes="64px" alt={article.title} loading="lazy" decoding="async"
           style="width:64px; height:48px; object-fit:cover; border-radius:6px;" on:error={imgFallback} />
       </a>
     {/if}
@@ -79,7 +80,7 @@
   <article class="article-card--magazine">
     <a {href} class="text-decoration-none d-block">
       <div class="article-card--magazine__img">
-        <img src={article.image ?? '/images/noimage.png'} alt={article.title} loading="lazy" decoding="async" on:error={imgFallback} />
+        <img src={imgUrl(article.image, 480) ?? '/images/noimage.png'} srcset={imgSrcset(article.image, 300)} sizes="(max-width: 767px) 72vw, (max-width: 991px) 50vw, 25vw" alt={article.title} loading="lazy" decoding="async" on:error={imgFallback} />
         <div class="article-card--magazine__overlay">
           {#if article.category}
             <span class="badge badge-main mb-1" style="font-size:0.6rem">{article.category.name}</span>
@@ -102,7 +103,7 @@
 
 {:else if variant === 'feature-tile'}
   <a {href} class="article-card-feature-tile text-decoration-none d-block">
-    <img src={article.image ?? '/images/noimage.png'} alt={article.title} loading="lazy" decoding="async" on:error={imgFallback} />
+    <img src={imgUrl(article.image, 480) ?? '/images/noimage.png'} srcset={imgSrcset(article.image, 300)} sizes="(max-width: 767px) 72vw, (max-width: 991px) 50vw, 25vw" alt={article.title} loading="lazy" decoding="async" on:error={imgFallback} />
     <div class="article-card-feature-tile__body">
       {#if article.category}
         <span class="badge badge-main">{article.category.name}</span>
@@ -114,7 +115,7 @@
 
 {:else if variant === 'borderless-feed'}
   <a {href} class="article-card-borderless-feed text-decoration-none d-block">
-    <img src={article.image ?? '/images/noimage.png'} alt={article.title} loading="lazy" decoding="async" on:error={imgFallback} />
+    <img src={imgUrl(article.image, 480) ?? '/images/noimage.png'} srcset={imgSrcset(article.image, 300)} sizes="(max-width: 767px) 72vw, (max-width: 991px) 50vw, 25vw" alt={article.title} loading="lazy" decoding="async" on:error={imgFallback} />
     <div>
       {#if article.category}
         <span>{article.category.name}</span>
@@ -130,7 +131,7 @@
     <a {href} class="article-card-link text-decoration-none d-block h-100">
       {#if article.image}
         <div class="overflow-hidden" style="height: 160px; border-radius: 8px 8px 0 0;">
-          <img src={article.image} alt={article.title} loading="lazy" decoding="async"
+          <img src={imgUrl(article.image, 480)} srcset={imgSrcset(article.image, 300)} sizes="(max-width: 767px) 72vw, (max-width: 991px) 50vw, 25vw" alt={article.title} loading="lazy" decoding="async"
             class="w-100 h-100" style="object-fit:cover; transition: transform 0.3s ease;" on:error={imgFallback} />
         </div>
       {:else}

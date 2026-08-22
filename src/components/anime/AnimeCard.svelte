@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { imgSrcset, imgUrl } from '$lib/img';
   import type { AnimeCard } from '$lib/api';
   import AnimeScore from './AnimeScore.svelte';
   import GenreChips from './GenreChips.svelte';
@@ -21,7 +22,7 @@
   <a class="anime-card__link" href={anime.malUrl} target="_blank" rel="noopener">
     <div class="anime-card__thumb">
       {#if anime.image}
-        <img src={anime.image} alt={anime.title} loading="lazy" decoding="async" />
+        <img src={imgUrl(anime.image, 320)} srcset={imgSrcset(anime.image, 200)} sizes="(max-width: 767px) 45vw, 200px" alt={anime.title} loading="lazy" decoding="async" />
       {:else}
         <div class="anime-card__placeholder"><i class="bi bi-image"></i></div>
       {/if}

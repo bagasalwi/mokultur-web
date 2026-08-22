@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { getArticle, getPopularTags, getAd, listCurhatan } from '$lib/api';
+import { getArticle, getPopularTags, getAd, listCurhatan, listEvents } from '$lib/api';
 import { error, redirect, fail } from '@sveltejs/kit';
 import { PUBLIC_API_URL } from '$env/static/public';
 import type { Actions } from './$types';
@@ -17,13 +17,14 @@ export const load: PageServerLoad = async ({ params, request, setHeaders, url })
 
   let res;
   try {
-    const [articleRes, tagsRes, articleAd1Res, articleAd2Res, articleAd3Res, curhatanRes] = await Promise.allSettled([
+    const [articleRes, tagsRes, articleAd1Res, articleAd2Res, articleAd3Res, curhatanRes, eventsRes] = await Promise.allSettled([
       getArticle(id, params.slug, ifNoneMatch),
       getPopularTags(15),
       getAd('article_ad_1', preview),
       getAd('article_ad_2', preview),
       getAd('article_ad_3', preview),
       listCurhatan({ perPage: 5 }),
+      listEvents('upcoming', 6),
     ]);
 
     if (articleRes.status === 'rejected') {
@@ -48,6 +49,7 @@ export const load: PageServerLoad = async ({ params, request, setHeaders, url })
       adSidebar: articleAd2Res.status === 'fulfilled' ? (articleAd2Res.value?.data ?? null) : null,
       adAfterContent: articleAd3Res.status === 'fulfilled' ? (articleAd3Res.value?.data ?? null) : null,
       promoCurhatan: curhatanRes.status === 'fulfilled' ? curhatanRes.value.data : [],
+      upcomingEvents: eventsRes.status === 'fulfilled' ? eventsRes.value.data : [],
     };
   } catch (e: any) {
     if (e.status === 301 || e.status === 302) throw e;

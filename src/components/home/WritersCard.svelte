@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { imgSrcset, imgUrl } from '$lib/img';
   import type { Writer } from '$lib/api';
 
   export let writers: Writer[] = [];
@@ -15,7 +16,9 @@
       {#each writers as w}
         <a href="/@{w.username ?? w.id}" class="home-writer-card__item text-decoration-none">
           <div class="home-writer-card__avatar">
-            <img src={w.img ?? '/images/noimage.png'} alt={w.name} loading="lazy" decoding="async" on:error={imgFallback} />
+            <img src={imgUrl(w.img, 160) ?? '/images/noimage.png'}
+              srcset={imgSrcset(w.img, 72)}
+              sizes="72px" alt={w.name} loading="lazy" decoding="async" on:error={imgFallback} />
           </div>
           <div class="flex-grow-1 min-w-0">
             <strong class="d-block text-truncate text-dark">{w.name}</strong>

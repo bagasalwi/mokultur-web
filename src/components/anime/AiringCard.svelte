@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { imgSrcset, imgUrl } from '$lib/img';
   import type { AnimeCard } from '$lib/api';
 
   export let anime: AnimeCard;
@@ -16,7 +17,7 @@
 <a class="airing-row" href={anime.malUrl} target="_blank" rel="noopener">
   <span class="airing-row__thumb">
     {#if anime.image}
-      <img src={anime.image} alt="" loading="lazy" decoding="async" />
+      <img src={imgUrl(anime.image, 160)} srcset={imgSrcset(anime.image, 80)} sizes="80px" alt="" loading="lazy" decoding="async" />
     {/if}
     <span class="airing-row__time">{time ?? '--:--'}</span>
   </span>

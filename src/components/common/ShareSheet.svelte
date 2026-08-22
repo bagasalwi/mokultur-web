@@ -148,6 +148,15 @@
     padding: 1.25rem;
     border-radius: 1rem;
     background: var(--bs-body-bg, #fff);
+    /*
+     * Stated explicitly, not inherited.
+     *
+     * The dialog renders in place rather than portalled to <body>, so it picks
+     * up the colour of whatever contains its trigger. Opened from a button
+     * inside a dark hero, every label here — which uses `color: inherit` —
+     * turned white on the panel's white background and vanished.
+     */
+    color: var(--bs-body-color, #212529);
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
     outline: none;
   }

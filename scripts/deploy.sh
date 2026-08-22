@@ -27,6 +27,18 @@ npm run build
 log "Restarting systemd service: $SERVICE_NAME"
 sudo systemctl restart "$SERVICE_NAME"
 
+# Every build rotates the hashed asset filenames, but nginx keeps serving the
+# HTML it cached from the previous build — HTML that still points at CSS and JS
+# files this build just deleted. Visitors then get either the old styling or,
+# once nginx drops the stale asset too, an unstyled page. There is no purge
+# module available, so the zone is emptied outright.
+NGINX_CACHE_DIR="${NGINX_CACHE_DIR:-/var/cache/nginx/sveltekit}"
+if [[ -d "$NGINX_CACHE_DIR" ]]; then
+  log "Clearing nginx proxy cache: $NGINX_CACHE_DIR"
+  sudo find "$NGINX_CACHE_DIR" -mindepth 1 -delete
+  sudo nginx -s reload
+fi
+
 log "Service status"
 sudo systemctl --no-pager --full status "$SERVICE_NAME"
 

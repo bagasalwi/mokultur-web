@@ -134,11 +134,17 @@
         {:else}
           <div class="media-partner-grid">
             {#each section.partners as partner}
-              <div class="media-partner-card">
+              <svelte:element
+                this={partner.link ? 'a' : 'div'}
+                class="media-partner-card"
+                href={partner.link ?? undefined}
+                target={partner.link ? '_blank' : undefined}
+                rel={partner.link ? 'noopener noreferrer' : undefined}
+              >
                   <div class="media-partner-card__top">
                     <div class="media-partner-logo">
                       {#if partner.logo}
-                        <img src={partner.logo} alt={partner.name} width="60" height="60" style="object-fit:contain;max-width:60px;max-height:55px;" loading="lazy" on:error={imgFallback} />
+                        <img src={partner.logo} alt={partner.name} width="84" height="84" loading="lazy" on:error={imgFallback} />
                       {:else}
                         <span class="fw-boldest fs-4" style="color:var(--site-primary,#f1ff32);">{partner.name.slice(0, 2).toUpperCase()}</span>
                       {/if}
@@ -148,21 +154,17 @@
                     {/if}
                   </div>
                   <div class="media-partner-card__body">
-                    <h3 class="fw-boldest mb-1">{partner.name}</h3>
+                    <h3>{partner.name}</h3>
                     {#if partner.industry}
-                      <p class="small text-muted mb-1">{partner.industry}</p>
-                    {/if}
-                    {#if partner.description}
-                      <p class="mb-0">{partner.description.slice(0, 130)}{partner.description.length > 130 ? '…' : ''}</p>
+                      <p class="media-partner-card__industry">{partner.industry}</p>
                     {/if}
                   </div>
                   {#if partner.link}
-                    <a href={partner.link} class="media-partner-card__link" target="_blank" rel="noopener noreferrer">
-                      <span>Kunjungi Website</span>
-                      <i class="bi bi-chevron-right"></i>
-                    </a>
+                    <span class="media-partner-card__link">
+                      Kunjungi <i class="bi bi-box-arrow-up-right"></i>
+                    </span>
                   {/if}
-                </div>
+              </svelte:element>
             {/each}
           </div>
         {/if}

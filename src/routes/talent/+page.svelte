@@ -37,7 +37,7 @@
 
 <TalentHero featured={data.featured} stats={data.stats} {description} />
 
-<div class="container-xl pb-5">
+<div class="container-xl pb-5 talent-body">
   {#if data.talents.length}
     {#if tiers.length > 1}
       <div class="talent-filters" role="group" aria-label="Saring talent">
@@ -139,15 +139,25 @@
 
   /* auto-fill rather than a fixed count: with only one or two talents a rigid
      4-column grid left a card stranded beside three empty tracks. */
+  /* Fixed tracks rather than auto-fill: with auto-fill a single talent sat at
+     205px on the far left of an otherwise empty row. Four across matches the
+     event and article grids, so cards are the same size across the site. */
   .talent-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(205px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 1.25rem;
+  }
+
+  @media (max-width: 991.98px) {
+    .talent-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
   }
 
   @media (max-width: 767.98px) {
     .talent-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
     }
   }
 </style>

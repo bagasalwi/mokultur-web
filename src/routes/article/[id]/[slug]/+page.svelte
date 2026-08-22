@@ -5,6 +5,7 @@
   import SocialMediaCard from "$components/common/SocialMediaCard.svelte";
   import AdBanner from "$components/common/AdBanner.svelte";
   import CurhatPromoCard from "$components/curhatan/CurhatPromoCard.svelte";
+  import EventPromoCard from "$components/event/EventPromoCard.svelte";
   import ArticleRankItem from "$components/common/ArticleRankItem.svelte";
   import ShareSheet from "$components/common/ShareSheet.svelte";
   import { onMount } from "svelte";
@@ -545,7 +546,12 @@
         <AdBanner ad={data.adSidebar} adSlot="article_ad_2" size="sidebar" />
         <SocialMediaCard socials={data.socials} />
 
-        {#if data.settings?.curhat_enabled && data.promoCurhatan?.length > 0}
+        <!-- The schedule takes this slot when there is one; the curhatan promo
+             keeps it only when there are no upcoming events, so the sidebar is
+             never left with a hole. -->
+        {#if data.upcomingEvents?.length > 0}
+          <EventPromoCard events={data.upcomingEvents} />
+        {:else if data.settings?.curhat_enabled && data.promoCurhatan?.length > 0}
           <CurhatPromoCard curhatan={data.promoCurhatan} {siteName} />
         {/if}
 

@@ -4,6 +4,7 @@
   import PopularTags from '$components/common/PopularTags.svelte';
   import Hero from '$components/hero/Hero.svelte';
   import EventSection from '$components/home/EventSection.svelte';
+  import EventScheduleSection from '$components/event/EventScheduleSection.svelte';
   import ReelsSection from '$components/home/ReelsSection.svelte';
   import AnimeSeasonSection from '$components/home/AnimeSeasonSection.svelte';
   import AiringTodaySection from '$components/anime/AiringTodaySection.svelte';
@@ -115,7 +116,9 @@
     </div>
   </section>
 
-  <EventSection articles={data.eventArticles} />
+  <EventScheduleSection events={data.upcomingEvents} />
+
+  <EventSection title="Liputan & Press Release" articles={data.eventArticles} />
 
   <ReelsSection reels={data.reels} profile={data.igProfile} />
 

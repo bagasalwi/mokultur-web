@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { imgSrcset, imgUrl } from '$lib/img';
   import type { AnimeCard } from '$lib/api';
   import { seasonLabel } from '$lib/anime';
   import AnimeScore from './AnimeScore.svelte';
@@ -29,14 +30,14 @@
   {#if anime.image}
     <!-- Backdrop is decorative: the same artwork already appears as the poster
          with the title beside it, so alt text here would just be noise. -->
-    <img class="slide__backdrop" src={anime.image} alt="" aria-hidden="true" />
+    <img class="slide__backdrop" src={imgUrl(anime.image, 768)} srcset={imgSrcset(anime.image, 600)} sizes="100vw" alt="" aria-hidden="true" />
   {/if}
   <div class="slide__scrim"></div>
 
   <div class="slide__inner">
     <div class="slide__poster">
       {#if anime.image}
-        <img src={anime.image} alt={anime.title} loading="lazy" decoding="async" />
+        <img src={imgUrl(anime.image, 320)} srcset={imgSrcset(anime.image, 200)} sizes="200px" alt={anime.title} loading="lazy" decoding="async" />
       {/if}
     </div>
 

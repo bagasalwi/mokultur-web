@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { imgSrcset, imgUrl } from '$lib/img';
   import type { IgProfile, Reel } from '$lib/api';
 
   export let reels: Reel[] = [];
@@ -36,7 +37,7 @@
         <div class="reels-header__left">
           {#if profile?.avatar}
             <img
-              src={profile.avatar}
+              src={imgUrl(profile.avatar, 96)}
               alt={profile.username}
               class="reels-header__avatar"
               loading="lazy"
@@ -82,7 +83,9 @@
             aria-label={firstLine(reel.caption) || `Reel ${reel.shortcode}`}
           >
             <img
-              src={reel.thumbnail ?? '/images/noimage.png'}
+              src={imgUrl(reel.thumbnail, 320) ?? '/images/noimage.png'}
+              srcset={imgSrcset(reel.thumbnail, 220)}
+              sizes="(max-width: 767px) 45vw, 220px"
               alt={firstLine(reel.caption)}
               class="reel-card__img"
               loading="lazy"

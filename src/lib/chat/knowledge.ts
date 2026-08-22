@@ -1,5 +1,16 @@
 import { PUBLIC_API_URL } from '$env/static/public';
-import { getSettings, listCategories, listArticles, listWriters, type ArticleListItem } from '$lib/api';
+import {
+  getSettings,
+  listCategories,
+  listArticles,
+  listWriters,
+  listTalents,
+  listEvents,
+  getPopularArticles,
+  type ArticleListItem,
+  type EventItem,
+  type PopularRange,
+} from '$lib/api';
 import { getAboutFacts } from '$lib/chat/about';
 
 /**
@@ -35,17 +46,143 @@ interface ReelsPayload {
   } | null;
 }
 
+const TIER_LABEL: Record<string, string> = {
+  verified: 'Verified',
+  partner: 'Partner',
+  general: 'General',
+};
+
+/**
+ * Most-read articles per time window.
+ *
+ * Views are a single lifetime counter per article — there is no per-day
+ * history — so each window ranks the articles *published* in it. The labels
+ * say exactly that, otherwise the bot would claim a daily trending chart the
+ * data cannot back up.
+ */
+const POPULAR_WINDOWS: { range: PopularRange; label: string }[] = [
+  { range: 'today', label: 'Terbit hari ini, paling banyak dibaca' },
+  { range: 'month', label: 'Terbit bulan ini, paling banyak dibaca' },
+  { range: 'all', label: 'Paling banyak dibaca sepanjang masa' },
+];
+
+const EVENT_STATUS_LABEL: Record<string, string> = {
+  upcoming: 'belum mulai',
+  ongoing: 'sedang berlangsung',
+  done: 'sudah selesai',
+  postponed: 'ditunda',
+  cancelled: 'dibatalkan',
+};
+
+function describeEvent(e: EventItem): string {
+  const dates = e.endDate && e.endDate !== e.startDate ? `${e.startDate} s/d ${e.endDate}` : e.startDate;
+  const bits = [
+    `- "${e.name}" (https://mokultur.com/event/${e.slug})`,
+    dates,
+    e.startTime ? `mulai ${e.startTime} WIB` : null,
+    [e.location, e.city].filter(Boolean).join(', ') || null,
+    `status: ${EVENT_STATUS_LABEL[e.status] ?? e.status}`,
+    e.ticketUrl ? `tiket: ${e.ticketUrl}` : null,
+  ].filter(Boolean);
+
+  return bits.join(' — ');
+}
+
+/**
+ * The event schedule, so the bot can answer "ada event apa bulan ini?".
+ *
+ * Dates are handed over as plain ISO strings with today's date stated next to
+ * them: the model is far better at "is 2026-10-03 after today" than at being
+ * told "3 hari lagi" and having to reason backwards from it.
+ */
+async function buildEventFacts(): Promise<string> {
+  const [upcomingRes, pastRes] = await Promise.allSettled([
+    listEvents('upcoming', 12),
+    listEvents('past', 5),
+  ]);
+
+  const upcoming = upcomingRes.status === 'fulfilled' ? upcomingRes.value.data : [];
+  const past = pastRes.status === 'fulfilled' ? pastRes.value.data : [];
+  const today = upcomingRes.status === 'fulfilled' ? upcomingRes.value.today : null;
+
+  if (!upcoming.length && !past.length) return '';
+
+  const parts = [
+    '## Jadwal event',
+    'Halaman jadwal: https://mokultur.com/event',
+    today ? `Hari ini: ${today} (WIB). Semua tanggal di bawah format YYYY-MM-DD.` : null,
+  ].filter(Boolean) as string[];
+
+  if (upcoming.length) {
+    parts.push('', '### Event mendatang dan yang sedang berlangsung', ...upcoming.map(describeEvent));
+  }
+
+  if (past.length) {
+    parts.push('', '### Event yang sudah lewat', ...past.map(describeEvent));
+  }
+
+  return parts.join('\n');
+}
+
+async function buildPopularFacts(): Promise<string> {
+  const blocks = await Promise.all(
+    POPULAR_WINDOWS.map(async ({ range, label }) => {
+      try {
+        const res = await getPopularArticles(5, range);
+        const items = res.data ?? [];
+        if (!items.length) return null;
+        return (
+          `### ${label}\n` +
+          items
+            .map((a, i) => {
+              const views =
+                typeof a.viewCount === 'number'
+                  ? ` — ${a.viewCount.toLocaleString('id-ID')} kali dibaca`
+                  : '';
+              return `${i + 1}. "${a.title}" (https://mokultur.com/article/${a.id}/${a.slug})${views}`;
+            })
+            .join('\n')
+        );
+      } catch {
+        return null;
+      }
+    })
+  );
+
+  const filled = blocks.filter(Boolean);
+  if (!filled.length) return '';
+
+  return (
+    '## Artikel paling populer\n' +
+    'Peringkat dihitung dari jumlah pembaca artikel yang terbit pada rentang waktu tersebut.\n\n' +
+    filled.join('\n\n')
+  );
+}
+
 /** Static site facts, refreshed at most every 10 minutes. */
 export async function getSiteFacts(): Promise<string> {
   if (_facts && Date.now() - _factsAt < CACHE_TTL) return _facts;
 
-  const [settingsRes, categoriesRes, aboutRes, partnersRes, reelsRes, writersRes] = await Promise.allSettled([
+  const [
+    settingsRes,
+    categoriesRes,
+    aboutRes,
+    partnersRes,
+    reelsRes,
+    writersRes,
+    talentsRes,
+    popularRes,
+    eventsRes,
+  ] = await Promise.allSettled([
     getSettings(),
     listCategories(),
     getAboutFacts(),
     fetchJson<MediaPartners>('/api/media-partners'),
     fetchJson<ReelsPayload>('/api/reels'),
     listWriters(1, 50),
+    listTalents(),
+    buildPopularFacts(),
+    buildEventFacts(),
   ]);
 
   const parts: string[] = [];
@@ -104,6 +241,43 @@ export async function getSiteFacts(): Promise<string> {
             .join('\n')
       );
     }
+  }
+
+  if (talentsRes.status === 'fulfilled') {
+    const { data, featured, stats } = talentsRes.value;
+    // `featured` repeats entries from `data`, so dedupe before listing them.
+    const all = [...featured, ...data].filter(
+      (t, i, arr) => arr.findIndex((x) => x.slug === t.slug) === i
+    );
+    if (all.length) {
+      parts.push(
+        [
+          '## Talent',
+          'Halaman daftar talent: https://mokultur.com/talent',
+          `Jumlah talent: ${stats.talentCount}, total pengikut gabungan: ${stats.totalFollowers.toLocaleString('id-ID')}`,
+          ...all.map((t) => {
+            const bits = [
+              `- ${t.alias} (https://mokultur.com/talent/${t.slug})`,
+              `tier ${TIER_LABEL[t.talentTier] ?? t.talentTier}`,
+              t.instagramUsername ? `IG @${t.instagramUsername}` : null,
+              t.igFollowers ? `${t.igFollowers.toLocaleString('id-ID')} pengikut` : null,
+              t.collabCount ? `${t.collabCount} kolaborasi` : null,
+              t.isFeatured ? 'talent unggulan' : null,
+            ].filter(Boolean);
+            const blurb = t.tagline ?? t.bioShort;
+            return `${bits.join(', ')}${blurb ? ` — ${blurb}` : ''}`;
+          }),
+        ].join('\n')
+      );
+    }
+  }
+
+  if (eventsRes.status === 'fulfilled' && eventsRes.value) {
+    parts.push(eventsRes.value);
+  }
+
+  if (popularRes.status === 'fulfilled' && popularRes.value) {
+    parts.push(popularRes.value);
   }
 
   if (partnersRes.status === 'fulfilled') {

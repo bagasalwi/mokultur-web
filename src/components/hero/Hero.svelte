@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { imgSrcset, imgUrl } from '$lib/img';
   import type { ArticleListItem } from '$lib/api';
   import HeroCinematic from './HeroCinematic.svelte';
 
@@ -36,7 +37,7 @@
       <div class="hero-ticker__grid">
         {#each articles.slice(0, 6) as a (a.id)}
           <a href={href(a)} class="hero-ticker__item text-decoration-none">
-            <div class="hero-ticker__thumb"><img src={img(a)} alt={a.title} loading="lazy" on:error={onErr} /></div>
+            <div class="hero-ticker__thumb"><img src={imgUrl(img(a), 160)} srcset={imgSrcset(img(a), 80)} sizes="80px" alt={a.title} loading="lazy" on:error={onErr} /></div>
             <div class="hero-ticker__body">
               {#if a.category}<span class="badge badge-main hero-ticker__badge">{a.category.name}</span>{/if}
               <div class="hero-ticker__title">{a.title}</div>
@@ -59,7 +60,7 @@
             {#if main.description}<p class="hero-masthead__description">{main.description}</p>{/if}
             <span class="hero-masthead__meta">{timeAgo(main.publishDate)}</span>
           </a>
-          <div class="hero-masthead__media"><img src={img(main)} alt={main.title} loading="eager" fetchpriority="high" on:error={onErr} /></div>
+          <div class="hero-masthead__media"><img src={imgUrl(img(main), 1080)} srcset={imgSrcset(img(main), 760)} sizes="(max-width: 991px) 100vw, 760px" alt={main.title} loading="eager" fetchpriority="high" on:error={onErr} /></div>
           {#if rest.length}
             <div class="hero-masthead__rail">
               {#each rest.slice(0, 3) as a (a.id)}
@@ -81,7 +82,7 @@
       <div class="hero-editorial-grid">
         {#if main}
           <a href={href(main)} class="hero-editorial-grid__lead text-decoration-none">
-            <img src={img(main)} alt={main.title} loading="eager" fetchpriority="high" on:error={onErr} />
+            <img src={imgUrl(img(main), 1080)} srcset={imgSrcset(img(main), 760)} sizes="(max-width: 991px) 100vw, 760px" alt={main.title} loading="eager" fetchpriority="high" on:error={onErr} />
             <div>
               {#if main.category}<span class="badge badge-main mb-2">{main.category.name}</span>{/if}
               <h2>{main.title}</h2>
@@ -91,7 +92,7 @@
         {/if}
         {#each rest.slice(0, 4) as a (a.id)}
           <a href={href(a)} class="hero-editorial-grid__card text-decoration-none">
-            <img src={img(a)} alt={a.title} loading="lazy" on:error={onErr} />
+            <img src={imgUrl(img(a), 480)} srcset={imgSrcset(img(a), 300)} sizes="(max-width: 767px) 72vw, 300px" alt={a.title} loading="lazy" on:error={onErr} />
             <div>
               {#if a.category}<span class="badge badge-main mb-2">{a.category.name}</span>{/if}
               <strong>{a.title}</strong>
@@ -108,7 +109,7 @@
       <div class="hero-spotlight-stack">
         {#if main}
           <a href={href(main)} class="hero-spotlight-stack__feature text-decoration-none">
-            <img src={img(main)} alt={main.title} loading="eager" fetchpriority="high" on:error={onErr} />
+            <img src={imgUrl(img(main), 1080)} srcset={imgSrcset(img(main), 760)} sizes="(max-width: 991px) 100vw, 760px" alt={main.title} loading="eager" fetchpriority="high" on:error={onErr} />
             <div class="hero-spotlight-stack__feature-copy">
               {#if main.category}<span class="badge badge-main mb-2">{main.category.name}</span>{/if}
               <h2>{main.title}</h2>

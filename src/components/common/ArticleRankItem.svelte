@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { imgSrcset, imgUrl } from '$lib/img';
   import type { ArticleListItem } from '$lib/api';
 
   export let article: ArticleListItem;
@@ -8,7 +9,7 @@
 <a href="/article/{article.id}/{article.slug}" class="popular-item text-decoration-none">
   <div class="popular-item__thumb">
     {#if article.image}
-      <img src={article.image} alt={article.title} loading="lazy" decoding="async" />
+      <img src={imgUrl(article.image, 160)} srcset={imgSrcset(article.image, 96)} sizes="96px" alt={article.title} loading="lazy" decoding="async" />
     {:else}
       <div class="popular-item__thumb-placeholder">{rank}</div>
     {/if}

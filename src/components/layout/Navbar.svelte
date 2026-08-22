@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { imgUrl } from '$lib/img';
   import { page } from '$app/stores';
   import { tick, onMount } from 'svelte';
   import { PUBLIC_API_URL } from '$env/static/public';
@@ -248,7 +249,7 @@
         <!-- Logo -->
         <a href="/" class="navbar-logo-link">
           {#if siteLogo}
-            <img src={siteLogo} alt={siteName} />
+            <img src={imgUrl(siteLogo, 160)} alt={siteName} />
           {:else}
             <span class="logo-text">{siteName}</span>
           {/if}

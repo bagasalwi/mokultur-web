@@ -1,26 +1,11 @@
 <script lang="ts">
   import type { ArticleListItem } from '$lib/api';
+  import ArticleCard from '$components/common/ArticleCard.svelte';
 
   export let articles: ArticleListItem[] = [];
   export let title = 'Event & Press Release';
   export let description = 'Kumpulan beragam artikel dari event-event yang ada di indonesia!';
   export let categorySlug = 'event';
-
-  function timeAgo(d: string | null): string {
-    if (!d) return '';
-    const [year, month, day] = d.slice(0, 10).split('-').map(Number);
-    const diff = Date.now() - new Date(year, month - 1, day).getTime();
-    const days = Math.floor(diff / 86400000);
-    if (days === 0) return 'Hari ini';
-    if (days === 1) return 'Kemarin';
-    if (days < 7) return `${days} hari lalu`;
-    if (days < 30) return `${Math.floor(days / 7)} minggu lalu`;
-    return `${Math.floor(days / 30)} bulan lalu`;
-  }
-
-  function imgFallback(e: Event) {
-    (e.target as HTMLImageElement).src = '/images/noimage.png';
-  }
 </script>
 
 {#if articles.length > 0}
@@ -40,30 +25,14 @@
 
       <div class="article-scroll-grid">
         {#each articles as item}
-          <a href="/article/{item.id}/{item.slug}" class="text-decoration-none">
-            <div class="card border-0 card-hover h-100" style="border-radius: 10px; overflow: hidden;">
-              <div class="px-2 pt-2">
-                <img
-                  src={item.image ?? '/images/noimage.png'}
-                  alt={item.title}
-                  class="img-article-2 w-100"
-                  loading="lazy"
-                  decoding="async"
-                  style="border-radius: 8px; object-fit: cover;"
-                  on:error={imgFallback}
-                />
-              </div>
-              <div class="p-2 pt-2 pb-3 d-flex flex-column flex-grow-1">
-                {#if item.category}
-                  <span class="badge badge-main mb-1 align-self-start" style="font-size: 0.65rem;">
-                    {item.category.name}
-                  </span>
-                {/if}
-                <h6 class="article-title text-dark mb-1 lh-sm">{item.title}</h6>
-                <small class="text-muted mt-auto" style="font-size: 0.7rem;">{timeAgo(item.publishDate)}</small>
-              </div>
-            </div>
-          </a>
+          <ArticleCard
+            id={item.id}
+            slug={item.slug}
+            title={item.title}
+            image={item.image}
+            publishDate={item.publishDate}
+            categoryName={item.category?.name ?? null}
+          />
         {/each}
       </div>
     </div>

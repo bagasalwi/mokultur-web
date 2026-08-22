@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { imgSrcset, imgUrl } from '$lib/img';
   import type { ArticleListItem } from '$lib/api';
 
   export let articles: ArticleListItem[] = [];
@@ -49,7 +50,9 @@
               <div class="card border-0 card-hover h-100" style="border-radius: 10px; overflow: hidden;">
                 <div class="px-2 pt-2">
                   <img
-                    src={item.image ?? '/images/noimage.png'}
+                    src={imgUrl(item.image, 480) ?? '/images/noimage.png'}
+                    srcset={imgSrcset(item.image, 300)}
+                    sizes="(max-width: 767px) 72vw, 25vw"
                     alt={item.title}
                     class="img-article-2 w-100"
                     loading="lazy"
@@ -93,7 +96,7 @@
           <div class="article-list-big__layout">
             <a href="/article/{lead.id}/{lead.slug}" class="article-list-big__lead text-decoration-none">
               <div class="article-list-big__lead-media">
-                <img src={lead.image ?? '/images/noimage.png'} alt={lead.title} loading="lazy" decoding="async" on:error={imgFallback} />
+                <img src={imgUrl(lead.image, 768) ?? '/images/noimage.png'} srcset={imgSrcset(lead.image, 560)} sizes="(max-width: 991px) 100vw, 560px" alt={lead.title} loading="lazy" decoding="async" on:error={imgFallback} />
               </div>
               <div class="article-list-big__lead-body">
                 {#if lead.category}
@@ -111,7 +114,7 @@
               {#each supporting as item}
                 <a href="/article/{item.id}/{item.slug}" class="article-list-big__item text-decoration-none">
                   <div class="article-list-big__item-media">
-                    <img src={item.image ?? '/images/noimage.png'} alt={item.title} loading="lazy" decoding="async" on:error={imgFallback} />
+                    <img src={imgUrl(item.image, 320) ?? '/images/noimage.png'} srcset={imgSrcset(item.image, 180)} sizes="180px" alt={item.title} loading="lazy" decoding="async" on:error={imgFallback} />
                   </div>
                   <div class="article-list-big__item-body">
                     {#if item.category}
@@ -148,7 +151,7 @@
           <div class="article-list-big__layout">
             <a href="/article/{lead.id}/{lead.slug}" class="article-list-big__lead text-decoration-none">
               <div class="article-list-big__lead-media">
-                <img src={lead.image ?? '/images/noimage.png'} alt={lead.title} loading="lazy" decoding="async" on:error={imgFallback} />
+                <img src={imgUrl(lead.image, 768) ?? '/images/noimage.png'} srcset={imgSrcset(lead.image, 560)} sizes="(max-width: 991px) 100vw, 560px" alt={lead.title} loading="lazy" decoding="async" on:error={imgFallback} />
               </div>
               <div class="article-list-big__lead-body">
                 {#if lead.category}
@@ -166,7 +169,7 @@
               {#each supporting as item}
                 <a href="/article/{item.id}/{item.slug}" class="article-list-big__item text-decoration-none">
                   <div class="article-list-big__item-media">
-                    <img src={item.image ?? '/images/noimage.png'} alt={item.title} loading="lazy" decoding="async" on:error={imgFallback} />
+                    <img src={imgUrl(item.image, 320) ?? '/images/noimage.png'} srcset={imgSrcset(item.image, 180)} sizes="180px" alt={item.title} loading="lazy" decoding="async" on:error={imgFallback} />
                   </div>
                   <div class="article-list-big__item-body">
                     {#if item.category}

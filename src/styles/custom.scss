@@ -3071,11 +3071,17 @@ a {
 }
 
 .media-partner-section-heading {
+    // Stacked, not a three-column flex row. As a row the badge, the title and
+    // the description became three space-between columns — badge hard left,
+    // title floating in the middle, description hard right — which read as a
+    // layout accident rather than a heading.
     display: flex;
-    align-items: end;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+    margin-bottom: 1.25rem;
+    padding-left: 0.75rem;
+    border-left: 4px solid var(--media-partner-primary);
 
     span {
         display: inline-flex;
@@ -3094,36 +3100,44 @@ a {
     h2 {
         margin: 0;
         color: var(--media-partner-dark);
-        font-size: clamp(1.45rem, 3vw, 2.4rem);
-        font-weight: 950;
-        letter-spacing: -0.055em;
-        line-height: 1;
+        font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1.2;
     }
 
     p {
         max-width: 58rem;
-        margin: 0.45rem 0 0;
+        margin: 0.2rem 0 0;
         color: #64748b;
-        line-height: 1.65;
-    }
-
-    @media (max-width: 767px) {
-        display: block;
+        font-size: 0.875rem;
+        line-height: 1.6;
     }
 }
 
 .media-partner-featured__grid,
 .media-partner-grid {
+    // Six across rather than three. Partners carry a logo, a name and sometimes
+    // an industry — no description and no link — so a third of the page each
+    // left every card mostly empty and stranded single tiles on their own row.
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.85rem;
 
-    @media (max-width: 991px) {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    @media (max-width: 1199px) {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
     }
 
-    @media (max-width: 575px) {
-        grid-template-columns: 1fr;
+    @media (max-width: 991px) {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    @media (max-width: 767px) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    @media (max-width: 479px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
@@ -3165,24 +3179,24 @@ a {
 .media-partner-card {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
     min-height: 100%;
-    padding: 1.1rem;
+    padding: 1rem 0.75rem;
+    border-radius: 16px;
 }
 
 .media-partner-card__top {
-    display: flex;
-    align-items: start;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    position: relative;
+    margin-bottom: 0.65rem;
 }
 
 .media-partner-logo {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 76px;
-    height: 76px;
+    width: 84px;
+    height: 84px;
     flex: 0 0 auto;
     overflow: hidden;
     border: 1px solid color-mix(in srgb, var(--media-partner-dark) 8%, transparent);
@@ -3205,6 +3219,10 @@ a {
 }
 
 .media-partner-card__badge {
+    // Pinned to the logo now that the tile is a centred column.
+    position: absolute;
+    top: -0.35rem;
+    right: -0.5rem;
     display: inline-flex;
     width: fit-content;
     padding: 0.26rem 0.55rem;
@@ -3215,16 +3233,25 @@ a {
     font-weight: 850;
 }
 
+.media-partner-card__industry {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.75rem;
+    line-height: 1.3;
+}
+
 .media-partner-card__body {
     flex: 1;
+    min-width: 0;
+    width: 100%;
 
     h3 {
-        margin: 0 0 0.25rem;
+        margin: 0 0 0.15rem;
         color: var(--media-partner-dark);
-        font-size: 1.1rem;
-        font-weight: 900;
-        letter-spacing: -0.03em;
-        line-height: 1.15;
+        font-size: 0.875rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.25;
     }
 
     span {
@@ -8351,4 +8378,12 @@ button.emoji-picker {
         font-size: 0.7rem;
         opacity: 0.55;
     }
+}
+
+// Six components already write class="min-w-0" to let a flex child shrink below
+// its content, but the utility was never defined here and Bootstrap 5 does not
+// ship one — so min-width stayed `auto` and a long URL inside a flex row pushed
+// /contact 361px wider than the phone it was drawn on.
+.min-w-0 {
+    min-width: 0 !important;
 }
