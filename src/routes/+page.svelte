@@ -8,6 +8,7 @@
   import ReelsSection from '$components/home/ReelsSection.svelte';
   import AnimeSeasonSection from '$components/home/AnimeSeasonSection.svelte';
   import AiringTodaySection from '$components/anime/AiringTodaySection.svelte';
+  import TastePromoCard from '$components/anime/TastePromoCard.svelte';
   import MokuThreadsPromo from '$components/home/MokuThreadsPromo.svelte';
   import { LOUNGE_ENABLED } from '$lib/features';
   import { absoluteUrl } from '$lib/seo';
@@ -112,6 +113,12 @@
             Lihat Semua <i class="bi bi-arrow-right"></i>
           </a>
         </AiringTodaySection>
+
+        <!-- Sits with the anime rows rather than as a banner of its own: someone
+             already browsing seasonal listings is exactly who the quiz is for. -->
+        <div class="home-anime-row__promo">
+          <TastePromoCard />
+        </div>
       </div>
     </div>
   </section>
@@ -211,6 +218,18 @@
   .home-anime-row {
     display: grid;
     gap: 1.5rem;
+  }
+
+  .home-anime-row__promo {
+    margin-top: 0.25rem;
+  }
+
+  @media (min-width: 768px) {
+    /* Spans both columns so it reads as the row's closing note, not a third
+       column squeezed between them. */
+    .home-anime-row--split .home-anime-row__promo {
+      grid-column: 1 / -1;
+    }
   }
 
   @media (min-width: 768px) {

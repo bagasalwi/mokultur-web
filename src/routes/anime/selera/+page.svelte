@@ -1,7 +1,9 @@
 <script lang="ts">
   import type { PageData } from './$types';
+  import { onDestroy } from 'svelte';
+  import { browser } from '$app/environment';
   import { goto } from '$app/navigation';
-  import { page as pageStore } from '$app/stores';
+  import { navigating, page as pageStore } from '$app/stores';
   import { absoluteUrl, buildPageTitle } from '$lib/seo';
   import { animeSlug } from '$lib/anime';
   import { imgSrcset, imgUrl } from '$lib/img';
@@ -9,7 +11,7 @@
 
   export let data: PageData;
 
-  type Axis = 'mood' | 'pace' | 'world' | 'fame';
+  type Axis = 'mood' | 'pace' | 'world' | 'heart' | 'fame' | 'length' | 'era';
 
   const QUESTIONS: { axis: Axis; question: string; positive: string; negative: string }[] = [
     {
@@ -31,22 +33,47 @@
       positive: 'Dunia lain, sihir, fantasi',
     },
     {
+      axis: 'heart',
+      question: 'Seberapa penting urusan perasaan tokohnya?',
+      negative: 'Nggak usah drama-drama',
+      positive: 'Justru itu yang bikin nempel',
+    },
+    {
       axis: 'fame',
       question: 'Kalau soal judul…',
       negative: 'Suka yang belum banyak orang tahu',
       positive: 'Yang ramai dibicarakan dulu',
     },
+    {
+      axis: 'length',
+      question: 'Panjang cerita yang kamu sanggupi?',
+      negative: 'Pendek, sekali duduk selesai',
+      positive: 'Panjang, biar puas',
+    },
+    {
+      axis: 'era',
+      question: 'Kamu lebih sering nonton…',
+      negative: 'Judul lama yang sudah teruji',
+      positive: 'Yang baru keluar',
+    },
   ];
 
-  let answers: Record<Axis, number> = { mood: 0, pace: 0, world: 0, fame: 0 };
+  let answers: Record<Axis, number> = { mood: 0, pace: 0, world: 0, heart: 0, fame: 0, length: 0, era: 0 };
   let step = 0;
-  let submitting = false;
+
+  /**
+   * Navigating to the result is one wait, the AI copy is the next. Both are
+   * covered by the same screen, and the navigation half reads from $navigating
+   * — a manual flag set before goto() stayed true forever, because SvelteKit
+   * reuses this component when only the query string changes.
+   */
+  $: submitting = Boolean($navigating);
 
   $: siteName = data.settings?.site_name ?? 'Mokultur';
   $: canonical = absoluteUrl('/anime/selera');
   $: pageTitle = buildPageTitle('Know Your Taste of Anime', siteName);
   $: description =
-    'Jawab 4 pertanyaan, dapat 6 rekomendasi anime yang cocok sama seleramu — bukan sekadar daftar yang lagi populer.';
+    'Jawab 7 pertanyaan, dapat 6 rekomendasi anime yang cocok sama seleramu — bukan sekadar daftar yang lagi populer.';
   $: resultUrl = $pageStore.url.href;
 
   function choose(axis: Axis, value: number) {
@@ -61,7 +88,6 @@
   }
 
   function submit() {
-    submitting = true;
     const q = new URLSearchParams(
       Object.entries(answers).map(([k, v]) => [k, String(v)])
     );
@@ -71,15 +97,114 @@
   }
 
   function restart() {
-    answers = { mood: 0, pace: 0, world: 0, fame: 0 };
+    answers = { mood: 0, pace: 0, world: 0, heart: 0, fame: 0, length: 0, era: 0 };
     step = 0;
-    submitting = false;
+    stopCooking();
     goto('/anime/selera');
   }
 
   function imgFallback(e: Event) {
     (e.target as HTMLImageElement).src = '/images/noimage.png';
   }
+
+  /**
+   * The AI copy is layered on top of a result that already works.
+   *
+   * The matcher picked the titles; this only asks a model to name the taste and
+   * say why each pick fits. If it is slow or down the reader keeps the
+   * deterministic profile and never learns anything was missing.
+   */
+  let aiLabel: string | null = null;
+  let aiBlurb: string | null = null;
+  let aiReasons: Record<string, string> = {};
+  let cooking = false;
+
+  const COOKING_LINES = [
+    'Sedang memasak rekomendasi buat kamu…',
+    'Menakar selera kamu…',
+    'Menyisihkan yang terlalu mainstream…',
+    'Hampir matang…',
+  ];
+  let cookingLine = COOKING_LINES[0];
+  let cookingTimer: ReturnType<typeof setInterval> | null = null;
+
+  let cookingGuard: ReturnType<typeof setTimeout> | null = null;
+
+  function startCooking() {
+    cooking = true;
+    let i = 0;
+    cookingLine = COOKING_LINES[0];
+    cookingTimer = setInterval(() => {
+      i = (i + 1) % COOKING_LINES.length;
+      cookingLine = COOKING_LINES[i];
+    }, 1800);
+
+    // Hard ceiling. The fetch has its own timeout, but a hung connection or a
+    // sleeping tab must never leave someone staring at a bowl of ramen.
+    cookingGuard = setTimeout(stopCooking, 18_000);
+  }
+
+  function stopCooking() {
+    cooking = false;
+    if (cookingTimer) {
+      clearInterval(cookingTimer);
+      cookingTimer = null;
+    }
+    if (cookingGuard) {
+      clearTimeout(cookingGuard);
+      cookingGuard = null;
+    }
+  }
+
+  async function enhance(result: NonNullable<PageData['result']>) {
+    startCooking();
+
+    try {
+      const res = await fetch('/api/anime/taste-ai', {
+        signal: AbortSignal.timeout(16_000),
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          answers: result.answers,
+          fallbackLabel: result.profile.label,
+          titles: result.anime.map((a) => ({
+            malId: a.malId,
+            title: a.title,
+            score: a.score,
+          })),
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        aiLabel = data.label ?? null;
+        aiBlurb = data.blurb ?? null;
+        aiReasons = data.reasons ?? {};
+      }
+    } catch {
+      // Deliberately silent: the deterministic result is already on screen.
+    } finally {
+      stopCooking();
+    }
+  }
+
+  // Re-runs whenever a new result loads, including a second pass of the quiz.
+  let enhancedFor: string | null = null;
+  $: if (browser && data.result) {
+    const key = JSON.stringify(data.result.answers);
+    if (key !== enhancedFor) {
+      enhancedFor = key;
+      aiLabel = null;
+      aiBlurb = null;
+      aiReasons = {};
+      enhance(data.result);
+    }
+  }
+
+  onDestroy(stopCooking);
+
+  $: shownLabel = aiLabel ?? data.result?.profile.label ?? '';
+  $: shownBlurb = aiBlurb ?? data.result?.profile.blurb ?? '';
 </script>
 
 <svelte:head>
@@ -98,13 +223,31 @@
   <meta name="twitter:description" content={description} />
 </svelte:head>
 
+{#if cooking || submitting}
+  <!-- Covers both waits with one screen: the navigation to the result and the
+       AI copy that lands after it. Two separate spinners would read as the page
+       stalling twice. -->
+  <div class="cooking" role="status" aria-live="polite">
+    <div class="cooking__inner">
+      <div class="cooking__pot" aria-hidden="true">
+        <span class="cooking__steam"></span>
+        <span class="cooking__steam"></span>
+        <span class="cooking__steam"></span>
+        <span class="cooking__bowl">🍜</span>
+      </div>
+      <p class="cooking__line">{cookingLine}</p>
+      <p class="cooking__sub">Sebentar ya, lagi dicocokin sama selera kamu.</p>
+    </div>
+  </div>
+{/if}
+
 <section class="section-md container-xl taste">
   {#if !data.answered}
     <header class="taste__hero">
       <span class="badge badge-main mb-3">Kuis</span>
       <h1 class="taste__title">Know Your Taste of Anime</h1>
       <p class="taste__desc">
-        Empat pertanyaan, enam rekomendasi. Bukan daftar yang lagi ramai — yang cocok sama seleramu.
+        Tujuh pertanyaan, enam rekomendasi. Bukan daftar yang lagi ramai — yang cocok sama seleramu.
       </p>
     </header>
 
@@ -116,33 +259,35 @@
       </div>
 
       <p class="taste__step">Pertanyaan {step + 1} dari {QUESTIONS.length}</p>
-      <h2 class="taste__question">{QUESTIONS[step].question}</h2>
 
-      <div class="taste__options">
-        <button type="button" class="taste__option" on:click={() => choose(QUESTIONS[step].axis, -1)}>
-          {QUESTIONS[step].negative}
-        </button>
-        <button type="button" class="taste__option" on:click={() => choose(QUESTIONS[step].axis, 1)}>
-          {QUESTIONS[step].positive}
-        </button>
-      </div>
+      {#key step}
+        <div class="taste__slide">
+          <h2 class="taste__question">{QUESTIONS[step].question}</h2>
 
-      <button type="button" class="taste__skip" on:click={() => choose(QUESTIONS[step].axis, 0)}>
-        Dua-duanya oke
-      </button>
+          <div class="taste__options">
+            <button type="button" class="taste__option" on:click={() => choose(QUESTIONS[step].axis, -1)}>
+              {QUESTIONS[step].negative}
+            </button>
+            <button type="button" class="taste__option" on:click={() => choose(QUESTIONS[step].axis, 1)}>
+              {QUESTIONS[step].positive}
+            </button>
+          </div>
 
-      {#if submitting}
-        <p class="taste__loading">Mencocokkan…</p>
-      {/if}
+          <button type="button" class="taste__skip" on:click={() => choose(QUESTIONS[step].axis, 0)}>
+            Dua-duanya oke
+          </button>
+        </div>
+      {/key}
+
     </div>
   {:else if data.result}
     <header class="taste__hero taste__hero--result">
       <span class="badge badge-main mb-3">Selera kamu</span>
-      <h1 class="taste__title">{data.result.profile.label}</h1>
-      <p class="taste__desc">{data.result.profile.blurb}</p>
+      <h1 class="taste__title">{shownLabel}</h1>
+      <p class="taste__desc">{shownBlurb}</p>
 
       <div class="d-flex flex-wrap gap-2 mt-4">
-        <ShareSheet url={resultUrl} title={`Selera anime gue: ${data.result.profile.label}`} />
+        <ShareSheet url={resultUrl} title={`Selera anime gue: ${shownLabel}`} />
         <button type="button" class="theme-btn theme-btn--surface" on:click={restart}>
           <i class="bi bi-arrow-repeat me-2"></i>Ulangi kuis
         </button>
@@ -167,6 +312,9 @@
             {/if}
           </div>
           <h3 class="taste__anime-title">{anime.title}</h3>
+          {#if aiReasons[String(anime.malId)]}
+            <p class="taste__reason">{aiReasons[String(anime.malId)]}</p>
+          {/if}
         </a>
       {/each}
     </div>
@@ -174,6 +322,114 @@
 </section>
 
 <style>
+  /* ---- overlay "sedang memasak" ---- */
+  .cooking {
+    position: fixed;
+    inset: 0;
+    z-index: 1090;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: rgb(10 10 10 / 82%);
+    backdrop-filter: blur(6px);
+    animation: cooking-in 0.25s ease-out;
+  }
+
+  .cooking__inner {
+    text-align: center;
+    color: #fff;
+    max-width: 22rem;
+  }
+
+  .cooking__pot {
+    position: relative;
+    width: 120px;
+    height: 110px;
+    margin: 0 auto 1.25rem;
+  }
+
+  .cooking__bowl {
+    position: absolute;
+    inset: auto 0 0;
+    font-size: 4rem;
+    line-height: 1;
+    animation: cooking-bob 1.6s ease-in-out infinite;
+  }
+
+  .cooking__steam {
+    position: absolute;
+    bottom: 58px;
+    width: 10px;
+    height: 30px;
+    border-radius: 999px;
+    background: linear-gradient(to top, rgb(255 255 255 / 45%), transparent);
+    opacity: 0;
+    animation: cooking-steam 2.2s ease-out infinite;
+  }
+
+  .cooking__steam:nth-child(1) { left: 38px; animation-delay: 0s; }
+  .cooking__steam:nth-child(2) { left: 55px; animation-delay: 0.5s; }
+  .cooking__steam:nth-child(3) { left: 72px; animation-delay: 1s; }
+
+  .cooking__line {
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0 0 0.35rem;
+    /* Keyed on text so each phrase fades in rather than snapping. */
+    animation: cooking-in 0.4s ease-out;
+  }
+
+  .cooking__sub {
+    margin: 0;
+    font-size: 0.85rem;
+    color: rgb(255 255 255 / 62%);
+  }
+
+  @keyframes cooking-in {
+    from { opacity: 0; transform: translateY(8px); }
+  }
+
+  @keyframes cooking-bob {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-6px) rotate(2deg); }
+  }
+
+  @keyframes cooking-steam {
+    0% { opacity: 0; transform: translateY(0) scaleX(1); }
+    30% { opacity: 0.9; }
+    100% { opacity: 0; transform: translateY(-38px) scaleX(1.6); }
+  }
+
+  /* ---- transisi antar pertanyaan ---- */
+  .taste__slide {
+    animation: taste-slide 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes taste-slide {
+    from { opacity: 0; transform: translateX(18px); }
+  }
+
+  .taste__reason {
+    margin: 0.3rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--bs-secondary-color, #6c757d);
+    animation: cooking-in 0.4s ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cooking,
+    .cooking__line,
+    .cooking__bowl,
+    .cooking__steam,
+    .taste__slide,
+    .taste__reason {
+      animation: none;
+    }
+  }
+
   .taste__hero {
     border-radius: 28px;
     padding: 2.25rem 2rem;

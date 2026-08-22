@@ -600,7 +600,15 @@ export interface TasteProfile {
   blurb: string;
 }
 
-export type TasteAnswers = { mood: number; pace: number; world: number; fame: number };
+export type TasteAnswers = {
+  mood: number;
+  pace: number;
+  world: number;
+  heart: number;
+  fame: number;
+  length: number;
+  era: number;
+};
 
 export function getAnimeTaste(answers: TasteAnswers) {
   const q = new URLSearchParams(

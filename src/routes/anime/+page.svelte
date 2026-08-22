@@ -7,6 +7,7 @@
   import AnimeSlide from '$components/anime/AnimeSlide.svelte';
   import AiringTodaySection from '$components/anime/AiringTodaySection.svelte';
   import SectionHead from '$components/ui/SectionHead.svelte';
+  import TastePromoCard from '$components/anime/TastePromoCard.svelte';
   import AnimeShare from '$components/anime/AnimeShare.svelte';
   import { page } from '$app/stores';
   import { replaceState } from '$app/navigation';
@@ -152,6 +153,12 @@
       </div>
     </section>
   {/if}
+
+  <!-- Right under the season hero: someone who just scrolled the current
+       season's best is the readiest audience for "what should I watch". -->
+  <section class="mb-5 anime-taste-slot">
+    <TastePromoCard />
+  </section>
 
   <AiringTodaySection anime={data.airingToday} day={data.airingDay} />
 
@@ -336,6 +343,10 @@
 </div>
 
 <style>
+  .anime-taste-slot {
+    max-width: 46rem;
+  }
+
   .anime-head__links {
     display: flex;
     flex-wrap: wrap;
