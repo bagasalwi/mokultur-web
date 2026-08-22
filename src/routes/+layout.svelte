@@ -79,6 +79,7 @@
   <meta property="og:locale" content="id_ID" />
   <meta property="og:site_name" content={siteName} />
   <meta name="twitter:site" content="@mokultur" />
+  <link rel="alternate" type="application/rss+xml" title="Mokultur" href="/rss.xml" />
   <meta name="twitter:creator" content="@mokultur" />
   {@html `<script type="application/ld+json">${orgSchema}<\/script>`}
   {@html `<script type="application/ld+json">${websiteSchema}<\/script>`}

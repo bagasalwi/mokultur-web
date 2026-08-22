@@ -588,6 +588,22 @@ export interface AnimeDetail extends AnimeCard {
   cachedAt: string | null;
 }
 
+export interface SeasonIndexItem {
+  year: number;
+  season: string;
+  total: number;
+}
+
+export function listAnimeSeasons() {
+  return apiFetch<{ data: SeasonIndexItem[] }>('/api/anime/seasons');
+}
+
+export function getAnimeSeason(year: number, season: string) {
+  return apiFetch<{ year: number; season: string; total: number; data: AnimeCard[] }>(
+    `/api/anime/season/${year}/${encodeURIComponent(season)}`
+  );
+}
+
 export function getCurrentSeasonTop(limit = 5): Promise<{ season: string; year: number; data: AnimeCard[] }> {
   return apiFetch<{ season: string; year: number; data: AnimeCard[] }>(`/api/anime/season/current/top?limit=${limit}`);
 }
