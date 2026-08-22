@@ -147,11 +147,16 @@
   {#if data.seasonTop.length}
     <section class="mb-5 anime-pair" aria-label={`Top anime ${seasonHeading}`}>
       <div class="anime-pair__main">
-        <Carousel items={data.seasonTop} label={`Yang terbaik ${seasonHeading}`} let:item>
-          <AnimeSlide anime={item} eyebrow={`Yang Terbaik · ${seasonHeading}`} />
-        </Carousel>
-        <div class="d-flex justify-content-end mt-3">
-          <AnimeShare list="season" url={absoluteUrl('/anime')} title={`Top 5 Anime ${seasonHeading} — ${siteName}`} />
+        <div class="anime-season-card">
+          <Carousel items={data.seasonTop} label={`Yang terbaik ${seasonHeading}`} let:item>
+            <AnimeSlide anime={item} eyebrow={`Yang Terbaik · ${seasonHeading}`} />
+          </Carousel>
+
+          <!-- Inside the card rather than floating under it, where it read as
+               belonging to the page instead of to this carousel. -->
+          <div class="anime-season-card__share">
+            <AnimeShare list="season" url={absoluteUrl('/anime')} title={`Top 5 Anime ${seasonHeading} — ${siteName}`} />
+          </div>
         </div>
       </div>
 
@@ -393,6 +398,17 @@
     }
   }
 
+  .anime-season-card {
+    position: relative;
+  }
+
+  .anime-season-card__share {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 3;
+  }
+
   .anime-pair {
     display: grid;
     gap: 1.5rem;
@@ -404,17 +420,9 @@
          and break the split — same reasoning as the homepage row. */
       grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
       gap: 0 2rem;
-      /* stretch, not start: at its natural height the quiz card left a large
-         hole beside a much taller carousel. */
-      align-items: stretch;
-    }
-
-    .anime-pair__side {
-      display: flex;
-    }
-
-    .anime-pair__side > :global(*) {
-      width: 100%;
+      /* start, not stretch: forced to the carousel's height the quiz card was
+         mostly empty bands above and below its own content. */
+      align-items: start;
     }
   }
 

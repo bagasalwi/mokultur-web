@@ -36,9 +36,10 @@
 <style>
   .taste-promo {
     position: relative;
+    display: block;
     overflow: hidden;
     border-radius: 16px;
-    padding: 1.25rem;
+    padding: 1.5rem;
     text-decoration: none;
     color: #fff;
     background:
@@ -58,32 +59,18 @@
     color: #fff;
   }
 
-  /* Fills whatever height the column gives it, with the copy pinned to the top
-     and the actions to the bottom. */
-  .taste-promo {
-    display: flex;
-    flex-direction: column;
-  }
-
   .taste-promo__body {
     position: relative;
     z-index: 1;
     max-width: 24rem;
-    display: flex;
-    flex-direction: column;
-    /* flex-start so the badge and the button keep their own width — stretched
-       they spanned the whole card. Centred vertically rather than pushed to the
-       edges, which left a hole in the middle. */
-    align-items: flex-start;
-    justify-content: center;
-    height: 100%;
   }
 
   .taste-promo__title {
-    font-size: 1.05rem;
+    font-size: 1.5rem;
     font-weight: 800;
-    letter-spacing: -0.02em;
-    margin: 0 0 0.35rem;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin: 0 0 0.5rem;
     color: #fff;
   }
 

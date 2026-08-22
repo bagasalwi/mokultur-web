@@ -347,7 +347,12 @@
       <h1 class="taste__title">{shownLabel}</h1>
       <p class="taste__desc">{shownBlurb}</p>
 
-      <div class="d-flex flex-wrap gap-2 mt-4">
+      <p class="taste__share-hint">
+        <i class="bi bi-instagram"></i>
+        Bagikan ke Instagram Story dan tag <strong>@mokultur</strong> ya!
+      </p>
+
+      <div class="d-flex flex-wrap gap-2 mt-3">
         <ShareSheet url={resultUrl} title={`Selera anime gue: ${shownLabel}`}>
           <a slot="extra" class="sheet__download" href={storyUrl}>
             <i class="bi bi-instagram"></i>
@@ -630,6 +635,23 @@
     text-align: center;
     margin: 1rem 0 0;
     color: var(--bs-secondary-color, #6c757d);
+  }
+
+  .taste__share-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1.5rem 0 0;
+    font-size: 0.9rem;
+    color: rgb(255 255 255 / 78%);
+  }
+
+  .taste__share-hint strong {
+    color: var(--site-primary, #f1ff32);
+  }
+
+  .taste__share-hint i {
+    color: var(--site-primary, #f1ff32);
   }
 
   .taste__section-head {

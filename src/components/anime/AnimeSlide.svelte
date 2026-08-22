@@ -110,8 +110,10 @@
     display: flex;
     align-items: center;
     gap: clamp(1rem, 3vw, 2rem);
-    padding: clamp(1.1rem, 3vw, 2rem);
-    min-height: 300px;
+    /* Less vertical than horizontal: the poster already sets the slide's height,
+       so an equal pad on all four sides left visible dead bands top and bottom. */
+    padding: clamp(0.85rem, 1.4vw, 1.15rem) clamp(1.1rem, 3vw, 2rem);
+    min-height: 0;
   }
 
   .slide__poster {
