@@ -33,6 +33,13 @@
    */
   export let perCard = 4;
 
+  /**
+   * Rows are laid out in this many columns inside one card. At 1 the card is a
+   * narrow list for a sidebar; at 3 it becomes a full-width block that shows
+   * nine entries as 3-3-3.
+   */
+  export let columns = 1;
+
   $: groups = Array.from({ length: Math.ceil(shown.length / perCard) }, (_, i) =>
     shown.slice(i * perCard, i * perCard + perCard)
   );
@@ -53,7 +60,10 @@
     <!-- Slower than the default: on the homepage this sits next to the season
          carousel, and two panels flipping in unison is a lot of movement. -->
     <Carousel items={groups} label="Jadwal tayang hari ini" interval={7000} let:item>
-      <div class="airing-card" style={`--airing-rows: ${perCard}`}>
+      <div
+        class="airing-card"
+        style={`--airing-rows: ${Math.ceil(perCard / columns)}; --airing-cols: ${columns}`}
+      >
         {#each item as entry (entry.malId)}
           <AiringCard anime={entry} />
         {/each}
@@ -70,15 +80,27 @@
   /* Height comes from the row count rather than a magic number, so every card
      in the carousel still matches even when a group has shorter titles — and it
      keeps matching if perCard changes. */
+  /* Height comes from the row count rather than a magic number, so every card
+     in the carousel still matches even when a group has shorter titles — and it
+     keeps matching if perCard or columns change. */
   .airing-card {
     --airing-row-height: 4.6rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+    display: grid;
+    grid-template-columns: repeat(var(--airing-cols, 1), minmax(0, 1fr));
+    gap: 0.25rem 0.75rem;
     min-height: calc(var(--airing-rows, 4) * var(--airing-row-height) + 1rem);
     padding: 0.5rem;
     border: 1px solid var(--bs-border-color, #dee2e6);
     border-radius: 0.85rem;
     background: var(--bs-body-bg, #fff);
+  }
+
+  /* One column on a phone whatever the caller asked for: three schedule rows
+     side by side at 390px leaves no room for a title. */
+  @media (max-width: 767.98px) {
+    .airing-card {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
   }
 </style>

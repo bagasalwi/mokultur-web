@@ -155,22 +155,18 @@
         </div>
       </div>
 
-      <!-- Paired with the season carousel, the same way the homepage row does
-           it: both answer "what do I watch now", so splitting them across the
-           page made the reader scroll past one to reach the other. -->
-      {#if data.airingToday.length}
-        <div class="anime-pair__side">
-          <AiringTodaySection anime={data.airingToday} day={data.airingDay} />
-        </div>
-      {/if}
+      <!-- The quiz sits beside the season carousel: someone weighing what to
+           watch is exactly who it is for, and it reads better at 40% than as a
+           banner of its own. -->
+      <div class="anime-pair__side">
+        <TastePromoCard />
+      </div>
     </section>
   {/if}
 
-  <!-- Right under the season hero: someone who just scrolled the current
-       season's best is the readiest audience for "what should I watch". -->
-  <section class="mb-5 anime-taste-slot">
-    <TastePromoCard />
-  </section>
+  <!-- Full width, nine entries as 3-3-3. In the narrow slot it only had room
+       for a stack of four. -->
+  <AiringTodaySection anime={data.airingToday} day={data.airingDay} perCard={9} columns={3} limit={18} />
 
   <!-- Liputan anime dari redaksi sendiri: the reason this page is not just a
        MyAnimeList mirror. -->
@@ -404,11 +400,21 @@
 
   @media (min-width: 768px) {
     .anime-pair {
-      /* minmax(0, …) so a long anime title cannot widen its own column and
-         break the split — same reasoning as the homepage row. */
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      /* 60/40. minmax(0, …) so a long anime title cannot widen its own column
+         and break the split — same reasoning as the homepage row. */
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
       gap: 0 2rem;
-      align-items: start;
+      /* stretch, not start: at its natural height the quiz card left a large
+         hole beside a much taller carousel. */
+      align-items: stretch;
+    }
+
+    .anime-pair__side {
+      display: flex;
+    }
+
+    .anime-pair__side > :global(*) {
+      width: 100%;
     }
   }
 

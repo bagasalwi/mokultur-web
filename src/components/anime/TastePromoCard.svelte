@@ -16,6 +16,12 @@
     <span class="taste-promo__cta">
       Mulai kuis <i class="bi bi-arrow-right"></i>
     </span>
+
+    <!-- Says what you get out of it, which is the actual reason to start. -->
+    <span class="taste-promo__hook">
+      <i class="bi bi-instagram"></i>
+      Hasilnya bisa langsung kamu share ke Story
+    </span>
   </div>
 
   <!-- Decorative only: three tilted "posters" hinting at a result, drawn in CSS
@@ -30,7 +36,6 @@
 <style>
   .taste-promo {
     position: relative;
-    display: block;
     overflow: hidden;
     border-radius: 16px;
     padding: 1.25rem;
@@ -53,10 +58,25 @@
     color: #fff;
   }
 
+  /* Fills whatever height the column gives it, with the copy pinned to the top
+     and the actions to the bottom. */
+  .taste-promo {
+    display: flex;
+    flex-direction: column;
+  }
+
   .taste-promo__body {
     position: relative;
     z-index: 1;
-    max-width: 22rem;
+    max-width: 24rem;
+    display: flex;
+    flex-direction: column;
+    /* flex-start so the badge and the button keep their own width — stretched
+       they spanned the whole card. Centred vertically rather than pushed to the
+       edges, which left a hole in the middle. */
+    align-items: flex-start;
+    justify-content: center;
+    height: 100%;
   }
 
   .taste-promo__title {
@@ -84,6 +104,20 @@
     font-weight: 800;
     background: var(--site-primary, #f1ff32);
     color: var(--site-primary-contrast, #0d0d0d);
+  }
+
+  .taste-promo__hook {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 0.85rem;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: rgb(255 255 255 / 66%);
+  }
+
+  .taste-promo__hook i {
+    color: var(--site-primary, #f1ff32);
   }
 
   .taste-promo__stack {
