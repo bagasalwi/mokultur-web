@@ -258,7 +258,7 @@
     if (!data.result) return '';
     const q = new URLSearchParams();
     for (const [k, v] of Object.entries(data.result.answers)) q.set(k, String(v));
-    q.set('ids', data.result.anime.slice(0, 3).map((a) => a.malId).join(','));
+    q.set('ids', data.result.anime.slice(0, 6).map((a) => a.malId).join(','));
     if (shownLabel) q.set('label', shownLabel);
     if (shownBlurb) q.set('blurb', shownBlurb);
     return `/anime/selera/story.png?${q}`;
