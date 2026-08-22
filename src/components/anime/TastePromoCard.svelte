@@ -11,7 +11,7 @@
     <span class="badge badge-main mb-2">Kuis</span>
     <h3 class="taste-promo__title">Know Your Taste of Anime</h3>
     <p class="taste-promo__desc">
-      Tujuh pertanyaan, enam rekomendasi yang beneran cocok sama kamu — bukan daftar yang lagi ramai.
+      Cari tahu selera anime kamu, lengkap dengan rekomendasi yang cocok sama seleranya.
     </p>
     <span class="taste-promo__cta">
       Mulai kuis <i class="bi bi-arrow-right"></i>

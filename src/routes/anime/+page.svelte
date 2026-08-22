@@ -113,7 +113,7 @@
   }
 
   const description =
-    'Koleksi anime dari MyAnimeList: top season berjalan, episode terbaru berskor tinggi, dan pencarian per tahun, genre, atau season.';
+    'Top season berjalan, jadwal tayang hari ini, episode terbaru berskor tinggi, dan berita anime pilihan redaksi.';
 </script>
 
 <svelte:head>
@@ -129,7 +129,7 @@
 
 <div class="container-xl py-4">
   <header class="anime-head mb-4">
-    <p class="anime-head__eyebrow">MyAnimeList</p>
+    <p class="anime-head__eyebrow">Anime</p>
     <h1 class="anime-head__title">Anime</h1>
     <p class="anime-head__desc">{description}</p>
 

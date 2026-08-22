@@ -110,7 +110,7 @@
   $: canonical = absoluteUrl('/anime/selera');
   $: pageTitle = buildPageTitle('Know Your Taste of Anime', siteName);
   $: description =
-    'Jawab 4 pertanyaan, dapat 6 rekomendasi anime yang cocok sama seleramu. Pertanyaannya berganti tiap kali main.';
+    'Jawab beberapa pertanyaan singkat buat tahu selera anime kamu, lengkap dengan rekomendasi yang cocok.';
   $: resultUrl = $pageStore.url.href;
 
   function choose(axis: Axis, value: number) {
@@ -249,6 +249,20 @@
 
   $: shownLabel = aiLabel ?? data.result?.profile.label ?? '';
   $: shownBlurb = aiBlurb ?? data.result?.profile.blurb ?? '';
+
+  /**
+   * Story card URL. Label and blurb ride along so the image matches the words
+   * on screen — including the AI copy, which the API has no way to recompute.
+   */
+  $: storyUrl = (() => {
+    if (!data.result) return '';
+    const q = new URLSearchParams();
+    for (const [k, v] of Object.entries(data.result.answers)) q.set(k, String(v));
+    q.set('ids', data.result.anime.slice(0, 3).map((a) => a.malId).join(','));
+    if (shownLabel) q.set('label', shownLabel);
+    if (shownBlurb) q.set('blurb', shownBlurb);
+    return `/anime/selera/story.png?${q}`;
+  })();
 </script>
 
 <svelte:head>
@@ -291,7 +305,7 @@
       <span class="badge badge-main mb-3">Kuis</span>
       <h1 class="taste__title">Know Your Taste of Anime</h1>
       <p class="taste__desc">
-        Empat pertanyaan, enam rekomendasi. Pertanyaannya beda tiap kali main — jadi coba lagi kalau penasaran.
+        Beberapa pertanyaan singkat buat tahu selera anime kamu — plus rekomendasi yang cocok sama seleranya.
       </p>
     </header>
 
@@ -334,7 +348,12 @@
       <p class="taste__desc">{shownBlurb}</p>
 
       <div class="d-flex flex-wrap gap-2 mt-4">
-        <ShareSheet url={resultUrl} title={`Selera anime gue: ${shownLabel}`} />
+        <ShareSheet url={resultUrl} title={`Selera anime gue: ${shownLabel}`}>
+          <a slot="extra" class="sheet__download" href={storyUrl}>
+            <i class="bi bi-instagram"></i>
+            <span>Unduh buat IG Story <small>1080 × 1920</small></span>
+          </a>
+        </ShareSheet>
         <button type="button" class="theme-btn theme-btn--surface" on:click={restart}>
           <i class="bi bi-arrow-repeat me-2"></i>Ulangi kuis
         </button>
@@ -456,6 +475,27 @@
 
   @keyframes taste-slide {
     from { opacity: 0; transform: translateX(18px); }
+  }
+
+  .sheet__download {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0.9rem;
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    margin-bottom: 0.5rem;
+  }
+
+  .sheet__download:hover {
+    background: var(--bs-tertiary-bg, #f8f9fa);
+  }
+
+  .sheet__download small {
+    display: block;
+    color: var(--bs-secondary-color, #6c757d);
   }
 
   .taste__reason {

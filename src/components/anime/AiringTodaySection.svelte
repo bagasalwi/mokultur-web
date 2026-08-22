@@ -23,8 +23,19 @@
   $: dayLabel = day ? (DAY_LABEL[day] ?? day) : null;
   $: shown = anime.slice(0, limit);
 
-  /** Three per card, so nine entries become three flip-through cards. */
-  $: groups = Array.from({ length: Math.ceil(shown.length / 3) }, (_, i) => shown.slice(i * 3, i * 3 + 3));
+  /**
+   * Rows per card is a prop, and the card sizes itself from it.
+   *
+   * It used to be three rows against a hardcoded 348px min-height — change one
+   * and the other silently stopped matching. Now the height is derived, so this
+   * section fits wherever it is dropped: four rows beside the season carousel,
+   * fewer in a narrower slot.
+   */
+  export let perCard = 4;
+
+  $: groups = Array.from({ length: Math.ceil(shown.length / perCard) }, (_, i) =>
+    shown.slice(i * perCard, i * perCard + perCard)
+  );
 </script>
 
 <!-- Hidden entirely when nothing airs today, rather than leaving a heading with
@@ -42,7 +53,7 @@
     <!-- Slower than the default: on the homepage this sits next to the season
          carousel, and two panels flipping in unison is a lot of movement. -->
     <Carousel items={groups} label="Jadwal tayang hari ini" interval={7000} let:item>
-      <div class="airing-card">
+      <div class="airing-card" style={`--airing-rows: ${perCard}`}>
         {#each item as entry (entry.malId)}
           <AiringCard anime={entry} />
         {/each}
@@ -56,14 +67,16 @@
     margin-bottom: 2rem;
   }
 
-  /* One card holds three schedule rows. A fixed min-height keeps every card
-     the same size so the flip does not jump when a group has shorter titles. */
+  /* Height comes from the row count rather than a magic number, so every card
+     in the carousel still matches even when a group has shorter titles — and it
+     keeps matching if perCard changes. */
   .airing-card {
+    --airing-row-height: 4.6rem;
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
-    min-height: 348px;
-    padding: 0.75rem;
+    gap: 0.25rem;
+    min-height: calc(var(--airing-rows, 4) * var(--airing-row-height) + 1rem);
+    padding: 0.5rem;
     border: 1px solid var(--bs-border-color, #dee2e6);
     border-radius: 0.85rem;
     background: var(--bs-body-bg, #fff);

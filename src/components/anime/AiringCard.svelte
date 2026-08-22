@@ -17,7 +17,7 @@
 <a class="airing-row" href={anime.malUrl} target="_blank" rel="noopener">
   <span class="airing-row__thumb">
     {#if anime.image}
-      <img src={imgUrl(anime.image, 160)} srcset={imgSrcset(anime.image, 80)} sizes="80px" alt="" loading="lazy" decoding="async" />
+      <img src={imgUrl(anime.image, 160)} srcset={imgSrcset(anime.image, 52)} sizes="52px" alt="" loading="lazy" decoding="async" />
     {/if}
     <span class="airing-row__time">{time ?? '--:--'}</span>
   </span>
@@ -34,8 +34,8 @@
   .airing-row {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.45rem;
+    gap: 0.6rem;
+    padding: 0.35rem;
     border-radius: 0.6rem;
     text-decoration: none;
     color: inherit;
@@ -50,8 +50,8 @@
   .airing-row__thumb {
     position: relative;
     flex: 0 0 auto;
-    width: 72px;
-    height: 100px;
+    width: 52px;
+    height: 72px;
     border-radius: 0.4rem;
     overflow: hidden;
     background: #e9ecef;
@@ -73,7 +73,7 @@
     padding: 0.15rem 0;
     background: rgba(0, 0, 0, 0.78);
     color: #fff;
-    font-size: 0.72rem;
+    font-size: 0.65rem;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
     text-align: center;
@@ -92,7 +92,7 @@
   }
 
   .airing-row__title {
-    font-size: 0.88rem;
+    font-size: 0.8rem;
     font-weight: 700;
     line-height: 1.3;
     display: -webkit-box;
@@ -103,7 +103,7 @@
   }
 
   .airing-row__english {
-    font-size: 0.76rem;
+    font-size: 0.7rem;
     font-weight: 500;
     line-height: 1.3;
     color: var(--bs-secondary-color, #6c757d);
