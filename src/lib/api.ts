@@ -594,6 +594,23 @@ export interface SeasonIndexItem {
   total: number;
 }
 
+export interface TasteProfile {
+  id: string;
+  label: string;
+  blurb: string;
+}
+
+export type TasteAnswers = { mood: number; pace: number; world: number; fame: number };
+
+export function getAnimeTaste(answers: TasteAnswers) {
+  const q = new URLSearchParams(
+    Object.entries(answers).map(([k, v]) => [k, String(v)])
+  );
+  return apiFetch<{ profile: TasteProfile; answers: TasteAnswers; poolSize: number; data: AnimeCard[] }>(
+    `/api/anime/taste?${q}`
+  );
+}
+
 export function listAnimeSeasons() {
   return apiFetch<{ data: SeasonIndexItem[] }>('/api/anime/seasons');
 }

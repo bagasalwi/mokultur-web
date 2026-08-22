@@ -130,6 +130,15 @@
     <p class="anime-head__eyebrow">MyAnimeList</p>
     <h1 class="anime-head__title">Anime</h1>
     <p class="anime-head__desc">{description}</p>
+
+    <div class="anime-head__links">
+      <a class="theme-btn theme-btn--primary theme-btn--sm" href="/anime/selera">
+        <i class="bi bi-stars me-2"></i>Cari selera anime kamu
+      </a>
+      <a class="theme-btn theme-btn--surface theme-btn--sm" href="/anime/musim">
+        <i class="bi bi-calendar3 me-2"></i>Jadwal per musim
+      </a>
+    </div>
   </header>
 
   <!-- Hero: top season berjalan -->
@@ -327,6 +336,13 @@
 </div>
 
 <style>
+  .anime-head__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
   .anime-head__eyebrow {
     margin: 0 0 0.15rem;
     font-size: 0.7rem;
