@@ -8,15 +8,10 @@
 
   $: profile = data.profile;
 
-  /**
-   * Account settings deliberately stays at /account rather than moving under
-   * /dashboard: it is linked from elsewhere and reached by ?redirect=, and a
-   * sidebar entry gives it a home here without breaking any of that.
-   */
   $: nav = [
     { href: '/dashboard', label: 'Ringkasan', icon: 'bi-grid-1x2', show: true },
     { href: '/dashboard/artikel', label: 'Artikel Saya', icon: 'bi-file-text', show: profile.canWrite },
-    { href: '/account', label: 'Pengaturan Akun', icon: 'bi-gear', show: true },
+    { href: '/dashboard/account', label: 'Pengaturan Akun', icon: 'bi-gear', show: true },
   ].filter((item) => item.show);
 
   $: current = $page.url.pathname;
@@ -26,7 +21,7 @@
     ...(profile.canWrite
       ? [{ href: '/dashboard/artikel', label: 'Artikel', icon: 'bi-file-text' }]
       : []),
-    { href: '/account', label: 'Akun', icon: 'bi-person-gear' },
+    { href: '/dashboard/account', label: 'Akun', icon: 'bi-person-gear' },
     { href: '/', label: 'Beranda', icon: 'bi-house' },
   ];
 

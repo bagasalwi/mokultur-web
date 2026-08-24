@@ -37,12 +37,10 @@
   <meta name="robots" content="noindex,nofollow" />
 </svelte:head>
 
-<section class="acc-page">
-  <div class="container-xl">
-    <header class="acc-head">
-      <h1>Pengaturan Akun</h1>
-      <p>Update profil, avatar, dan keamanan akun.</p>
-    </header>
+<header class="acc-head">
+  <h1>Pengaturan Akun</h1>
+  <p>Update profil, avatar, dan keamanan akun.</p>
+</header>
 
     <div class="acc-grid">
       <div class="acc-col">
@@ -240,17 +238,13 @@
     </div>
       </div>
     </div>
-  </div>
-</section>
 
 <style>
-  .acc-page { padding: 24px 0 40px; }
-  .acc-head { max-width: 1040px; margin: 0 auto 18px; }
+  .acc-head { margin: 0 0 18px; }
   .acc-head h1 { font-size: 24px; margin: 0; }
   .acc-head p { color: #6b7280; margin: 4px 0 0; }
 
   .acc-grid {
-    max-width: 1040px; margin: 0 auto;
     display: grid; grid-template-columns: 1fr 1fr;
     gap: 18px; align-items: start;
   }

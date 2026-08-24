@@ -292,7 +292,7 @@
                   <a class="navbar-user__item" href="/dashboard" role="menuitem" on:click={closeUserMenu}>
                     <i class="bi bi-grid-1x2"></i> Dashboard
                   </a>
-                  <a class="navbar-user__item" href="/account" role="menuitem" on:click={closeUserMenu}>
+                  <a class="navbar-user__item" href="/dashboard/account" role="menuitem" on:click={closeUserMenu}>
                     <i class="bi bi-person-gear"></i> Pengaturan Akun
                   </a>
                   <form method="POST" action="/auth/logout" class="d-block">
@@ -377,7 +377,7 @@
         <a href="/dashboard" class="bottomsheet-auth-link" on:click={closeMenu}>
           <i class="bi bi-grid-1x2"></i> Dashboard
         </a>
-        <a href="/account" class="bottomsheet-auth-link" on:click={closeMenu}>
+        <a href="/dashboard/account" class="bottomsheet-auth-link" on:click={closeMenu}>
           <i class="bi bi-person-gear"></i> Pengaturan Akun
         </a>
         <form method="POST" action="/auth/logout">

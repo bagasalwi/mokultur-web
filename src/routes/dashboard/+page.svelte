@@ -108,7 +108,7 @@
       </p>
     {/if}
 
-    <a class="dash-btn dash-btn--ghost" href="/account">
+    <a class="dash-btn dash-btn--ghost" href="/dashboard/account">
       <i class="bi bi-gear"></i> Atur profil
     </a>
   </article>

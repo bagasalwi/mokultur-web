@@ -178,7 +178,7 @@
 
       <!-- Mobile-only profile card, attached to the feed -->
       {#if me}
-        <a href="/account" class="mt-mobile-profile">
+        <a href="/dashboard/account" class="mt-mobile-profile">
           <div class="mt-mobile-profile__avatar">
             {#if me.img}<img src={imgUrl(me.img)} alt={me.name} />{:else}<span>{initials(me.name)}</span>{/if}
           </div>
@@ -376,7 +376,7 @@
     <aside class="mt-aside">
       <div class="mt-side-card">
         {#if me}
-          <a href="/account" class="mt-side-profile">
+          <a href="/dashboard/account" class="mt-side-profile">
             <div class="mt-side-profile__avatar">
               {#if me.img}<img src={imgUrl(me.img)} alt={me.name} />{:else}<span>{initials(me.name)}</span>{/if}
             </div>
@@ -386,7 +386,7 @@
             </div>
           </a>
           {#if me.description}<p class="mt-side-profile__bio">{me.description}</p>{/if}
-          <a href="/account" class="mt-side-link"><i class="bi bi-pencil"></i> Edit Profil</a>
+          <a href="/dashboard/account" class="mt-side-link"><i class="bi bi-pencil"></i> Edit Profil</a>
         {:else}
           <h3 class="mt-side-card__title">Gabung diskusi</h3>
           <p class="mt-side-card__hint">Masuk untuk posting, balas thread & share post.</p>

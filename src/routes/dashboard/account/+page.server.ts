@@ -5,40 +5,20 @@ import type { Actions, PageServerLoad } from './$types';
 
 const COOKIE = 'mokultur_token';
 
-export const load: PageServerLoad = async ({ locals, cookies, fetch }) => {
-  if (!locals.user) throw redirect(303, '/auth/login?redirect=/account');
-
-  const token = cookies.get(COOKIE) ?? '';
-  let user: AuthUser & { id: number } = {
-    id: locals.user.id,
-    name: locals.user.name,
-    email: locals.user.email,
-    role: locals.user.role,
-    img: locals.user.img,
-    username: locals.user.username,
-    description: locals.user.description,
-    instagram: locals.user.instagram,
-    facebook: locals.user.facebook,
-  };
-
-  try {
-    const res = await fetch(`${PUBLIC_API_URL}/api/auth/me`, {
-      headers: { cookie: `${COOKIE}=${token}` },
-    });
-    if (res.ok) {
-      const json = await res.json();
-      if (json?.user) user = { ...user, ...json.user };
-    }
-  } catch {
-    // fallback to locals.user
-  }
-
-  return { profile: user };
+/**
+ * The dashboard layout already loads the signed-in profile from /api/auth/me
+ * and guards the route, so this reuses it rather than making the same call
+ * again. Form actions invalidate load functions, the layout's included, so the
+ * form still redraws with freshly saved values.
+ */
+export const load: PageServerLoad = async ({ parent }) => {
+  const { profile } = await parent();
+  return { profile };
 };
 
 export const actions: Actions = {
   profile: async ({ request, cookies, fetch, locals }) => {
-    if (!locals.user) throw redirect(303, '/auth/login?redirect=/account');
+    if (!locals.user) throw redirect(303, '/auth/login?redirect=/dashboard/account');
 
     const fd = await request.formData();
     const payload = {
@@ -70,7 +50,7 @@ export const actions: Actions = {
   },
 
   avatar: async ({ request, cookies, fetch, locals }) => {
-    if (!locals.user) throw redirect(303, '/auth/login?redirect=/account');
+    if (!locals.user) throw redirect(303, '/auth/login?redirect=/dashboard/account');
 
     const fd = await request.formData();
     const avatar = fd.get('avatar');
@@ -111,7 +91,7 @@ export const actions: Actions = {
   },
 
   password: async ({ request, cookies, fetch, locals }) => {
-    if (!locals.user) throw redirect(303, '/auth/login?redirect=/account');
+    if (!locals.user) throw redirect(303, '/auth/login?redirect=/dashboard/account');
 
     const fd = await request.formData();
     const currentPassword = String(fd.get('currentPassword') ?? '');
