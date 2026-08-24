@@ -42,6 +42,31 @@ $social-whatsapp: #25d366;
 // =============================================================================
 
 /*
+ * Screens with a fixed bottom bar publish its height here so floating UI (the
+ * chat button) can sit clear of it. The class is toggled on <body> by the
+ * dashboard layout; every other page leaves the variable unset, so the
+ * fallback of 0 applies.
+ */
+body.has-bottom-nav {
+    --app-bottom-nav: 64px;
+
+    /*
+     * Reserved on <body>, not on the dashboard section: the bar is fixed and
+     * overlays whatever ends up last on the page, which is the footer once the
+     * reader scrolls all the way down.
+     */
+    @media (max-width: 860px) {
+        padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    }
+}
+
+@media (min-width: 861px) {
+    body.has-bottom-nav {
+        --app-bottom-nav: 0px;
+    }
+}
+
+/*
  * iOS Safari zooms into any focused form control whose font-size is under 16px,
  * and never zooms back out — the page is left stranded at 1.3x with the layout
  * shifted sideways. Enforced site-wide rather than per-component so new forms

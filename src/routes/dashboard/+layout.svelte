@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { onDestroy, onMount } from 'svelte';
   import { page } from '$app/stores';
   import { avatarUrl, initials } from '$lib/user';
+  import BottomNav from '$components/dashboard/BottomNav.svelte';
 
   export let data;
 
@@ -18,6 +20,25 @@
   ].filter((item) => item.show);
 
   $: current = $page.url.pathname;
+
+  $: bottomNav = [
+    { href: '/dashboard', label: 'Ringkasan', icon: 'bi-grid-1x2' },
+    ...(profile.canWrite
+      ? [{ href: '/dashboard/artikel', label: 'Artikel', icon: 'bi-file-text' }]
+      : []),
+    { href: '/account', label: 'Akun', icon: 'bi-person-gear' },
+    { href: '/', label: 'Beranda', icon: 'bi-house' },
+  ];
+
+  /*
+   * Tells the rest of the app a bottom bar is present, so the floating chat
+   * button can lift clear of it. Set on <body> rather than in scoped CSS so it
+   * is removed the moment we navigate away from the dashboard.
+   */
+  onMount(() => document.body.classList.add('has-bottom-nav'));
+  onDestroy(() => {
+    if (typeof document !== 'undefined') document.body.classList.remove('has-bottom-nav');
+  });
 </script>
 
 <svelte:head>
@@ -66,6 +87,8 @@
     </div>
   </div>
 </section>
+
+<BottomNav items={bottomNav} />
 
 <style>
   .dash { padding: 24px 0 48px; }
@@ -169,22 +192,22 @@
     /*
      * minmax(0, …) rather than a bare 1fr.
      *
-     * A grid track's automatic minimum is the content's min-content width, and
-     * the nav below is a row of nowrap items — so a bare 1fr refused to go
-     * under 488px and a 375px phone rendered the whole dashboard zoomed out.
+     * A grid track's automatic minimum is its content's min-content width, so a
+     * bare 1fr cannot shrink below the widest unbreakable thing inside it — a
+     * row of nowrap menu items once pinned this at 488px and a 375px phone
+     * rendered the whole dashboard zoomed out. That menu now lives in the
+     * bottom bar, but long article titles can do the same, so this stays.
      */
     .dash__grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
     .dash__side { position: static; }
 
-    /* Horizontal strip on mobile — a stacked menu would push the actual
-       content below the fold on every visit. min-width:0 lets the scroller
-       actually shrink instead of propagating its content width upward. */
-    .dash__nav { flex-direction: row; overflow-x: auto; gap: 6px; min-width: 0; }
-    .dash__nav-item { white-space: nowrap; flex: 0 0 auto; }
+    /* The bottom bar carries navigation on mobile, so the sidebar keeps only
+       the profile row. Two copies of the same menu on one screen is worse than
+       either alone. */
+    .dash__nav,
     .dash__back { display: none; }
 
-    /* Hides the scrollbar without disabling the scroll. */
-    .dash__nav { scrollbar-width: none; }
-    .dash__nav::-webkit-scrollbar { display: none; }
+    .dash__me { padding-bottom: 0; margin-bottom: 0; border-bottom: 0; }
+
   }
 </style>

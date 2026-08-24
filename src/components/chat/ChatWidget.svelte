@@ -236,7 +236,10 @@
   .mchat {
     position: fixed;
     right: 1.25rem;
-    bottom: 1.25rem;
+    /* --app-bottom-nav is set on <body> by any screen with a fixed bottom bar
+       (currently the dashboard on mobile). Without it the bar covers the
+       floating button. Defaults to 0 everywhere else. */
+    bottom: calc(1.25rem + var(--app-bottom-nav, 0px));
     z-index: 1050;
     display: flex;
     flex-direction: column;
@@ -534,7 +537,9 @@
   @media (max-width: 575px) {
     .mchat {
       right: 0.85rem;
-      bottom: 0.85rem;
+      /* Must repeat the offset: this rule overrides the base `bottom`, and
+         dropping the variable here put the button back under the bottom bar. */
+      bottom: calc(0.85rem + var(--app-bottom-nav, 0px));
     }
 
     .mchat__panel {
