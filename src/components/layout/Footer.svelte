@@ -142,4 +142,29 @@
   .footer-cookie-btn:hover {
     color: #fff;
   }
+
+  /*
+   * Thumb-sized tap targets on phones.
+   *
+   * Measured on a 375px viewport, the footer links were 15px tall and the
+   * social icons 28px — well under the ~44px a fingertip actually covers, so
+   * hitting the wrong category was easy. The links stay visually identical;
+   * only the hit area grows.
+   */
+  @media (max-width: 768px) {
+    :global(.footer-link) {
+      display: inline-block;
+      padding: 0.45rem 0;
+    }
+
+    :global(.footer-socmed-btn) {
+      width: 40px;
+      height: 40px;
+    }
+
+    .footer-cookie-btn {
+      display: inline-block;
+      padding: 0.4rem 0;
+    }
+  }
 </style>

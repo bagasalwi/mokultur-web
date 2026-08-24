@@ -41,6 +41,23 @@ $social-whatsapp: #25d366;
 // Base Styles
 // =============================================================================
 
+/*
+ * iOS Safari zooms into any focused form control whose font-size is under 16px,
+ * and never zooms back out — the page is left stranded at 1.3x with the layout
+ * shifted sideways. Enforced site-wide rather than per-component so new forms
+ * (the article editor next) cannot reintroduce it.
+ *
+ * Phone widths only: the denser 14px controls are kept on desktop, where no
+ * such zoom exists.
+ */
+@media (max-width: 768px) {
+    input:not([type='checkbox']):not([type='radio']):not([type='range']),
+    textarea,
+    select {
+        font-size: 16px;
+    }
+}
+
 body {
     font-size: 0.9375rem;
     background-color: #fff;

@@ -294,6 +294,14 @@
     font-family: inherit; outline: none;
     transition: border-color 0.15s, box-shadow 0.15s;
   }
+  /* Matches the site-wide rule in custom.scss; repeated here because the
+     scoped selector above outranks a bare `textarea` rule. See the iOS
+     auto-zoom note there. */
+  @media (max-width: 768px) {
+    .acc-field input,
+    .acc-field textarea { font-size: 16px; }
+  }
+
   .acc-field input:disabled { background: #f9fafb; color: #6b7280; }
   .acc-field textarea { resize: vertical; }
   .acc-field input:focus, .acc-field textarea:focus {

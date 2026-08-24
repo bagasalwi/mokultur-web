@@ -77,7 +77,12 @@
     align-items: start;
   }
 
+  /* Grid items default to min-width:auto, which lets a long title push the
+     column past the viewport instead of wrapping. */
+  .dash__main { min-width: 0; }
+
   .dash__side {
+    min-width: 0;
     position: sticky;
     top: 88px;
     background: #fff;
@@ -161,13 +166,25 @@
   .dash__back:hover { color: #111; }
 
   @media (max-width: 860px) {
-    .dash__grid { grid-template-columns: 1fr; gap: 16px; }
+    /*
+     * minmax(0, …) rather than a bare 1fr.
+     *
+     * A grid track's automatic minimum is the content's min-content width, and
+     * the nav below is a row of nowrap items — so a bare 1fr refused to go
+     * under 488px and a 375px phone rendered the whole dashboard zoomed out.
+     */
+    .dash__grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
     .dash__side { position: static; }
 
     /* Horizontal strip on mobile — a stacked menu would push the actual
-       content below the fold on every visit. */
-    .dash__nav { flex-direction: row; overflow-x: auto; gap: 6px; }
-    .dash__nav-item { white-space: nowrap; }
+       content below the fold on every visit. min-width:0 lets the scroller
+       actually shrink instead of propagating its content width upward. */
+    .dash__nav { flex-direction: row; overflow-x: auto; gap: 6px; min-width: 0; }
+    .dash__nav-item { white-space: nowrap; flex: 0 0 auto; }
     .dash__back { display: none; }
+
+    /* Hides the scrollbar without disabling the scroll. */
+    .dash__nav { scrollbar-width: none; }
+    .dash__nav::-webkit-scrollbar { display: none; }
   }
 </style>
