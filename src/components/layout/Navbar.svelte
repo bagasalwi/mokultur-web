@@ -2,21 +2,9 @@
   import { imgUrl } from '$lib/img';
   import { page } from '$app/stores';
   import { tick, onMount } from 'svelte';
-  import { PUBLIC_API_URL } from '$env/static/public';
   import type { SiteSettings, SocialMediaItem, NavbarItem, Category } from '$lib/api';
   import { LOUNGE_ENABLED } from '$lib/features';
-
-  function avatarUrl(img: string | null | undefined): string | null {
-    if (!img) return null;
-    if (img.startsWith('http://') || img.startsWith('https://')) return img;
-    if (img.startsWith('/uploads/')) return `${PUBLIC_API_URL}${img}`;
-    // legacy Laravel storage path (e.g. "storage/profile/xxx.jpg")
-    if (img.startsWith('storage/') || img.startsWith('/storage/')) {
-      const p = img.startsWith('/') ? img : `/${img}`;
-      return `https://mokultur.com${p}`;
-    }
-    return img;
-  }
+  import { avatarUrl, initials } from '$lib/user';
 
   let scrolled = false;
 
@@ -39,10 +27,6 @@
   let menuOpen = false;
   function openMenu() { menuOpen = true; document.body.style.overflow = 'hidden'; }
   function closeMenu() { menuOpen = false; document.body.style.overflow = ''; }
-
-  function initials(name: string): string {
-    return name.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '').join('') || '?';
-  }
 
   $: siteName = settings?.site_name ?? 'Mokultur';
   $: siteLogo = settings?.site_logo ?? null;
@@ -305,6 +289,9 @@
                       <i class="bi bi-stars"></i> <em>Culture Lounge</em>
                     </a>
                   {/if}
+                  <a class="navbar-user__item" href="/dashboard" role="menuitem" on:click={closeUserMenu}>
+                    <i class="bi bi-grid-1x2"></i> Dashboard
+                  </a>
                   <a class="navbar-user__item" href="/account" role="menuitem" on:click={closeUserMenu}>
                     <i class="bi bi-person-gear"></i> Pengaturan Akun
                   </a>
@@ -387,6 +374,9 @@
             <i class="bi bi-stars"></i> <em>Culture Lounge</em>
           </a>
         {/if}
+        <a href="/dashboard" class="bottomsheet-auth-link" on:click={closeMenu}>
+          <i class="bi bi-grid-1x2"></i> Dashboard
+        </a>
         <a href="/account" class="bottomsheet-auth-link" on:click={closeMenu}>
           <i class="bi bi-person-gear"></i> Pengaturan Akun
         </a>

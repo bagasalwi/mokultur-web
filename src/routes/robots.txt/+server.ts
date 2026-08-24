@@ -10,6 +10,9 @@ export const GET: RequestHandler = async () => {
     // hundreds of them. They are noindex already, but that only stops indexing
     // — this stops the crawl.
     'Disallow: /auth/',
+    // Signed-in only, and every URL under it is per-user. Nothing here belongs
+    // in an index.
+    'Disallow: /dashboard',
     '',
     `Sitemap: ${PUBLIC_SITE_URL}/sitemap.xml`,
     // Declared separately: Google reads the news sitemap on its own cadence and

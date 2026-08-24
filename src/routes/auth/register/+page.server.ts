@@ -4,7 +4,7 @@ import { setSessionCookie } from '$lib/auth';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ locals }) => {
-  if (locals.user) throw redirect(303, '/');
+  if (locals.user) throw redirect(303, '/dashboard');
   return {};
 };
 
@@ -46,6 +46,6 @@ export const actions: Actions = {
       return fail(503, { error: 'Server lagi sibuk, coba lagi sebentar.', name, email });
     }
 
-    throw redirect(303, '/');
+    throw redirect(303, '/dashboard');
   },
 };

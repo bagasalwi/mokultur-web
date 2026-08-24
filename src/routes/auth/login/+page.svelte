@@ -5,7 +5,7 @@
   export let data: PageData;
   export let form: ActionData;
 
-  $: redirectTo = $page.url.searchParams.get('redirect') ?? '/';
+  $: redirectTo = $page.url.searchParams.get('redirect') ?? '/dashboard';
   $: siteName = data.settings?.site_name ?? 'Mokultur';
 </script>
 
