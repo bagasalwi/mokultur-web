@@ -174,11 +174,7 @@ a {
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
     color: #fff;
-    background:
-        linear-gradient(90deg, color-mix(in srgb, var(--site-accent-glow, #{$mokultur-accent-glow}) 10%, transparent) 1px, transparent 1px),
-        linear-gradient(0deg, rgba(34, 211, 238, 0.08) 1px, transparent 1px),
-        linear-gradient(135deg, color-mix(in srgb, var(--site-dark, #0a0a0a) 96%, #05070b) 0%, #0b1017 52%, #101827 100%);
-    background-size: 44px 44px, 44px 44px, auto;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--site-dark, #0a0a0a) 96%, #05070b) 0%, #0b1017 52%, #101827 100%);
 
     &::before {
         content: "";
@@ -964,14 +960,6 @@ a {
 
 .home-page .theme-btn {
     box-shadow: none;
-}
-
-.home-tech-section .article-list-big__item-body {
-    background:
-        linear-gradient(90deg, color-mix(in srgb, var(--site-accent-glow, #{$mokultur-accent-glow}) 10%, transparent) 1px, transparent 1px),
-        linear-gradient(0deg, rgba(34, 211, 238, 0.08) 1px, transparent 1px),
-        linear-gradient(135deg, color-mix(in srgb, var(--site-dark, #0a0a0a) 96%, #05070b) 0%, #0b1017 52%, #101827 100%);
-    background-size: 44px 44px, 44px 44px, auto;
 }
 
 .navbar-collab-btn {
