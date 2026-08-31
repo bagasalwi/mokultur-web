@@ -86,14 +86,15 @@ export function listArticles(params: {
   return apiFetch<{ data: ArticleListItem[]; meta: ArticleMeta }>(`/api/articles?${q}`);
 }
 
-export function getArticle(id: number, slug: string, ifNoneMatch?: string) {
+export function getArticle(id: number, slug: string, ifNoneMatch?: string, preview?: string) {
+  const q = preview ? `?preview=${encodeURIComponent(preview)}` : '';
   return apiFetch<{
     data: ArticleSingle;
     related: ArticleListItem[];
     relatedIds: number[];
     seo: ArticleSeo;
     jsonLd: object[];
-  }>(`/api/articles/${id}/${slug}`, {
+  }>(`/api/articles/${id}/${slug}${q}`, {
     headers: ifNoneMatch ? { 'if-none-match': ifNoneMatch } : {},
   });
 }

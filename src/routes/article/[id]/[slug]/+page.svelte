@@ -207,6 +207,12 @@
   {/if}
 </svelte:head>
 
+{#if data.isPreview}
+  <div class="bg-black text-white py-2 text-center small fw-semibold">
+    Mode preview — artikel ini belum terbit dan tidak terlihat oleh publik.
+  </div>
+{/if}
+
 <!-- Hero -->
 <article
   class="article-detail article-detail--{detailStyle} home-collab-card anime-hero-full mb-0"

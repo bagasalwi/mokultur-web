@@ -11,14 +11,23 @@ export const load: PageServerLoad = async ({ params, request, setHeaders, url })
   if (!Number.isFinite(id) || id <= 0) throw error(404, 'Not found');
 
   const preview = url.searchParams.get('preview_ads') === 'true';
-  if (!preview) setHeaders({ 'cache-control': 'public, max-age=120, stale-while-revalidate=600' });
 
-  const ifNoneMatch = request.headers.get('if-none-match') ?? undefined;
+  // Signed token minted by the dashboard so editors can open an unpublished
+  // article. Never cache such a response: it holds draft content.
+  const previewToken = url.searchParams.get('preview') ?? undefined;
+
+  if (!preview && !previewToken) {
+    setHeaders({ 'cache-control': 'public, max-age=120, stale-while-revalidate=600' });
+  } else if (previewToken) {
+    setHeaders({ 'cache-control': 'private, no-store' });
+  }
+
+  const ifNoneMatch = previewToken ? undefined : (request.headers.get('if-none-match') ?? undefined);
 
   let res;
   try {
     const [articleRes, tagsRes, articleAd1Res, articleAd2Res, articleAd3Res, curhatanRes, eventsRes] = await Promise.allSettled([
-      getArticle(id, params.slug, ifNoneMatch),
+      getArticle(id, params.slug, ifNoneMatch, previewToken),
       getPopularTags(15),
       getAd('article_ad_1', preview),
       getAd('article_ad_2', preview),
@@ -36,7 +45,8 @@ export const load: PageServerLoad = async ({ params, request, setHeaders, url })
     res = articleRes.value;
 
     if ((res as any).redirect) {
-      throw redirect(301, `/article/${id}/${res.data?.slug ?? params.slug}`);
+      const suffix = previewToken ? `?preview=${encodeURIComponent(previewToken)}` : '';
+      throw redirect(301, `/article/${id}/${res.data?.slug ?? params.slug}${suffix}`);
     }
 
     return {
@@ -50,6 +60,7 @@ export const load: PageServerLoad = async ({ params, request, setHeaders, url })
       adAfterContent: articleAd3Res.status === 'fulfilled' ? (articleAd3Res.value?.data ?? null) : null,
       promoCurhatan: curhatanRes.status === 'fulfilled' ? curhatanRes.value.data : [],
       upcomingEvents: eventsRes.status === 'fulfilled' ? eventsRes.value.data : [],
+      isPreview: Boolean(previewToken),
     };
   } catch (e: any) {
     if (e.status === 301 || e.status === 302) throw e;
