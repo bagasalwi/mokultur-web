@@ -54,7 +54,6 @@
   <title>{pageTitle}</title>
   <meta name="description" content={highlights ? `${description} Termasuk ${highlights}.` : description} />
   <link rel="canonical" href={canonical} />
-  <meta name="robots" content="index, follow" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content={pageTitle} />
   <meta property="og:description" content={description} />
