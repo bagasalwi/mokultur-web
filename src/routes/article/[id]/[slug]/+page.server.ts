@@ -19,7 +19,9 @@ export const load: PageServerLoad = async ({ params, request, setHeaders, url })
   if (!preview && !previewToken) {
     setHeaders({ 'cache-control': 'public, max-age=120, stale-while-revalidate=600' });
   } else if (previewToken) {
-    setHeaders({ 'cache-control': 'private, no-store' });
+    // The API marks the JSON noindex; the rendered page needs saying too, or a
+    // shared preview link is indexable even though the article is unpublished.
+    setHeaders({ 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex, nofollow' });
   }
 
   const ifNoneMatch = previewToken ? undefined : (request.headers.get('if-none-match') ?? undefined);
