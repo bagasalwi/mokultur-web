@@ -32,6 +32,10 @@
 <style>
   .reel {
     display: block;
+    /* The grid gives a lone or sparse set of reels the whole row via
+       auto-fit; without a cap here a single reel would stretch edge to edge
+       at a 9:16 ratio and tower over everything else on the page. */
+    max-width: 190px;
     text-decoration: none;
     color: inherit;
   }

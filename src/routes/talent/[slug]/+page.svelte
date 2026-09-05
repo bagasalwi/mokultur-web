@@ -2,6 +2,7 @@
   import type { PageData } from './$types';
   import { absoluteUrl, buildPageTitle, buildBreadcrumb } from '$lib/seo';
   import { PUBLIC_API_URL } from '$env/static/public';
+  import type { TalentWork } from '$lib/api';
   import { collabLink, formatCount } from '$lib/talent';
   import ShareButtons from '$components/common/ShareButtons.svelte';
   import TalentBadges from '$components/talent/TalentBadges.svelte';
@@ -15,6 +16,13 @@
   $: pageTitle = buildPageTitle(talent.alias, siteName);
   $: description = talent.tagline ?? talent.bioShort ?? `Profil ${talent.alias} di ${siteName}.`;
   $: collabUrl = collabLink(talent.contact?.url ?? null, talent.alias);
+  // A short bio that just repeats the alias carries no information — it reads
+  // as a stray fragment sitting between the name and the CTA row rather than a
+  // bio. Anything else the talent actually wrote still renders.
+  $: bioShort =
+    talent.bioShort && talent.bioShort.trim().toLowerCase() !== talent.alias.trim().toLowerCase()
+      ? talent.bioShort
+      : null;
   $: shareImageUrl = `${PUBLIC_API_URL}/api/talents/${encodeURIComponent(talent.slug)}/share.png`;
   // Downloaded from this origin so the `download` attribute is honoured; the
   // API URL is still what social scrapers get for og:image.
@@ -114,8 +122,8 @@
             </div>
           </div>
 
-          {#if talent.bioShort}
-            <p class="creator-profile-description talent-bio mt-4 mb-0">{talent.bioShort}</p>
+          {#if bioShort}
+            <p class="creator-profile-description talent-bio mt-4 mb-0">{bioShort}</p>
           {/if}
 
           <div class="d-flex flex-wrap align-items-center gap-2 mt-4">
@@ -155,8 +163,13 @@
         {#if talent.collabReels.length}
           <section class="creator-profile-section card border-0">
             <div class="card-body p-4">
-              <p class="creator-profile-section__eyebrow badge badge-main mb-1">Latest Work</p>
-              <h2 class="creator-profile-section__title mb-4">Talent's Latest Work</h2>
+              <!-- Renamed from "Latest Work" / "Talent's Latest Work": that read
+                   as a near-duplicate of the Portfolio section's "Latest Works"
+                   directly below it, for what is actually the Instagram reels.
+                   "Kolaborasi" echoes the "3 Kolaborasi" badge already in the
+                   hero, so the vocabulary agrees across the page. -->
+              <p class="creator-profile-section__eyebrow badge badge-main mb-1">Kolaborasi</p>
+              <h2 class="creator-profile-section__title mb-4">Latest Reels</h2>
 
               <div class="reels-grid">
                 {#each talent.collabReels as reel (reel.url)}
@@ -173,26 +186,37 @@
               <p class="creator-profile-section__eyebrow badge badge-main mb-1">Portfolio</p>
               <h2 class="creator-profile-section__title mb-4">Latest Works</h2>
 
+              <!-- The whole tile is the link, not just the title text: a thumbnail
+                   and description that look clickable but aren't is the more
+                   common failure than the reverse. `{#snippet}` keeps the linked
+                   and unlinked markup identical rather than maintained twice. -->
+              {#snippet workCardBody(work: TalentWork)}
+                {#if work.thumbnail}
+                  <img class="work-card__thumb" src={work.thumbnail} alt={work.title} loading="lazy" />
+                {/if}
+                <div class="work-card__body">
+                  <h3 class="work-card__title">{work.title}</h3>
+                  <p class="work-card__meta">
+                    {[work.client, work.type, formatDate(work.publishedAt)].filter(Boolean).join(' · ')}
+                  </p>
+                  {#if work.description}<p class="work-card__desc">{work.description}</p>{/if}
+                </div>
+                {#if work.url}
+                  <span class="work-card__out" aria-hidden="true"><i class="bi bi-box-arrow-up-right"></i></span>
+                {/if}
+              {/snippet}
+
               <div class="works-grid">
                 {#each talent.works as work (work.slug)}
-                  <article class="work-card">
-                    {#if work.thumbnail}
-                      <img class="work-card__thumb" src={work.thumbnail} alt={work.title} loading="lazy" />
-                    {/if}
-                    <div class="work-card__body">
-                      <h3 class="work-card__title">
-                        {#if work.url}
-                          <a href={work.url} target="_blank" rel="noopener">{work.title}</a>
-                        {:else}
-                          {work.title}
-                        {/if}
-                      </h3>
-                      <p class="work-card__meta">
-                        {[work.client, work.type, formatDate(work.publishedAt)].filter(Boolean).join(' · ')}
-                      </p>
-                      {#if work.description}<p class="work-card__desc">{work.description}</p>{/if}
-                    </div>
-                  </article>
+                  {#if work.url}
+                    <a class="work-card" href={work.url} target="_blank" rel="noopener">
+                      {@render workCardBody(work)}
+                    </a>
+                  {:else}
+                    <article class="work-card">
+                      {@render workCardBody(work)}
+                    </article>
+                  {/if}
                 {/each}
               </div>
             </div>
@@ -233,7 +257,14 @@
                     <div class="creator-achievement__icon"><i class="bi bi-trophy-fill"></i></div>
                     <div>
                       <strong class="d-block">{a.title}</strong>
-                      <span class="small text-muted">{a.description ?? a.year}</span>
+                      <!-- `??` let an empty-string description slip past, and a
+                           year of 0 (an unset value in the dashboard, not a real
+                           achievement year) would have rendered as the literal
+                           text "0". Both are falsy, so `||` catches them, and the
+                           line is skipped entirely rather than left blank. -->
+                      {#if a.description || a.year}
+                        <span class="small text-muted">{a.description || a.year}</span>
+                      {/if}
                     </div>
                   </div>
                 {/each}
@@ -353,28 +384,62 @@
     background: linear-gradient(180deg, var(--talent-color, #f1ff32) 0%, rgba(255, 255, 255, 0.65) 100%);
   }
 
+  /*
+   * `auto-fit` rather than `auto-fill`: with a fixed or auto-fill track count,
+   * a section with fewer items than the grid reserves columns for a talent
+   * with 3 reels or a single work leaves a dead, unreserved-looking gap the
+   * width of the missing cards. auto-fit collapses those empty tracks and lets
+   * the real cards fill the row, and a max-width on the card stops that same
+   * mechanism from stretching a lone item to the full column width.
+   */
   .reels-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 1rem;
   }
 
   .works-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1rem;
   }
 
   .work-card {
+    position: relative;
+    display: block;
+    max-width: 380px;
     border: 1px solid var(--bs-border-color, #dee2e6);
     border-radius: 0.75rem;
     overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    background: #fff;
+    transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 220ms ease, border-color 220ms ease;
+  }
+
+  /* Only anchors are actually clickable — a work with no url stays an
+     <article> and never receives this affordance. */
+  a.work-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+    border-color: color-mix(in srgb, var(--site-accent, #55ad9b) 45%, transparent);
+  }
+
+  a.work-card:hover .work-card__thumb {
+    transform: scale(1.04);
+  }
+
+  a.work-card:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--site-primary, #f1ff32) 46%, transparent);
+    outline-offset: 3px;
   }
 
   .work-card__thumb {
+    display: block;
     width: 100%;
     aspect-ratio: 16 / 9;
     object-fit: cover;
+    transition: transform 250ms ease;
   }
 
   .work-card__body {
@@ -385,15 +450,6 @@
     margin: 0;
     font-size: 0.95rem;
     font-weight: 700;
-  }
-
-  .work-card__title :global(a) {
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .work-card__title :global(a:hover) {
-    color: var(--site-accent, #55ad9b);
   }
 
   .work-card__meta {
@@ -407,10 +463,38 @@
     font-size: 0.83rem;
   }
 
+  /* Same fade-in-on-hover affordance as .social-link__out, so the two "this
+     leaves the site" signals on this page read as one idiom. */
+  .work-card__out {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(10, 10, 10, 0.65);
+    color: #fff;
+    font-size: 0.78rem;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  a.work-card:hover .work-card__out,
+  a.work-card:focus-visible .work-card__out {
+    opacity: 1;
+  }
+
   .gallery-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 1rem;
+  }
+
+  .gallery-grid > figure {
+    max-width: 220px;
   }
 
   .gallery-grid img {
@@ -514,15 +598,4 @@
     opacity: 1;
   }
 
-  @media (max-width: 991.98px) {
-    .reels-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-
-  @media (max-width: 575.98px) {
-    .reels-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
 </style>
