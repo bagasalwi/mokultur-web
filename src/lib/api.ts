@@ -300,9 +300,11 @@ export interface AdItem {
   slot: string;
 }
 
-export function getAd(slot: string, preview = false): Promise<{ data: AdItem } | null> {
+export function getAd(slot: string, preview = false): Promise<{ data: AdItem | null } | null> {
   const url = preview ? `/api/ads/slot/${slot}?preview_ads=true` : `/api/ads/slot/${slot}`;
-  return apiFetch<{ data: AdItem }>(url).catch(() => null);
+  // An empty slot now answers 200 with data:null; the catch stays for genuine
+  // transport failures.
+  return apiFetch<{ data: AdItem | null }>(url).catch(() => null);
 }
 
 // ── Curhatan ──────────────────────────────────────────────────────────────
