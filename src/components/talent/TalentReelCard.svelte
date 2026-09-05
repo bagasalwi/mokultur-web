@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { TalentReel } from '$lib/api';
-  import { formatCount } from '$lib/talent';
 
   export let reel: TalentReel;
 </script>
@@ -18,10 +17,6 @@
         <span class="reel__placeholder-text">Lihat di Instagram</span>
       </span>
     {/if}
-
-    {#if reel.viewCount > 0}
-      <span class="reel__views"><i class="bi bi-play-fill"></i> {formatCount(reel.viewCount)}</span>
-    {/if}
   </div>
 
   {#if reel.title}
@@ -32,10 +27,10 @@
 <style>
   .reel {
     display: block;
-    /* The grid gives a lone or sparse set of reels the whole row via
-       auto-fit; without a cap here a single reel would stretch edge to edge
-       at a 9:16 ratio and tower over everything else on the page. */
-    max-width: 190px;
+    /* The rail sizes cards from this, not from a track: flex-basis auto plus
+       a cap keeps every reel the same width whether there are two or twelve. */
+    width: 210px;
+    max-width: 210px;
     text-decoration: none;
     color: inherit;
   }
@@ -81,26 +76,14 @@
     letter-spacing: 0.02em;
   }
 
-  .reel__views {
-    position: absolute;
-    left: 0.5rem;
-    bottom: 0.5rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.15rem;
-    padding: 0.15rem 0.5rem;
-    border-radius: 999px;
-    background: rgba(0, 0, 0, 0.75);
-    color: #fff;
-    font-size: 0.72rem;
-    font-weight: 800;
-  }
-
   .reel__title {
-    margin: 0.5rem 0 0;
-    font-size: 0.82rem;
-    font-weight: 700;
-    line-height: 1.35;
+    /* Was 0.82rem/700 — caption-sized. Reads as a title now, in the same
+       family as .article-title on the rest of the site. */
+    margin: 0.55rem 0 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1.3;
+    color: #0a0a0a;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     line-clamp: 2;

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import type { PageData } from './$types';
   import { absoluteUrl, buildPageTitle, buildBreadcrumb } from '$lib/seo';
   import { PUBLIC_API_URL } from '$env/static/public';
@@ -54,6 +55,45 @@
       ? ''
       : d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
   }
+
+  // ── Reels rail ────────────────────────────────────────────────────────────
+  let reelsRail: HTMLDivElement | undefined;
+  let reelsOverflowing = false;
+
+  function measureReels() {
+    // Buttons only earn their place when there is something to scroll to.
+    reelsOverflowing = !!reelsRail && reelsRail.scrollWidth > reelsRail.clientWidth + 4;
+  }
+
+  function slideReels(direction: 1 | -1) {
+    if (!reelsRail) return;
+    // Roughly one viewport of cards, so a click never leaves a card half-shown.
+    const step = Math.max(reelsRail.clientWidth * 0.8, 220);
+    reelsRail.scrollBy({ left: direction * step, behavior: 'smooth' });
+  }
+
+  onMount(() => {
+    measureReels();
+    const observer = new ResizeObserver(measureReels);
+    if (reelsRail) observer.observe(reelsRail);
+    return () => observer.disconnect();
+  });
+
+  // ── Gallery lightbox ──────────────────────────────────────────────────────
+  let lightboxIndex: number | null = null;
+  $: lightboxImage = lightboxIndex === null ? null : talent.gallery[lightboxIndex] ?? null;
+
+  // Same scroll lock the article lightbox uses. Guarded on `document` so SSR,
+  // which renders this module too, does not touch a browser global.
+  $: if (typeof document !== 'undefined') {
+    document.body.style.overflow = lightboxImage ? 'hidden' : '';
+  }
+
+  onMount(() => () => {
+    // A client-side navigation away while the lightbox is open would otherwise
+    // leave the page unscrollable.
+    document.body.style.overflow = '';
+  });
 </script>
 
 <svelte:head>
@@ -89,6 +129,18 @@
     ])
   )}<\/script>`}
 </svelte:head>
+
+<svelte:window
+  on:keydown={(event) => {
+    // Captured once: TypeScript cannot narrow a mutable outer binding inside a
+    // closure, and the arithmetic below needs it to be a number.
+    const current = lightboxIndex;
+    if (current === null) return;
+    if (event.key === 'Escape') lightboxIndex = null;
+    if (event.key === 'ArrowRight') lightboxIndex = (current + 1) % talent.gallery.length;
+    if (event.key === 'ArrowLeft') lightboxIndex = (current - 1 + talent.gallery.length) % talent.gallery.length;
+  }}
+/>
 
 <section
   class="section-top container-xl creator-profile-page talent-profile"
@@ -146,7 +198,7 @@
 
         <div class="col-12 col-lg-4">
           <div class="creator-profile-highlight">
-            <span class="creator-profile-highlight__label badge badge-main">Talent Snapshot</span>
+            <span class="creator-profile-highlight__label badge badge-main">Featured</span>
             <div class="creator-profile-highlight__value">
               {formatCount(talent.instagram?.followers ?? 0)}
             </div>
@@ -168,10 +220,24 @@
                    directly below it, for what is actually the Instagram reels.
                    "Kolaborasi" echoes the "3 Kolaborasi" badge already in the
                    hero, so the vocabulary agrees across the page. -->
-              <p class="creator-profile-section__eyebrow badge badge-main mb-1">Kolaborasi</p>
-              <h2 class="creator-profile-section__title mb-4">Latest Reels</h2>
+              <div class="d-flex align-items-start justify-content-between gap-3 mb-4">
+                <div>
+                  <p class="creator-profile-section__eyebrow badge badge-main mb-1">Kolaborasi</p>
+                  <h2 class="creator-profile-section__title mb-0">Latest Reels</h2>
+                </div>
+                <!-- A mouse cannot swipe, so desktop gets buttons. Hidden when the
+                     row fits and on touch, where the swipe is the better gesture. -->
+                <div class="reels-nav" class:reels-nav--shown={reelsOverflowing}>
+                  <button type="button" class="reels-nav__btn" on:click={() => slideReels(-1)} aria-label="Geser ke kiri">
+                    <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                  </button>
+                  <button type="button" class="reels-nav__btn" on:click={() => slideReels(1)} aria-label="Geser ke kanan">
+                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </div>
 
-              <div class="reels-grid">
+              <div class="reels-rail" bind:this={reelsRail}>
                 {#each talent.collabReels as reel (reel.url)}
                   <TalentReelCard {reel} />
                 {/each}
@@ -229,12 +295,25 @@
               <p class="creator-profile-section__eyebrow badge badge-main mb-1">Galeri</p>
               <h2 class="creator-profile-section__title mb-4">Potret {talent.alias}</h2>
 
+              <!-- Editorial rather than a uniform contact sheet: the first frame
+                   takes a 2×2 tile and the rest fill around it, so four photos
+                   read as a composition instead of a row of thumbnails. -->
               <div class="gallery-grid">
-                {#each talent.gallery as img (img.slug)}
-                  <figure class="mb-0">
+                {#each talent.gallery as img, i (img.slug)}
+                  <button
+                    type="button"
+                    class="gallery-tile"
+                    class:gallery-tile--lead={i === 0}
+                    on:click={() => (lightboxIndex = i)}
+                  >
                     <img src={img.url} alt={img.caption} loading="lazy" decoding="async" />
-                    <figcaption class="small text-muted mt-1">{img.caption}</figcaption>
-                  </figure>
+                    <span class="gallery-tile__veil"></span>
+                    <span class="gallery-tile__caption">
+                      {img.caption}
+                      {#if img.year}<span class="gallery-tile__year">{img.year}</span>{/if}
+                    </span>
+                    <span class="gallery-tile__zoom" aria-hidden="true"><i class="bi bi-arrows-angle-expand"></i></span>
+                  </button>
                 {/each}
               </div>
             </div>
@@ -353,6 +432,64 @@
   </div>
 </section>
 
+<!--
+  Reuses the global .fb-lightbox styling the article body already ships, so both
+  lightboxes look identical. The article's own is driven by DOM data attributes
+  and delegation from .bodyArticle; this page has reactive data instead, so it
+  drives the same markup from state rather than reaching into that mechanism.
+-->
+{#if lightboxImage}
+  <!-- Backdrop click is a convenience on top of Escape, which the window
+       handler above already provides — so keyboard users are not relying on
+       this element. -->
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <div
+    class="fb-lightbox active"
+    role="dialog"
+    aria-modal="true"
+    aria-label={lightboxImage.caption}
+    on:click={(event) => {
+      if (event.target === event.currentTarget) lightboxIndex = null;
+    }}
+    tabindex="-1"
+  >
+    <button class="fb-lightbox-close" type="button" aria-label="Tutup" on:click={() => (lightboxIndex = null)}>&times;</button>
+
+    <div class="fb-lightbox-img-wrap">
+      {#if talent.gallery.length > 1}
+        <button
+          class="fb-lightbox-nav fb-lightbox-prev"
+          type="button"
+          aria-label="Sebelumnya"
+          on:click={() => (lightboxIndex = ((lightboxIndex ?? 0) - 1 + talent.gallery.length) % talent.gallery.length)}
+        >
+          <i class="bi bi-chevron-left"></i>
+        </button>
+      {/if}
+
+      <img src={lightboxImage.url} alt={lightboxImage.caption} />
+
+      {#if talent.gallery.length > 1}
+        <button
+          class="fb-lightbox-nav fb-lightbox-next"
+          type="button"
+          aria-label="Berikutnya"
+          on:click={() => (lightboxIndex = ((lightboxIndex ?? 0) + 1) % talent.gallery.length)}
+        >
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      {/if}
+    </div>
+
+    <div class="fb-lightbox-footer">
+      <div class="fb-lightbox-caption">{lightboxImage.caption}</div>
+      {#if talent.gallery.length > 1}
+        <div class="fb-lightbox-counter">{(lightboxIndex ?? 0) + 1} / {talent.gallery.length}</div>
+      {/if}
+    </div>
+  </div>
+{/if}
+
 <style>
   /* Portrait behind the hero, veiled rather than blurred. */
   .talent-backdrop {
@@ -385,17 +522,69 @@
   }
 
   /*
-   * `auto-fit` rather than `auto-fill`: with a fixed or auto-fill track count,
-   * a section with fewer items than the grid reserves columns for a talent
-   * with 3 reels or a single work leaves a dead, unreserved-looking gap the
-   * width of the missing cards. auto-fit collapses those empty tracks and lets
-   * the real cards fill the row, and a max-width on the card stops that same
-   * mechanism from stretching a lone item to the full column width.
+   * A rail rather than a grid. Reels are a feed — a talent may have twelve —
+   * and wrapping them into rows pushed the rest of the profile down. Same
+   * horizontal-scroll idiom the site already uses in .article-scroll-grid and
+   * the home ReelsSection: snap points, no visible scrollbar.
    */
-  .reels-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  .reels-rail {
+    display: flex;
+    flex-wrap: nowrap;
     gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    /* Room for the card's hover lift, which would otherwise be clipped by the
+       scroll container. */
+    padding-bottom: 0.35rem;
+  }
+
+  .reels-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .reels-rail > :global(.reel) {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+
+  .reels-nav {
+    display: none;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+
+  /* Shown once the rail actually overflows, and only from lg up — the same
+     breakpoint the page's own two-column split uses. Below it the row is
+     swiped, which is the better gesture there and needs no chrome. */
+  @media (min-width: 992px) {
+    .reels-nav--shown {
+      display: flex;
+    }
+  }
+
+  .reels-nav__btn {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    background: #fff;
+    color: #0a0a0a;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .reels-nav__btn:hover {
+    background: #f4f5f7;
+    border-color: color-mix(in srgb, var(--site-accent, #55ad9b) 45%, transparent);
+  }
+
+  .reels-nav__btn:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--site-primary, #f1ff32) 46%, transparent);
+    outline-offset: 3px;
   }
 
   .works-grid {
@@ -487,21 +676,130 @@
     opacity: 1;
   }
 
+  /*
+   * The first frame takes a 2x2 tile and the rest fill in around it, so a
+   * handful of photos reads as a composition rather than a contact sheet.
+   * `dense` lets later small tiles backfill any hole the lead leaves.
+   */
   .gallery-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: dense;
+    gap: 0.6rem;
   }
 
-  .gallery-grid > figure {
-    max-width: 220px;
+  @media (min-width: 576px) {
+    .gallery-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    .gallery-tile--lead {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
   }
 
-  .gallery-grid img {
-    width: 100%;
+  .gallery-tile {
+    position: relative;
+    display: block;
+    padding: 0;
+    border: 0;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: #e9ecef;
+    cursor: zoom-in;
     aspect-ratio: 3 / 4;
+  }
+
+  .gallery-tile--lead {
+    aspect-ratio: 1 / 1;
+  }
+
+  .gallery-tile img {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    border-radius: 0.6rem;
+    display: block;
+    transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .gallery-tile:hover img,
+  .gallery-tile:focus-visible img {
+    transform: scale(1.06);
+  }
+
+  /* The caption sits on the photo instead of under it; the veil is what keeps
+     it legible over a bright frame. */
+  .gallery-tile__veil {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, rgba(10, 10, 10, 0.78) 0%, rgba(10, 10, 10, 0) 55%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .gallery-tile__caption {
+    position: absolute;
+    left: 0.65rem;
+    right: 0.65rem;
+    bottom: 0.6rem;
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.3;
+    text-align: left;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .gallery-tile__year {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  .gallery-tile__zoom {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.55rem;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(10, 10, 10, 0.6);
+    color: #fff;
+    font-size: 0.75rem;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .gallery-tile:hover .gallery-tile__veil,
+  .gallery-tile:focus-visible .gallery-tile__veil,
+  .gallery-tile:hover .gallery-tile__caption,
+  .gallery-tile:focus-visible .gallery-tile__caption,
+  .gallery-tile:hover .gallery-tile__zoom,
+  .gallery-tile:focus-visible .gallery-tile__zoom {
+    opacity: 1;
+    transform: none;
+  }
+
+  .gallery-tile:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--site-primary, #f1ff32) 46%, transparent);
+    outline-offset: 3px;
+  }
+
+  /* Touch has no hover, so the caption would never appear otherwise. */
+  @media (hover: none) {
+    .gallery-tile__veil,
+    .gallery-tile__caption {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   .rate-list {
