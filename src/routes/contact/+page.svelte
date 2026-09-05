@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PageData } from "./$types";
   import { absoluteUrl } from '$lib/seo';
+  import { timeAgo, imgFallback } from '$lib/format';
 
   export let data: PageData;
 
@@ -58,25 +59,7 @@
     { label: "Diskusi", desc: "lanjut bersama" },
   ];
 
-  function imgFallback(e: Event) {
-    (e.target as HTMLImageElement).src = "/images/noimage.png";
-  }
 
-  function timeAgo(d: string | null): string {
-    if (!d) return "";
-    const diff = Date.now() - new Date(d).getTime();
-    const days = Math.floor(diff / 86400000);
-    if (days === 0) return "Hari ini";
-    if (days === 1) return "Kemarin";
-    if (days < 7) return `${days} hari lalu`;
-    if (days < 30) return `${Math.floor(days / 7)} minggu lalu`;
-    if (days < 365) return `${Math.floor(days / 30)} bulan lalu`;
-    return new Date(d).toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  }
 </script>
 
 <svelte:head>

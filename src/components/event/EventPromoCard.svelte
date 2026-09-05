@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
   import type { EventItem } from '$lib/api';
   import { countdownLabel, formatDateRange, STATUS_LABELS } from '$lib/event';
+  import { imgFallback } from '$lib/format';
 
   export let events: EventItem[] = [];
 
@@ -41,9 +42,6 @@
   onMount(start);
   onDestroy(stop);
 
-  function imgFallback(e: Event) {
-    (e.target as HTMLImageElement).src = '/images/noimage.png';
-  }
 </script>
 
 {#if events.length > 0}

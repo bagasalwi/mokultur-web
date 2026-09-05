@@ -2,6 +2,7 @@
   import type { EventItem } from '$lib/api';
   import { countdownLabel, formatDateRange, STATUS_LABELS } from '$lib/event';
   import { imgSrcset, imgUrl } from '$lib/img';
+  import { imgFallback } from '$lib/format';
 
   export let event: EventItem;
 
@@ -14,9 +15,6 @@
 
   $: posterSrcset = imgSrcset(event.poster, 300);
 
-  function imgFallback(e: Event) {
-    (e.target as HTMLImageElement).src = '/images/noimage.png';
-  }
 </script>
 
 <!-- Built from the same pieces as the homepage article card — card-hover, the

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { imgSrcset, imgUrl } from '$lib/img';
+  import { timeAgo, imgFallback } from '$lib/format';
   /**
    * The article card the homepage rows use.
    *
@@ -18,21 +19,7 @@
   export let publishDate: string | null = null;
   export let categoryName: string | null = null;
 
-  function timeAgo(d: string | null): string {
-    if (!d) return '';
-    const [year, month, day] = d.slice(0, 10).split('-').map(Number);
-    const diff = Date.now() - new Date(year, month - 1, day).getTime();
-    const days = Math.floor(diff / 86400000);
-    if (days === 0) return 'Hari ini';
-    if (days === 1) return 'Kemarin';
-    if (days < 7) return `${days} hari lalu`;
-    if (days < 30) return `${Math.floor(days / 7)} minggu lalu`;
-    return `${Math.floor(days / 30)} bulan lalu`;
-  }
 
-  function imgFallback(e: Event) {
-    (e.target as HTMLImageElement).src = '/images/noimage.png';
-  }
 
   // The card is ~300px at its widest (4-up inside a 1200px container).
   $: srcset = imgSrcset(image, 300);

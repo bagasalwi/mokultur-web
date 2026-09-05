@@ -1,6 +1,7 @@
 <script lang="ts">
   import { imgSrcset, imgUrl } from '$lib/img';
   import type { ArticleListItem } from '$lib/api';
+  import { timeAgo, imgFallback } from '$lib/format';
 
   export let article: ArticleListItem;
   export let variant: 'vertical' | 'horizontal' | 'minimal' | 'compact'
@@ -12,24 +13,9 @@
     return new Date(year, month - 1, day).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
-  function timeAgo(d: string | null): string {
-    if (!d) return '';
-    const [year, month, day] = d.slice(0, 10).split('-').map(Number);
-    const diff = Date.now() - new Date(year, month - 1, day).getTime();
-    const days = Math.floor(diff / 86400000);
-    if (days === 0) return 'Hari ini';
-    if (days === 1) return 'Kemarin';
-    if (days < 7) return `${days} hari lalu`;
-    if (days < 30) return `${Math.floor(days / 7)} minggu lalu`;
-    if (days < 365) return `${Math.floor(days / 30)} bulan lalu`;
-    return formatDate(d);
-  }
 
   $: href = `/article/${article.id}/${article.slug}`;
 
-  function imgFallback(e: Event) {
-    (e.target as HTMLImageElement).src = '/images/noimage.png';
-  }
 </script>
 
 {#if variant === 'horizontal'}

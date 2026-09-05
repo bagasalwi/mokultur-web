@@ -4,6 +4,7 @@
   import ArticleCard from '$components/articles/ArticleCard.svelte';
   import Pagination from '$components/common/Pagination.svelte';
   import { absoluteUrl, buildBreadcrumb } from '$lib/seo';
+  import { timeAgo } from '$lib/format';
 
   export let data: PageData;
 
@@ -25,17 +26,6 @@
     return new Date(d).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
   }
 
-  function timeAgo(d: string | null): string {
-    if (!d) return 'Belum ada';
-    const diff = Date.now() - new Date(d).getTime();
-    const days = Math.floor(diff / 86400000);
-    if (days === 0) return 'Hari ini';
-    if (days === 1) return 'Kemarin';
-    if (days < 7) return `${days} hari lalu`;
-    if (days < 30) return `${Math.floor(days / 7)} minggu lalu`;
-    if (days < 365) return `${Math.floor(days / 30)} bulan lalu`;
-    return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-  }
 
   function fmt(n: number): string {
     return n.toLocaleString('id-ID');

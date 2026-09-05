@@ -2,6 +2,7 @@
   import { imgSrcset, imgUrl } from '$lib/img';
   import type { ArticleListItem } from '$lib/api';
   import HeroCinematic from './HeroCinematic.svelte';
+  import { timeAgo, imgFallback as onErr } from '$lib/format';
 
   export let articles: ArticleListItem[] = [];
   export let type: string = 'cinematic';
@@ -12,20 +13,8 @@
   $: main = articles[0] ?? null;
   $: rest = articles.slice(1);
 
-  function timeAgo(d: string | null): string {
-    if (!d) return '';
-    const [year, month, day] = d.slice(0, 10).split('-').map(Number);
-    const diff = Date.now() - new Date(year, month - 1, day).getTime();
-    const days = Math.floor(diff / 86400000);
-    if (days <= 0) return 'Hari ini';
-    if (days === 1) return 'Kemarin';
-    if (days < 7) return `${days} hari lalu`;
-    if (days < 30) return `${Math.floor(days / 7)} minggu lalu`;
-    return `${Math.floor(days / 30)} bulan lalu`;
-  }
   const img = (a: ArticleListItem) => a.image ?? '/images/noimage.png';
   const href = (a: ArticleListItem) => `/article/${a.id}/${a.slug}`;
-  function onErr(e: Event) { (e.target as HTMLImageElement).src = '/images/noimage.png'; }
 </script>
 
 {#if variant === 'cinematic'}

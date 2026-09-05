@@ -12,6 +12,7 @@
   import { PUBLIC_API_URL } from "$env/static/public";
   import { enhance } from "$app/forms";
   import { page } from "$app/stores";
+  import { imgSrcset, imgUrl } from '$lib/img';
 
   export let data: PageData;
 
@@ -285,7 +286,9 @@
         <div class="col-12 col-lg-5 article-detail__hero-media">
           <figure class="article-hero-figure mb-0">
             <img
-              src={a.image}
+              src={imgUrl(a.image, 1080) ?? a.image}
+              srcset={imgSrcset(a.image, 480)}
+              sizes="(max-width: 991px) 100vw, 480px"
               alt={a.title}
               class="article-hero-img w-100"
               fetchpriority="high"

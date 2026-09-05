@@ -1,26 +1,13 @@
 <script lang="ts">
   import type { ArticleListItem } from '$lib/api';
+  import { timeAgo, imgFallback } from '$lib/format';
 
   export let articles: ArticleListItem[] = [];
 
   $: main = articles[0] ?? null;
   $: secondaries = articles.slice(1, 5);
 
-  function timeAgo(d: string | null): string {
-    if (!d) return '';
-    const [year, month, day] = d.slice(0, 10).split('-').map(Number);
-    const diff = Date.now() - new Date(year, month - 1, day).getTime();
-    const days = Math.floor(diff / 86400000);
-    if (days === 0) return 'Hari ini';
-    if (days === 1) return 'Kemarin';
-    if (days < 7) return `${days} hari lalu`;
-    if (days < 30) return `${Math.floor(days / 7)} minggu lalu`;
-    return `${Math.floor(days / 30)} bulan lalu`;
-  }
 
-  function imgFallback(e: Event) {
-    (e.target as HTMLImageElement).src = '/images/noimage.png';
-  }
 </script>
 
 <section class="home-collab-card anime-hero-full">

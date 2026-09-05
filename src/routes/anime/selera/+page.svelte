@@ -8,6 +8,7 @@
   import { animeSlug } from '$lib/anime';
   import { imgSrcset, imgUrl } from '$lib/img';
   import ShareSheet from '$components/common/ShareSheet.svelte';
+  import { imgFallback } from '$lib/format';
 
   export let data: PageData;
 
@@ -141,9 +142,6 @@
     goto('/anime/selera');
   }
 
-  function imgFallback(e: Event) {
-    (e.target as HTMLImageElement).src = '/images/noimage.png';
-  }
 
   /**
    * The AI copy is layered on top of a result that already works.

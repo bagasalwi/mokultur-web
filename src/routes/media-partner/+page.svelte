@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import { absoluteUrl } from '$lib/seo';
+  import { imgFallback } from '$lib/format';
 
   export let data: PageData;
 
@@ -8,9 +9,6 @@
   $: email = data.settings?.contact_email ?? null;
   $: mailUrl = email ? `mailto:${email}` : null;
 
-  function imgFallback(e: Event) {
-    (e.target as HTMLImageElement).src = '/images/noimage.png';
-  }
 </script>
 
 <svelte:head>

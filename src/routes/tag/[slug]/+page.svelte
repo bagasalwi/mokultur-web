@@ -2,6 +2,8 @@
   import type { PageData } from './$types';
   import Pagination from '$components/common/Pagination.svelte';
   import { absoluteUrl, buildBreadcrumb } from '$lib/seo';
+  import { timeAgo, imgFallback } from '$lib/format';
+  import { imgUrl } from '$lib/img';
 
   export let data: PageData;
 
@@ -15,22 +17,7 @@
     return `/tag/${data.tag.slug}?page=${page}`;
   }
 
-  function timeAgo(d: string | null): string {
-    if (!d) return '';
-    const [year, month, day] = d.slice(0, 10).split('-').map(Number);
-    const diff = Date.now() - new Date(year, month - 1, day).getTime();
-    const days = Math.floor(diff / 86400000);
-    if (days === 0) return 'Hari ini';
-    if (days === 1) return 'Kemarin';
-    if (days < 7) return `${days} hari lalu`;
-    if (days < 30) return `${Math.floor(days / 7)} minggu lalu`;
-    if (days < 365) return `${Math.floor(days / 30)} bulan lalu`;
-    return new Date(year, month - 1, day).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-  }
 
-  function imgFallback(e: Event) {
-    (e.target as HTMLImageElement).src = '/images/noimage.png';
-  }
 </script>
 
 <svelte:head>
@@ -118,7 +105,7 @@
               <a href="/article/{lead.id}/{lead.slug}" class="archive-feature-card__media d-block text-decoration-none">
                 <div>
                   <img
-                    src={lead.image ?? '/images/noimage.png'}
+                    src={imgUrl(lead.image, 1080) ?? '/images/noimage.png'}
                     alt={lead.title}
                     loading="eager"
                     decoding="async"
@@ -152,7 +139,7 @@
                       <div class="article-card">
                         <div class="article-card-img">
                           <img
-                            src={item.image ?? '/images/noimage.png'}
+                            src={imgUrl(item.image, 480) ?? '/images/noimage.png'}
                             alt={item.title}
                             loading="lazy"
                             decoding="async"
@@ -188,7 +175,7 @@
                       <div class="article-card">
                         <div class="article-card-img">
                           <img
-                            src={item.image ?? '/images/noimage.png'}
+                            src={imgUrl(item.image, 480) ?? '/images/noimage.png'}
                             alt={item.title}
                             loading="lazy"
                             decoding="async"
@@ -226,7 +213,7 @@
                       <div class="article-card">
                         <div class="article-card-img">
                           <img
-                            src={item.image ?? '/images/noimage.png'}
+                            src={imgUrl(item.image, 480) ?? '/images/noimage.png'}
                             alt={item.title}
                             loading="lazy"
                             decoding="async"
@@ -277,7 +264,7 @@
                 <a href="/article/{item.id}/{item.slug}" class="archive-sidebar-card__item text-decoration-none">
                   <div class="archive-sidebar-card__image">
                     <img
-                      src={item.image ?? '/images/noimage.png'}
+                      src={imgUrl(item.image, 480) ?? '/images/noimage.png'}
                       alt={item.title}
                       loading="lazy"
                       decoding="async"

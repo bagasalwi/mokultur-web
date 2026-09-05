@@ -3,6 +3,7 @@
   import { absoluteUrl, buildBreadcrumb, buildPageTitle } from '$lib/seo';
   import { animeSlug, seasonLabel } from '$lib/anime';
   import { imgSrcset, imgUrl } from '$lib/img';
+  import { imgFallback } from '$lib/format';
 
   export let data: PageData;
 
@@ -45,9 +46,6 @@
     })),
   };
 
-  function imgFallback(e: Event) {
-    (e.target as HTMLImageElement).src = '/images/noimage.png';
-  }
 </script>
 
 <svelte:head>

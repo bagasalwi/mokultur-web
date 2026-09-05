@@ -1,23 +1,12 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import Pagination from '$components/common/Pagination.svelte';
+  import { timeAgo } from '$lib/format';
 
   export let data: PageData;
 
   $: siteName = data.settings?.site_name ?? 'Mokultur';
 
-  function timeAgo(d: string | null): string {
-    if (!d) return 'Belum publish';
-    const [year, month, day] = d.slice(0, 10).split('-').map(Number);
-    const diff = Date.now() - new Date(year, month - 1, day).getTime();
-    const days = Math.floor(diff / 86400000);
-    if (days === 0) return 'Hari ini';
-    if (days === 1) return 'Kemarin';
-    if (days < 7) return `${days} hari lalu`;
-    if (days < 30) return `${Math.floor(days / 7)} minggu lalu`;
-    if (days < 365) return `${Math.floor(days / 30)} bulan lalu`;
-    return new Date(year, month - 1, day).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-  }
 
   function truncate(s: string | null, n: number): string {
     if (!s) return '';
@@ -102,7 +91,7 @@
                 <small class="text-muted"><i class="bi bi-eye me-1"></i>{writer.totalViews.toLocaleString('id-ID')}</small>
               </div>
               {#if writer.latestPublishDate}
-                <span class="home-writer-card__meta">Terakhir publish {timeAgo(writer.latestPublishDate)}</span>
+                <span class="home-writer-card__meta">Terakhir publish {timeAgo(writer.latestPublishDate, 'Belum publish')}</span>
               {/if}
             </div>
           </a>

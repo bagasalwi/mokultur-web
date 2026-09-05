@@ -1,5 +1,6 @@
 <script lang="ts">
   import { roleLabel } from '$lib/user';
+  import { timeAgo } from '$lib/format';
 
   export let data;
 
@@ -22,16 +23,6 @@
     return new Intl.NumberFormat('id-ID').format(n);
   }
 
-  function timeAgo(iso: string | null): string {
-    if (!iso) return '';
-    const diff = Date.now() - new Date(iso).getTime();
-    const days = Math.floor(diff / 86400000);
-    if (days === 0) return 'Hari ini';
-    if (days === 1) return 'Kemarin';
-    if (days < 30) return `${days} hari lalu`;
-    if (days < 365) return `${Math.floor(days / 30)} bulan lalu`;
-    return `${Math.floor(days / 365)} tahun lalu`;
-  }
 </script>
 
 <svelte:head>

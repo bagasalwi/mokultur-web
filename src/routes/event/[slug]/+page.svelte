@@ -5,6 +5,7 @@
   import { countdownLabel, formatDateRange, STATUS_LABELS } from '$lib/event';
   import ShareSheet from '$components/common/ShareSheet.svelte';
   import ArticleCard from '$components/common/ArticleCard.svelte';
+  import { imgFallback } from '$lib/format';
 
   export let data: PageData;
 
@@ -58,9 +59,6 @@
       : {}),
   };
 
-  function imgFallback(e: globalThis.Event) {
-    (e.target as HTMLImageElement).src = '/images/noimage.png';
-  }
 </script>
 
 <svelte:head>

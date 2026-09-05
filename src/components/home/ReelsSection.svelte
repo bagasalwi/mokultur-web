@@ -1,6 +1,7 @@
 <script lang="ts">
   import { imgSrcset, imgUrl } from '$lib/img';
   import type { IgProfile, Reel } from '$lib/api';
+  import { imgFallback } from '$lib/format';
 
   export let reels: Reel[] = [];
   export let profile: IgProfile | null = null;
@@ -23,9 +24,6 @@
     return caption.split('\n')[0];
   }
 
-  function imgFallback(e: Event) {
-    (e.target as HTMLImageElement).src = '/images/noimage.png';
-  }
 
   $: igUrl = profile ? `https://www.instagram.com/${profile.username}/` : 'https://www.instagram.com/';
 </script>

@@ -1,12 +1,10 @@
 <script lang="ts">
   import { imgSrcset, imgUrl } from '$lib/img';
   import type { Writer } from '$lib/api';
+  import { imgFallback } from '$lib/format';
 
   export let writers: Writer[] = [];
 
-  function imgFallback(e: Event) {
-    (e.target as HTMLImageElement).src = '/images/noimage.png';
-  }
 </script>
 
 {#if writers.length > 0}
