@@ -212,6 +212,14 @@ export interface SiteSettings {
   event_section_style: string | null;
   tech_section_style: string | null;
   navbar_style: string | null;
+  anime_enabled: boolean;
+  quiz_enabled: boolean;
+  event_enabled: boolean;
+  ai_chat_enabled: boolean;
+  ai_chat_title: string | null;
+  ai_chat_greeting: string | null;
+  ai_chat_placeholder: string | null;
+  ai_chat_suggestions: string | null;
   site_favicon: string | null;
   contact_email: string | null;
   contact_whatsapp: string | null;

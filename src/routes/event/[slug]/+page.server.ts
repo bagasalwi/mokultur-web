@@ -2,7 +2,11 @@ import type { PageServerLoad } from './$types';
 import { getEvent } from '$lib/api';
 import { error } from '@sveltejs/kit';
 
-export const load: PageServerLoad = async ({ params, setHeaders }) => {
+export const load: PageServerLoad = async ({ params, setHeaders, parent }) => {
+  // Disabled features are gone, not merely hidden: the route 404s.
+  const { settings } = await parent();
+  if (settings?.event_enabled === false) throw error(404, 'Event tidak tersedia.');
+
   /**
    * Not cached anywhere, unlike the talent pages this was modelled on.
    *

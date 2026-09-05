@@ -1,3 +1,4 @@
+import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { getAnimeTaste, type TasteAnswers } from '$lib/api';
 
@@ -9,7 +10,11 @@ function readAnswer(value: string | null): number {
   return Math.max(-1, Math.min(1, Math.round(n)));
 }
 
-export const load: PageServerLoad = async ({ url, setHeaders }) => {
+export const load: PageServerLoad = async ({ url, setHeaders, parent }) => {
+  // Disabled features are gone, not merely hidden: the route 404s.
+  const { settings } = await parent();
+  if (settings?.anime_enabled === false || settings?.quiz_enabled === false) throw error(404, 'Kuis tidak tersedia.');
+
   // A result is a function of its query string and nothing else, so it is safe
   // to cache — and sharing a result link is the point of the feature.
   setHeaders({ 'cache-control': 'public, max-age=600, stale-while-revalidate=3600' });

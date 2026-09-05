@@ -113,6 +113,7 @@
     <MokuThreadsPromo {siteName} threads={data.trendingThreads} />
   {/if}
 
+  {#if data.settings?.anime_enabled !== false}
   <section class="section-md py-4">
     <div class="container-xl">
       <div class="home-anime-row" class:home-anime-row--split={splitAnimeRow}>
@@ -128,14 +129,19 @@
 
         <!-- Sits with the anime rows rather than as a banner of its own: someone
              already browsing seasonal listings is exactly who the quiz is for. -->
-        <div class="home-anime-row__promo">
-          <TastePromoCard />
-        </div>
+        {#if data.settings?.quiz_enabled !== false}
+          <div class="home-anime-row__promo">
+            <TastePromoCard />
+          </div>
+        {/if}
       </div>
     </div>
   </section>
+  {/if}
 
-  <EventScheduleSection events={data.upcomingEvents} />
+  {#if data.settings?.event_enabled !== false}
+    <EventScheduleSection events={data.upcomingEvents} />
+  {/if}
 
   <EventSection
     title="Liputan & Press Release"

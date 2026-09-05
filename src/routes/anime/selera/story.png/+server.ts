@@ -1,6 +1,7 @@
 import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
 import { PUBLIC_API_URL } from '$env/static/public';
+import { getSettings } from '$lib/api';
 
 /**
  * Same-origin proxy for the Story card.
@@ -10,6 +11,10 @@ import { PUBLIC_API_URL } from '$env/static/public';
  * is the entire point of a card made for Instagram.
  */
 export const GET: RequestHandler = async ({ url, fetch, setHeaders }) => {
+  // Share cards belong to the feature; when it is off they go too.
+  const { data: settings } = await getSettings();
+  if (settings.anime_enabled === false || settings.quiz_enabled === false) throw error(404, 'Kuis tidak tersedia.');
+
   const upstream = new URL(`${PUBLIC_API_URL}/api/anime/taste/share.png`);
   for (const [k, v] of url.searchParams) upstream.searchParams.set(k, v);
 

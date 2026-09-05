@@ -2,11 +2,12 @@ import { error, json } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 import { getSiteFacts, searchArticles } from '$lib/chat/knowledge';
 import { createThinkStripper } from '$lib/chat/think-stripper';
+import { getAiSettings } from '$lib/server/ai-settings';
 import type { RequestHandler } from './$types';
 
 const MAX_MESSAGE_CHARS = 1000;
 const MAX_HISTORY = 10;
-const RATE_LIMIT = 20;
+const DEFAULT_RATE_LIMIT = 20;
 const RATE_WINDOW_MS = 5 * 60 * 1000;
 
 /** This endpoint is public and every call costs money, so cap it per IP. */
@@ -34,7 +35,7 @@ function clientIp(request: Request, fallback: () => string): string {
   return fallback();
 }
 
-function rateLimited(ip: string): boolean {
+function rateLimited(ip: string, limit: number): boolean {
   const now = Date.now();
   const recent = (hits.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
   recent.push(now);
@@ -46,10 +47,16 @@ function rateLimited(ip: string): boolean {
     }
   }
 
-  return recent.length > RATE_LIMIT;
+  return recent.length > limit;
 }
 
-function buildSystemPrompt(facts: string, articles: string): string {
+/**
+ * `persona` comes from the AI settings tab when an admin has written one. The
+ * data fences are appended either way — they are what keeps the model from
+ * inventing articles, so they are not the admin's to remove.
+ */
+function buildSystemPrompt(facts: string, articles: string, persona: string | null): string {
+  if (persona) return `${persona}\n\n=== DATA MOKULTUR ===\n${facts}\n\n${articles}\n=== AKHIR DATA ===`;
   return `Kamu adalah asisten resmi Mokultur — media yang membahas budaya pop: anime, manga, cosplay, game, teknologi, dan film.
 
 Tugasmu membantu pengunjung mengetahui seputar Mokultur.
@@ -78,7 +85,9 @@ export const POST: RequestHandler = async ({ request, getClientAddress }) => {
     throw error(503, 'Fitur chat belum dikonfigurasi.');
   }
 
-  if (rateLimited(clientIp(request, getClientAddress))) {
+  const ai = await getAiSettings(fetch);
+
+  if (rateLimited(clientIp(request, getClientAddress), ai.rateLimit ?? DEFAULT_RATE_LIMIT)) {
     return json({ error: 'Kebanyakan pesan. Coba lagi beberapa menit lagi ya.' }, { status: 429 });
   }
 
@@ -112,12 +121,12 @@ export const POST: RequestHandler = async ({ request, getClientAddress }) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: env.AI_MODEL,
+        model: ai.model ?? env.AI_MODEL,
         stream: true,
         // Reasoning tokens are drawn from this budget, so a small cap yields an empty answer.
-        max_tokens: 2048,
-        temperature: 0.3,
-        messages: [{ role: 'system', content: buildSystemPrompt(facts, articles) }, ...history],
+        max_tokens: ai.maxTokens ?? 2048,
+        temperature: ai.temperature ?? 0.3,
+        messages: [{ role: 'system', content: buildSystemPrompt(facts, articles, ai.systemPrompt) }, ...history],
       }),
       signal: AbortSignal.timeout(60_000),
     });

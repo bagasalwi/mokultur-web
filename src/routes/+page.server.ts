@@ -3,8 +3,12 @@ import { listArticles, getPopularTags, getPopularArticles, listWriters, getAd, l
 import { fetchTopThreads } from '$lib/threads';
 import { LOUNGE_ENABLED } from '$lib/features';
 
-export const load: PageServerLoad = async ({ setHeaders, url, fetch }) => {
+export const load: PageServerLoad = async ({ setHeaders, url, fetch, parent }) => {
   const preview = url.searchParams.get('preview_ads') === 'true';
+  // Settings already came down with the layout load, so this costs no request.
+  const { settings } = await parent();
+  const animeOn = settings?.anime_enabled !== false;
+  const eventOn = settings?.event_enabled !== false;
   if (!preview) setHeaders({ 'cache-control': 'public, max-age=60, stale-while-revalidate=300' });
 
   const [headlinesRes, latestRes, moreRes, tagsRes, popularRes, eventRes, writersRes, techRes, ad0Res, ad1Res, ad2Res, ad3Res, curhatanRes, threadsRes, reelsRes, seasonAnimeRes, airingRes, upcomingEventsRes] = await Promise.allSettled([
@@ -23,9 +27,9 @@ export const load: PageServerLoad = async ({ setHeaders, url, fetch }) => {
     listCurhatan({ perPage: 6 }),
     LOUNGE_ENABLED ? fetchTopThreads(fetch, 4) : Promise.resolve([]),
     listReels(),
-    getCurrentSeasonTop(8),
-    getAiringToday(),
-    listEvents('upcoming', 8),
+    animeOn ? getCurrentSeasonTop(8) : Promise.resolve(null),
+    animeOn ? getAiringToday() : Promise.resolve(null),
+    eventOn ? listEvents('upcoming', 8) : Promise.resolve(null),
   ]);
 
   const headlines = headlinesRes.status === 'fulfilled' ? headlinesRes.value.data : [];
@@ -52,11 +56,11 @@ export const load: PageServerLoad = async ({ setHeaders, url, fetch }) => {
     trendingThreads: threadsRes.status === 'fulfilled' ? threadsRes.value : [],
     reels: reelsRes.status === 'fulfilled' ? reelsRes.value.data : [],
     igProfile: reelsRes.status === 'fulfilled' ? reelsRes.value.profile : null,
-    seasonAnime: seasonAnimeRes.status === 'fulfilled' ? seasonAnimeRes.value.data : [],
-    animeSeason: seasonAnimeRes.status === 'fulfilled' ? seasonAnimeRes.value.season : null,
-    animeSeasonYear: seasonAnimeRes.status === 'fulfilled' ? seasonAnimeRes.value.year : null,
-    airingToday: airingRes.status === 'fulfilled' ? airingRes.value.data : [],
-    airingDay: airingRes.status === 'fulfilled' ? airingRes.value.day : null,
-    upcomingEvents: upcomingEventsRes.status === 'fulfilled' ? upcomingEventsRes.value.data : [],
+    seasonAnime: seasonAnimeRes.status === 'fulfilled' ? (seasonAnimeRes.value?.data ?? []) : [],
+    animeSeason: seasonAnimeRes.status === 'fulfilled' ? (seasonAnimeRes.value?.season ?? null) : null,
+    animeSeasonYear: seasonAnimeRes.status === 'fulfilled' ? (seasonAnimeRes.value?.year ?? null) : null,
+    airingToday: airingRes.status === 'fulfilled' ? (airingRes.value?.data ?? []) : [],
+    airingDay: airingRes.status === 'fulfilled' ? (airingRes.value?.day ?? null) : null,
+    upcomingEvents: upcomingEventsRes.status === 'fulfilled' ? (upcomingEventsRes.value?.data ?? []) : [],
   };
 };

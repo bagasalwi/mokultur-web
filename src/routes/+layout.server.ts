@@ -46,6 +46,26 @@ function applyPreview(settings: SiteSettings | null, url: URL): SiteSettings | n
   return preview ?? settings;
 }
 
+/**
+ * Menu entries whose destination a feature flag can switch off.
+ *
+ * The header carries "Anime" -> /anime and "Jadwal Event" -> /event as rows in
+ * mm_navbar, so turning a feature off without filtering here would leave the
+ * menu pointing at a 404. Matching on the target rather than the label keeps it
+ * working when an editor renames the entry.
+ */
+function navAllowed(settings: SiteSettings | null) {
+  const disabled: string[] = [];
+  if (settings && settings.anime_enabled === false) disabled.push('/anime');
+  if (settings && settings.event_enabled === false) disabled.push('/event');
+  if (!disabled.length) return null;
+
+  return (item: NavbarItem) => {
+    const target = `/${(item.navTarget ?? '').replace(/^\//, '')}`;
+    return !disabled.some((path) => target === path || target.startsWith(`${path}/`));
+  };
+}
+
 export const load: LayoutServerLoad = async ({ locals, url }) => {
   if (!_cache || Date.now() - _cacheAt >= CACHE_TTL) {
     const [settingsRes, categoriesRes, navHeaderRes, navFooterRes, socialsRes] = await Promise.allSettled([
@@ -69,5 +89,14 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
     _cacheAt = Date.now();
   }
 
-  return { ..._cache, settings: applyPreview(_cache.settings, url), user: locals.user };
+  const settings = applyPreview(_cache.settings, url);
+  const keep = navAllowed(settings);
+
+  return {
+    ..._cache,
+    settings,
+    navHeader: keep ? _cache.navHeader.filter(keep) : _cache.navHeader,
+    navFooter: keep ? _cache.navFooter.filter(keep) : _cache.navFooter,
+    user: locals.user,
+  };
 };

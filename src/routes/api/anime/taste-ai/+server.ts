@@ -1,6 +1,7 @@
 import { error, json } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 import type { RequestHandler } from './$types';
+import { getAiSettings } from '$lib/server/ai-settings';
 
 /**
  * Writes the personality read on a quiz result.
@@ -80,6 +81,8 @@ export const POST: RequestHandler = async ({ request, getClientAddress }) => {
     throw error(429, 'Terlalu banyak permintaan.');
   }
 
+  const ai = await getAiSettings(fetch);
+
   let body: {
     answers?: Record<string, number>;
     fallbackLabel?: string;
@@ -129,7 +132,7 @@ Aturan:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: env.AI_FAST_MODEL || env.AI_MODEL,
+        model: ai.fastModel ?? env.AI_FAST_MODEL ?? env.AI_MODEL,
         max_tokens: 900,
         temperature: 0.8,
         messages: [{ role: 'user', content: prompt }],

@@ -8,12 +8,26 @@
   }
 
   const STORAGE_KEY = 'mokultur_chat';
-  const SUGGESTIONS = [
-    'Apa itu Mokultur?',
-    'Artikel terbaru soal anime?',
-    'Cara jadi media partner?',
-    'Gimana cara kontak Mokultur?',
-  ];
+
+  /**
+   * Copy comes from the AI settings tab. The literals below are the values that
+   * shipped before it existed, so an unfilled field changes nothing.
+   */
+  export let title: string | null = null;
+  export let greeting: string | null = null;
+  export let placeholder: string | null = null;
+  /** One suggestion per line; blank hides the chips entirely. */
+  export let suggestions: string | null = null;
+
+  $: panelTitle = title?.trim() || 'Tanya Mokultur';
+  $: welcomeText =
+    greeting?.trim() ||
+    'Hai! Aku bisa bantu kamu cari tahu soal Mokultur — artikel, kategori, media partner, Instagram, sampai kontak.';
+  $: inputPlaceholder = placeholder?.trim() || 'Tanya soal Mokultur...';
+  $: SUGGESTIONS = (suggestions ?? '')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
 
   let open = false;
   let messages: Msg[] = [];
@@ -153,7 +167,7 @@
       <header class="mchat__head">
         <div class="mchat__head-title">
           <span class="mchat__dot" aria-hidden="true"></span>
-          <strong>Tanya Mokultur</strong>
+          <strong>{panelTitle}</strong>
         </div>
         <div class="mchat__head-actions">
           {#if messages.length > 0}
@@ -170,14 +184,14 @@
       <div class="mchat__body" bind:this={listEl}>
         {#if messages.length === 0}
           <div class="mchat__welcome">
-            <p class="mchat__welcome-text">
-              Hai! Aku bisa bantu kamu cari tahu soal Mokultur — artikel, kategori, media partner, Instagram, sampai kontak.
-            </p>
-            <div class="mchat__suggestions">
-              {#each SUGGESTIONS as s}
-                <button type="button" class="mchat__chip" on:click={() => send(s)}>{s}</button>
-              {/each}
-            </div>
+            <p class="mchat__welcome-text">{welcomeText}</p>
+            {#if SUGGESTIONS.length > 0}
+              <div class="mchat__suggestions">
+                {#each SUGGESTIONS as s}
+                  <button type="button" class="mchat__chip" on:click={() => send(s)}>{s}</button>
+                {/each}
+              </div>
+            {/if}
           </div>
         {/if}
 
@@ -208,7 +222,7 @@
           bind:value={input}
           type="text"
           class="mchat__input"
-          placeholder="Tanya soal Mokultur..."
+          placeholder={inputPlaceholder}
           maxlength="1000"
           autocomplete="off"
           disabled={busy}

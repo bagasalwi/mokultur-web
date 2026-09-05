@@ -1,6 +1,7 @@
 import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
 import { PUBLIC_API_URL } from '$env/static/public';
+import { getSettings } from '$lib/api';
 
 /**
  * Same-origin proxy for the event share card.
@@ -11,6 +12,10 @@ import { PUBLIC_API_URL } from '$env/static/public';
  * visitor never leaves the page. Same reasoning as the talent card proxy.
  */
 export const GET: RequestHandler = async ({ params, fetch, setHeaders }) => {
+  // Share cards belong to the feature; when it is off they go too.
+  const { data: settings } = await getSettings();
+  if (settings.event_enabled === false) throw error(404, 'Event tidak tersedia.');
+
   const upstream = `${PUBLIC_API_URL}/api/events/${encodeURIComponent(params.slug)}/share.png`;
   const res = await fetch(upstream);
 

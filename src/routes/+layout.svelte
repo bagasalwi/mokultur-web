@@ -43,6 +43,10 @@
   $: navbarText = s?.navbar_text ?? '#1a1a1a';
   $: primaryContrast = s?.primary_contrast ?? '#000000';
 
+  // The assistant answers questions about the public site; it has no business
+  // on the dashboard or the auth screens.
+  $: isPrivateRoute = $page.url.pathname.startsWith('/dashboard') || $page.url.pathname.startsWith('/auth');
+
   $: origin = $page.url.origin;
   $: siteName = data.settings?.site_name ?? 'Mokultur';
 
@@ -108,7 +112,14 @@
 
 <Footer settings={data.settings} footerItems={data.navFooter} socials={data.socials} categories={data.categories} />
 
-<ChatWidget />
+{#if data.settings?.ai_chat_enabled && !isPrivateRoute}
+  <ChatWidget
+    title={data.settings.ai_chat_title}
+    greeting={data.settings.ai_chat_greeting}
+    placeholder={data.settings.ai_chat_placeholder}
+    suggestions={data.settings.ai_chat_suggestions}
+  />
+{/if}
 
 <CookieConsent />
 <Analytics

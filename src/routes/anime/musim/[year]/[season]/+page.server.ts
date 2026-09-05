@@ -2,7 +2,11 @@ import type { PageServerLoad } from './$types';
 import { getAnimeSeason } from '$lib/api';
 import { error } from '@sveltejs/kit';
 
-export const load: PageServerLoad = async ({ params, setHeaders }) => {
+export const load: PageServerLoad = async ({ params, setHeaders, parent }) => {
+  // Disabled features are gone, not merely hidden: the route 404s.
+  const { settings } = await parent();
+  if (settings?.anime_enabled === false) throw error(404, 'Anime tidak tersedia.');
+
   const year = Number(params.year);
 
   if (!Number.isInteger(year)) throw error(404, 'Musim tidak ditemukan');

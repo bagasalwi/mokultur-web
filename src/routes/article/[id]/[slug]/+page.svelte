@@ -558,7 +558,7 @@
         <!-- The schedule takes this slot when there is one; the curhatan promo
              keeps it only when there are no upcoming events, so the sidebar is
              never left with a hole. -->
-        {#if data.upcomingEvents?.length > 0}
+        {#if data.settings?.event_enabled !== false && data.upcomingEvents?.length > 0}
           <EventPromoCard events={data.upcomingEvents} />
         {:else if data.settings?.curhat_enabled && data.promoCurhatan?.length > 0}
           <CurhatPromoCard curhatan={data.promoCurhatan} {siteName} />

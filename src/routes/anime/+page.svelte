@@ -163,9 +163,11 @@
       <!-- The quiz sits beside the season carousel: someone weighing what to
            watch is exactly who it is for, and it reads better at 40% than as a
            banner of its own. -->
-      <div class="anime-pair__side">
-        <TastePromoCard />
-      </div>
+      {#if data.settings?.quiz_enabled !== false}
+        <div class="anime-pair__side">
+          <TastePromoCard />
+        </div>
+      {/if}
     </section>
   {/if}
 

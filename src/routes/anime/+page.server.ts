@@ -1,3 +1,4 @@
+import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { getAiringToday, getCurrentSeasonTop, getLatestEpisodes, getTopAnime, listAnimeGenres, listAnimeYears, listArticles } from '$lib/api';
 
@@ -5,7 +6,11 @@ const TOP_LIMIT = 5;
 /** The hero carousel shows more than the ranked grids — one anime per slide. */
 const SEASON_TOP_LIMIT = 8;
 
-export const load: PageServerLoad = async ({ url, setHeaders }) => {
+export const load: PageServerLoad = async ({ url, setHeaders, parent }) => {
+  // Disabled features are gone, not merely hidden: the route 404s.
+  const { settings } = await parent();
+  if (settings?.anime_enabled === false) throw error(404, 'Anime tidak tersedia.');
+
   setHeaders({ 'cache-control': 'public, max-age=300, stale-while-revalidate=900' });
 
   // Filters live in the query string so any result set is a shareable link.
