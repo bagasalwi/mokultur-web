@@ -211,6 +211,7 @@ export interface SiteSettings {
   article_detail_style: string | null;
   event_section_style: string | null;
   tech_section_style: string | null;
+  navbar_style: string | null;
   site_favicon: string | null;
   contact_email: string | null;
   contact_whatsapp: string | null;
@@ -218,6 +219,10 @@ export interface SiteSettings {
   google_analytics: string | null;
   adsense_enabled: boolean;
   adsense_publisher_id: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  meta_keywords: string | null;
+  og_image: string | null;
 }
 
 export function getSettings() {

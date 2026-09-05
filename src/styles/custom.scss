@@ -5045,6 +5045,234 @@ header.sticky-top {
     }
 }
 
+// -----------------------------------------------------------------------------
+// Navbar layout variants (site_settings.navbar_style)
+//
+// Every block below still reads --navbar-bg / --navbar-text. Those two are what
+// the colour settings in the dashboard drive, so a variant that hardcodes its
+// own colours would silently stop responding to them.
+// -----------------------------------------------------------------------------
+
+// --- compact: one row, sections inline between the logo and the actions ------
+.navbar-times--compact {
+    .navbar-brand-bar {
+        padding: 0.4rem 0;
+    }
+
+    .navbar-logo-link {
+        flex-shrink: 0;
+    }
+
+    .navbar-sections-nav--inline {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .navbar-section-link {
+        padding: 0.5rem 0.6rem;
+        border-bottom-width: 2px;
+        margin-bottom: 0;
+    }
+
+    // Holds the actions against the right edge whether or not the section links
+    // are on screen.
+    .navbar-actions {
+        flex-shrink: 0;
+        margin-left: auto;
+    }
+
+    // One row has no room for section links on a phone; the bottom sheet carries
+    // them there instead.
+    @media (max-width: 991.98px) {
+        .navbar-sections-nav--inline {
+            display: none;
+        }
+    }
+}
+
+// --- masthead: oversized centred logo over a centred sections bar ------------
+.navbar-times--masthead {
+    --navbar-logo-height: 46px;
+
+    .navbar-brand-bar--masthead {
+        padding: 0.35rem 0 0.7rem;
+    }
+
+    .navbar-masthead__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 34px;
+    }
+
+    // The burger is hidden from lg up, which would otherwise let the actions
+    // cluster slide to the left edge.
+    .navbar-masthead__top .navbar-actions {
+        margin-left: auto;
+    }
+
+    .navbar-masthead__brand {
+        display: flex;
+        justify-content: center;
+    }
+
+    .navbar-logo-link img {
+        height: var(--navbar-logo-height);
+    }
+
+    .navbar-logo-link .logo-text {
+        font-size: 2.25rem;
+    }
+
+    .navbar-sections-nav--center {
+        justify-content: center;
+        // Plain `center` cuts off the first links once the row overflows and
+        // starts scrolling; `safe` falls back to flex-start at that point.
+        justify-content: safe center;
+    }
+
+    @media (max-width: 991.98px) {
+        --navbar-logo-height: 32px;
+
+        .navbar-logo-link .logo-text {
+            font-size: 1.5rem;
+        }
+    }
+}
+
+// --- split: section links flanking a centred logo ----------------------------
+.navbar-times--split {
+    .navbar-split {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.25rem 1rem;
+    }
+
+    .navbar-split__side {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+
+    .navbar-split__side--right {
+        justify-content: flex-end;
+    }
+
+    .navbar-split__center {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 0 0 auto;
+    }
+
+    .navbar-actions {
+        flex: 0 0 auto;
+    }
+
+    // Three columns stop fitting below lg. Rather than duplicating the links in
+    // a second bar, the row is allowed to wrap: an empty full-width pseudo
+    // element forces the break, so the logo and actions keep the first line and
+    // both link halves share the second.
+    @media (max-width: 991.98px) {
+        .navbar-split::before {
+            content: '';
+            flex: 1 0 100%;
+            order: 3;
+            height: 0;
+        }
+
+        .navbar-split__center {
+            order: 1;
+        }
+
+        .navbar-actions {
+            order: 2;
+            margin-left: auto;
+        }
+
+        .navbar-split__side--left {
+            order: 4;
+            flex: 0 1 auto;
+        }
+
+        .navbar-split__side--right {
+            order: 5;
+            flex: 0 1 auto;
+            justify-content: flex-start;
+        }
+    }
+}
+
+// --- minimal: every link behind a menu, at all breakpoints -------------------
+//
+// The disclosure is a checkbox rather than the Svelte state the other variants
+// use. This layout has no visible links to fall back on, and the settings
+// preview renders the site with scripts blocked — a JS-only toggle would show an
+// empty header there, and to any visitor without JS.
+.navbar-times--minimal {
+    .navbar-minimal__toggle {
+        // Clipped rather than display:none so it can still take keyboard focus.
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    // Unlike the scripted burger this one carries no d-lg-none, so it stays put
+    // on desktop.
+    .navbar-minimal__burger {
+        cursor: pointer;
+        margin-bottom: 0;
+    }
+
+    .navbar-minimal__toggle:focus-visible ~ .navbar-brand-bar .navbar-minimal__burger {
+        outline: 2px solid var(--site-primary, #f1ff32);
+        outline-offset: 2px;
+    }
+
+    .navbar-minimal__panel {
+        background-color: var(--navbar-bg, #ffffff);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+        // 0fr → 1fr animates a panel of unknown height without a magic max-height.
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows 0.25s ease;
+
+        > .container-xl {
+            overflow: hidden;
+        }
+    }
+
+    .navbar-minimal__toggle:checked ~ .navbar-minimal__panel {
+        grid-template-rows: 1fr;
+    }
+
+    .navbar-sections-nav--stack {
+        flex-direction: column;
+        align-items: stretch;
+        overflow-x: visible;
+        padding: 0.25rem 0 0.5rem;
+    }
+
+    .navbar-sections-nav--stack .navbar-section-link {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        border-left: 3px solid transparent;
+        margin-bottom: 0;
+        padding: 0.7rem 0.5rem;
+
+        &:hover,
+        &.active {
+            border-bottom-color: rgba(0, 0, 0, 0.06);
+            border-left-color: var(--site-primary, #f1ff32);
+        }
+    }
+}
+
 // Inline expanding search in brand bar
 @keyframes navSearchSlideIn {
     from { opacity: 0; transform: translateX(8px); }

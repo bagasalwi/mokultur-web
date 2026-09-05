@@ -2,7 +2,10 @@ import type { LayoutServerLoad } from './$types';
 import type { SiteSettings, NavbarItem, SocialMediaItem, Category } from '$lib/api';
 import { getSettings, listCategories, getSocialMedia, getNavbar } from '$lib/api';
 
-const CACHE_TTL = 5 * 60 * 1000;
+// 60s, not 5 minutes. The API already caches these responses for 300s and
+// busts that cache the moment settings are saved, so a long window here just
+// stacked on top of it: a color change took up to ten minutes to appear.
+const CACHE_TTL = 60 * 1000;
 let _cache: {
   settings: SiteSettings | null;
   categories: Category[];
@@ -12,7 +15,38 @@ let _cache: {
 } | null = null;
 let _cacheAt = 0;
 
-export const load: LayoutServerLoad = async ({ locals }) => {
+/**
+ * Layout settings the dashboard may override per-request, so an admin can see a
+ * variant before committing it. Values are checked against these lists rather
+ * than trusted: they land in markup and component branches.
+ */
+const PREVIEWABLE = {
+  hero_type: ['cinematic', 'split', 'ticker', 'masthead', 'editorial-grid', 'spotlight-stack'],
+  card_style: ['vertical', 'horizontal', 'magazine', 'minimal', 'compact-news', 'feature-tile', 'borderless-feed'],
+  article_detail_style: ['classic', 'immersive', 'editorial', 'clean'],
+  event_section_style: ['standard', 'immersive', 'magazine'],
+  tech_section_style: ['standard', 'immersive', 'magazine'],
+  navbar_style: ['times', 'compact', 'masthead', 'split', 'minimal'],
+} as const satisfies Record<string, readonly string[]>;
+
+/**
+ * Returns a copy when a preview is requested, never a mutated original —
+ * `_cache` is module state shared by every visitor, so writing an admin's
+ * preview into it would leak that variant to the whole site.
+ */
+function applyPreview(settings: SiteSettings | null, url: URL): SiteSettings | null {
+  if (!settings) return settings;
+  let preview: SiteSettings | null = null;
+  for (const key of Object.keys(PREVIEWABLE) as (keyof typeof PREVIEWABLE)[]) {
+    const value = url.searchParams.get(`preview_${key}`);
+    if (!value || !(PREVIEWABLE[key] as readonly string[]).includes(value)) continue;
+    preview ??= { ...settings };
+    preview[key] = value;
+  }
+  return preview ?? settings;
+}
+
+export const load: LayoutServerLoad = async ({ locals, url }) => {
   if (!_cache || Date.now() - _cacheAt >= CACHE_TTL) {
     const [settingsRes, categoriesRes, navHeaderRes, navFooterRes, socialsRes] = await Promise.allSettled([
       getSettings(),
@@ -35,5 +69,5 @@ export const load: LayoutServerLoad = async ({ locals }) => {
     _cacheAt = Date.now();
   }
 
-  return { ..._cache, user: locals.user };
+  return { ..._cache, settings: applyPreview(_cache.settings, url), user: locals.user };
 };

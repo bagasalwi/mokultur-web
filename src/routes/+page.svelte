@@ -52,25 +52,37 @@
       name: a.title,
     })),
   };
+
+  // Homepage meta comes from the SEO settings group; the old hardcoded copy is
+  // the fallback for a site that has never filled those fields in.
+  $: metaTitle = data.settings?.meta_title || `${siteName} - Berita, Review & Budaya Pop Indonesia`;
+  $: metaDescription =
+    data.settings?.meta_description ||
+    `Berita, ulasan, dan liputan event seputar anime, manga, cosplay, game, teknologi, dan film. ${siteName} — media kultur interaktifnya Indonesia sejak 2021.`;
+  $: metaKeywords = data.settings?.meta_keywords || null;
+  $: shareImage = data.headlines[0]?.image || data.settings?.og_image || null;
 </script>
 
 <svelte:head>
-  <title>{siteName} - Berita, Review &amp; Budaya Pop Indonesia</title>
-  <meta name="description" content="Berita, ulasan, dan liputan event seputar anime, manga, cosplay, game, teknologi, dan film. {siteName} — media kultur interaktifnya Indonesia sejak 2021." />
+  <title>{metaTitle}</title>
+  <meta name="description" content={metaDescription} />
+  {#if metaKeywords}
+    <meta name="keywords" content={metaKeywords} />
+  {/if}
   <link rel="canonical" href={absoluteUrl('/')} />
   <meta name="robots" content="index, follow" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="{siteName} - Berita, Review & Budaya Pop Indonesia" />
-  <meta property="og:description" content="Berita, ulasan, dan liputan event seputar anime, manga, cosplay, game, teknologi, dan film. {siteName} — media kultur interaktifnya Indonesia sejak 2021." />
+  <meta property="og:title" content={metaTitle} />
+  <meta property="og:description" content={metaDescription} />
   <meta property="og:url" content={absoluteUrl('/')} />
-  {#if data.headlines[0]?.image}
-    <meta property="og:image" content={data.headlines[0].image} />
+  {#if shareImage}
+    <meta property="og:image" content={shareImage} />
   {/if}
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="{siteName} - Berita, Review & Budaya Pop Indonesia" />
-  <meta name="twitter:description" content="Berita, ulasan, dan liputan event seputar anime, manga, cosplay, game, teknologi, dan film. {siteName} — media kultur interaktifnya Indonesia sejak 2021." />
-  {#if data.headlines[0]?.image}
-    <meta name="twitter:image" content={data.headlines[0].image} />
+  <meta name="twitter:title" content={metaTitle} />
+  <meta name="twitter:description" content={metaDescription} />
+  {#if shareImage}
+    <meta name="twitter:image" content={shareImage} />
   {/if}
   {@html `<script type="application/ld+json">${JSON.stringify(homeSchema)}<\/script>`}
   {#if data.headlines[0]?.image}
@@ -125,7 +137,11 @@
 
   <EventScheduleSection events={data.upcomingEvents} />
 
-  <EventSection title="Liputan & Press Release" articles={data.eventArticles} />
+  <EventSection
+    title="Liputan & Press Release"
+    articles={data.eventArticles}
+    style={data.settings?.event_section_style ?? 'standard'}
+  />
 
   <ReelsSection reels={data.reels} profile={data.igProfile} />
 
