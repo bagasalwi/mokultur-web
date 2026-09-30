@@ -1,6 +1,7 @@
+import { browser } from '$app/environment';
 import { PUBLIC_API_URL } from '$env/static/public';
 
-const BASE = PUBLIC_API_URL;
+const BASE = browser ? PUBLIC_API_URL : 'http://127.0.0.1:3001';
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
