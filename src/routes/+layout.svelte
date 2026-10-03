@@ -10,6 +10,7 @@
   import CookieConsent from '$components/common/CookieConsent.svelte';
   import Analytics from '$components/common/Analytics.svelte';
   import type { LayoutData } from './$types';
+  import { isAnimePath } from '$lib/route-policy';
 
   export let data: LayoutData;
 
@@ -77,6 +78,9 @@
 </script>
 
 <svelte:head>
+  {#if isAnimePath($page.url.pathname)}
+    <meta name="robots" content="noindex, follow" />
+  {/if}
   {#if data.settings?.site_favicon}
     <link rel="icon" href={data.settings.site_favicon} />
   {/if}

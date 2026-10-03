@@ -3,6 +3,8 @@ import { redirect } from '@sveltejs/kit';
 import { getAnime } from '$lib/api';
 import { animeSlug } from '$lib/anime';
 
+export const trailingSlash = 'ignore';
+
 /**
  * Legacy per-episode URLs from the Laravel frontend.
  *

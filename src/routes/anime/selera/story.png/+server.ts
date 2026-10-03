@@ -3,6 +3,8 @@ import { error } from '@sveltejs/kit';
 import { PUBLIC_API_URL } from '$env/static/public';
 import { getSettings } from '$lib/api';
 
+export const trailingSlash = 'ignore';
+
 /**
  * Same-origin proxy for the Story card.
  *

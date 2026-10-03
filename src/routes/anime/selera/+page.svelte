@@ -267,8 +267,6 @@
   <title>{pageTitle}</title>
   <meta name="description" content={description} />
   <link rel="canonical" href={canonical} />
-  <!-- The robots tag lives in the /anime layout now: the whole section is
-       noindex, so the quiz no longer needs its own rule. -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content={pageTitle} />
   <meta property="og:description" content={description} />
