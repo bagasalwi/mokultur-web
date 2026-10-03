@@ -41,6 +41,8 @@
             title={item.title}
             image={item.image}
             publishDate={item.publishDate}
+            format={item.format}
+            photoCount={item.photoCount ?? 0}
             categoryName={item.category?.name ?? null}
           />
         {/each}

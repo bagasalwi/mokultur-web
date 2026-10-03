@@ -15,6 +15,7 @@
 
 
   $: href = `/article/${article.id}/${article.slug}`;
+  $: meta = `${article.format === 'photo-story' ? `Photo Story · ${article.photoCount ?? 0} foto · ` : ''}${timeAgo(article.publishDate)}`;
 
 </script>
 
@@ -31,7 +32,7 @@
           <span class="badge badge-main" style="font-size:0.65rem">{article.category.name}</span>
         {/if}
         <h6 class="article-card--horizontal__title">{article.title}</h6>
-        <small class="text-muted">{timeAgo(article.publishDate)}</small>
+        <small class="text-muted">{meta}</small>
       </div>
     </a>
   </article>
@@ -43,6 +44,7 @@
         <span class="badge badge-main flex-shrink-0">{article.category.name}</span>
       {/if}
       <span class="small fw-semibold text-dark lh-sm">{article.title}</span>
+      {#if article.format === 'photo-story'}<small class="text-muted">Photo Story · {article.photoCount} foto</small>{/if}
     </a>
   </article>
 
@@ -58,7 +60,7 @@
       <a {href} class="text-decoration-none">
         <p class="mb-1 small fw-semibold text-dark lh-sm line-clamp-2">{article.title}</p>
       </a>
-      <small class="text-muted">{timeAgo(article.publishDate)}</small>
+      <small class="text-muted">{meta}</small>
     </div>
   </article>
 
@@ -72,7 +74,7 @@
             <span class="badge badge-main mb-1" style="font-size:0.6rem">{article.category.name}</span>
           {/if}
           <div class="article-card--magazine__title">{article.title}</div>
-          <span class="article-card--magazine__meta">{timeAgo(article.publishDate)}</span>
+          <span class="article-card--magazine__meta">{meta}</span>
         </div>
       </div>
     </a>
@@ -84,7 +86,7 @@
       <span class="article-card-compact-news__category">{article.category.name}</span>
     {/if}
     <h6>{article.title}</h6>
-    <time datetime={article.publishDate ?? ''}>{timeAgo(article.publishDate)}</time>
+    <time datetime={article.publishDate ?? ''}>{meta}</time>
   </a>
 
 {:else if variant === 'feature-tile'}
@@ -95,7 +97,7 @@
         <span class="badge badge-main">{article.category.name}</span>
       {/if}
       <h6>{article.title}</h6>
-      <time datetime={article.publishDate ?? ''}>{timeAgo(article.publishDate)}</time>
+      <time datetime={article.publishDate ?? ''}>{meta}</time>
     </div>
   </a>
 
@@ -107,7 +109,7 @@
         <span>{article.category.name}</span>
       {/if}
       <h6>{article.title}</h6>
-      <time datetime={article.publishDate ?? ''}>{timeAgo(article.publishDate)}</time>
+      <time datetime={article.publishDate ?? ''}>{meta}</time>
     </div>
   </a>
 
@@ -135,7 +137,7 @@
           <p class="text-muted small mb-2 line-clamp-2">{article.description}</p>
         {/if}
         <div class="d-flex align-items-center justify-content-between mt-auto">
-          <small class="text-muted">{timeAgo(article.publishDate)}</small>
+          <small class="text-muted">{meta}</small>
         </div>
       </div>
     </a>

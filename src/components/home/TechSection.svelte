@@ -55,7 +55,7 @@
                     </span>
                   {/if}
                   <h6 class="article-title text-dark mb-1 lh-sm">{item.title}</h6>
-                  <small class="text-muted mt-auto" style="font-size: 0.7rem;">{timeAgo(item.publishDate)}</small>
+                  <small class="text-muted mt-auto" style="font-size: 0.7rem;">{#if item.format === 'photo-story'}Photo Story · {item.photoCount} foto · {/if}{timeAgo(item.publishDate)}</small>
                 </div>
               </div>
             </a>
@@ -93,7 +93,7 @@
                 {#if lead.description}
                   <p>{lead.description}</p>
                 {/if}
-                <small>{timeAgo(lead.publishDate)}</small>
+                <small>{#if lead.format === 'photo-story'}Photo Story · {lead.photoCount} foto · {/if}{timeAgo(lead.publishDate)}</small>
               </div>
             </a>
 
@@ -108,7 +108,7 @@
                       <span class="badge badge-main">{item.category.name}</span>
                     {/if}
                     <h6>{item.title}</h6>
-                    <small>{timeAgo(item.publishDate)}</small>
+                    <small>{#if item.format === 'photo-story'}Photo Story · {item.photoCount} foto · {/if}{timeAgo(item.publishDate)}</small>
                   </div>
                 </a>
               {/each}
@@ -148,7 +148,7 @@
                 {#if lead.description}
                   <p>{lead.description}</p>
                 {/if}
-                <small>{timeAgo(lead.publishDate)}</small>
+                <small>{#if lead.format === 'photo-story'}Photo Story · {lead.photoCount} foto · {/if}{timeAgo(lead.publishDate)}</small>
               </div>
             </a>
 
@@ -163,7 +163,7 @@
                       <span class="badge badge-main">{item.category.name}</span>
                     {/if}
                     <h6>{item.title}</h6>
-                    <small>{timeAgo(item.publishDate)}</small>
+                    <small>{#if item.format === 'photo-story'}Photo Story · {item.photoCount} foto · {/if}{timeAgo(item.publishDate)}</small>
                   </div>
                 </a>
               {/each}

@@ -183,6 +183,8 @@
           title={article.title}
           image={article.image}
           publishDate={article.publishDate}
+          format={article.format}
+          photoCount={article.photoCount ?? 0}
           categoryName={article.catName}
         />
       {/each}

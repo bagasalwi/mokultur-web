@@ -128,7 +128,7 @@
                 {#if lead.description}
                   <p class="archive-section__intro mb-2">{lead.description}</p>
                 {/if}
-                <small><time datetime={lead.publishDate ?? ''}>{timeAgo(lead.publishDate)}</time></small>
+                <small>{#if lead.format === 'photo-story'}Photo Story · {lead.photoCount} foto · {/if}<time datetime={lead.publishDate ?? ''}>{timeAgo(lead.publishDate)}</time></small>
               </div>
             </article>
 
@@ -153,7 +153,7 @@
                             <span class="badge badge-main">{item.category.name}</span>
                           {/if}
                           <h6 class="article-card-title">{item.title}</h6>
-                          <span class="article-card-date">{timeAgo(item.publishDate)}</span>
+                          <span class="article-card-date">{#if item.format === 'photo-story'}Photo Story · {item.photoCount} foto · {/if}{timeAgo(item.publishDate)}</span>
                         </div>
                       </div>
                     </a>
@@ -189,7 +189,7 @@
                             <span class="badge badge-main">{item.category.name}</span>
                           {/if}
                           <h6 class="article-card-title">{item.title}</h6>
-                          <span class="article-card-date">{timeAgo(item.publishDate)}</span>
+                          <span class="article-card-date">{#if item.format === 'photo-story'}Photo Story · {item.photoCount} foto · {/if}{timeAgo(item.publishDate)}</span>
                         </div>
                       </div>
                     </a>
@@ -227,7 +227,7 @@
                             <span class="badge badge-main">{item.category.name}</span>
                           {/if}
                           <h6 class="article-card-title">{item.title}</h6>
-                          <span class="article-card-date">{timeAgo(item.publishDate)}</span>
+                          <span class="article-card-date">{#if item.format === 'photo-story'}Photo Story · {item.photoCount} foto · {/if}{timeAgo(item.publishDate)}</span>
                         </div>
                       </div>
                     </a>
@@ -278,7 +278,7 @@
                       <span class="badge badge-main mb-1">{item.category.name}</span>
                     {/if}
                     <strong class="d-block">{item.title}</strong>
-                    <small>{timeAgo(item.publishDate)}</small>
+                    <small>{#if item.format === 'photo-story'}Photo Story · {item.photoCount} foto · {/if}{timeAgo(item.publishDate)}</small>
                   </div>
                 </a>
               {/each}

@@ -29,6 +29,8 @@ export interface ArticleMeta {
 }
 
 export interface ArticleListItem {
+  format?: 'article' | 'photo-story';
+  photoCount?: number;
   id: number;
   title: string;
   slug: string;
@@ -49,6 +51,7 @@ export interface TocItem {
 }
 
 export interface ArticleSingle extends ArticleListItem {
+  photoStory?: PhotoStory | null;
   content: string;
   toc: TocItem[];
   updatedAt: string | null;
@@ -69,6 +72,12 @@ export interface ArticleSeo {
   robots: string;
   og: { title: string; description: string; image: string | null; type: string; url: string };
   twitter: { card: string; title: string; description: string; image: string | null };
+}
+
+export interface PhotoStory {
+  coverId: number | null;
+  schemaType: 'NewsArticle' | 'Article';
+  photos: { galleryId: number; url: string; width: number | null; height: number | null; alt: string; caption: string; credit: string; text: string }[];
 }
 
 export function listArticles(params: {
@@ -445,6 +454,8 @@ export interface EventItem {
 }
 
 export interface EventArticle {
+  format?: 'article' | 'photo-story';
+  photoCount?: number;
   id: number;
   title: string;
   slug: string;

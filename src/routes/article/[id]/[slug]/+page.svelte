@@ -13,6 +13,9 @@
   import { enhance } from "$app/forms";
   import { page } from "$app/stores";
   import { imgSrcset, imgUrl } from '$lib/img';
+  import PhotoStoryHeader from '$components/articles/PhotoStoryHeader.svelte';
+  import PhotoStoryGallery from '$components/articles/PhotoStoryGallery.svelte';
+  import PhotoStoryViewer from '$components/articles/PhotoStoryViewer.svelte';
 
   export let data: PageData;
 
@@ -29,11 +32,15 @@
   // Comments
   let comments: any[] = [];
   let commentBody = "";
+  let storyViewer: PhotoStoryViewer;
 
-  onMount(async () => {
+  onMount(() => {
+    const controller = new AbortController();
+    void (async () => {
     try {
       const res = await fetch(
         `${PUBLIC_API_URL}/api/articles/${a.id}/interactions`,
+        { signal: controller.signal },
       );
       if (res.ok) {
         const d = await res.json();
@@ -44,12 +51,15 @@
     try {
       const res = await fetch(
         `${PUBLIC_API_URL}/api/articles/${a.id}/comments`,
+        { signal: controller.signal },
       );
       if (res.ok) {
         const d = await res.json();
         comments = d.data ?? [];
       }
     } catch {}
+
+    })();
 
     if (typeof window !== "undefined") {
       document.querySelectorAll(".carousel").forEach((el) => {
@@ -134,6 +144,7 @@
     window.addEventListener('keydown', onKeydown);
 
     return () => {
+      controller.abort();
       articleBody?.removeEventListener('click', onGalleryClick);
       window.removeEventListener('keydown', onKeydown);
       lb.remove();
@@ -201,9 +212,9 @@
     />{/if}
   {#if a.author}<meta property="article:author" content={a.author.name} />{/if}
   {#each data.jsonLd as schema}
-    {@html `<script type="application/ld+json">${JSON.stringify(schema)}<\/script>`}
+    {@html `<script type="application/ld+json">${JSON.stringify(schema).replace(/</g, '\\u003c')}<\/script>`}
   {/each}
-  {#if a.image}
+  {#if a.image && !a.photoStory}
     <link rel="preload" as="image" href={a.image} fetchpriority="high" />
   {/if}
 </svelte:head>
@@ -284,6 +295,9 @@
 
       {#if a.image}
         <div class="col-12 col-lg-5 article-detail__hero-media">
+          {#if a.photoStory && a.photoStory.photos.length >= 2}
+            <PhotoStoryHeader story={a.photoStory} onopen={(index) => storyViewer?.open(index)} />
+          {:else}
           <figure class="article-hero-figure mb-0">
             <img
               src={imgUrl(a.image, 1080) ?? a.image}
@@ -296,11 +310,14 @@
               decoding="async"
             />
           </figure>
+          {/if}
         </div>
       {/if}
     </div>
   </div>
 </article>
+
+{#if a.photoStory && a.photoStory.photos.length}<PhotoStoryViewer story={a.photoStory} bind:this={storyViewer} />{/if}
 
 <!-- Ad below hero -->
 <div class="container-xl mt-3">
@@ -444,6 +461,7 @@
       <div class="bodyArticle article-detail__reader pt-lg-2">
         {@html a.content}
       </div>
+      {#if a.photoStory}<PhotoStoryGallery story={a.photoStory} onopen={(index) => storyViewer?.open(index)} />{/if}
 
       <!-- Ad after content -->
       <AdBanner ad={data.adAfterContent} adSlot="article_ad_3" />

@@ -18,6 +18,8 @@
   export let image: string | null = null;
   export let publishDate: string | null = null;
   export let categoryName: string | null = null;
+  export let format: string | undefined = undefined;
+  export let photoCount = 0;
 
 
 
@@ -47,6 +49,7 @@
         </span>
       {/if}
       <h6 class="article-title text-dark mb-1 lh-sm">{title}</h6>
+      {#if format === 'photo-story'}<small class="text-muted">Photo Story · {photoCount} foto</small>{/if}
       <small class="text-muted mt-auto" style="font-size: 0.7rem;">{timeAgo(publishDate)}</small>
     </div>
   </div>
