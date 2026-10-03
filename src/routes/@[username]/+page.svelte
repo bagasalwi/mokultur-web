@@ -5,6 +5,7 @@
   import Pagination from '$components/common/Pagination.svelte';
   import { absoluteUrl, buildBreadcrumb } from '$lib/seo';
   import { timeAgo } from '$lib/format';
+  import { paginationPath } from '$lib/pagination';
 
   export let data: PageData;
 
@@ -32,8 +33,10 @@
   }
 
   function buildUrl(p: number): string {
-    return `/@${username}?page=${p}`;
+    return paginationPath(`/@${username}`, p);
   }
+
+  $: canonicalUrl = absoluteUrl(paginationPath(`/@${username}`, page));
 
   $: latestArticle = articles.data[0]?.publishDate ?? null;
   $: roleLabel = user.role === 'admin' ? 'Admin' : siteName;
@@ -61,12 +64,14 @@
   <title>@{username} - {siteName}</title>
   <meta name="description" content={user.description ?? `Lihat profil, artikel, dan pencapaian dari ${user.name} di ${siteName}.`} />
   <meta name="robots" content="index, follow" />
-  <link rel="canonical" href={absoluteUrl(`/@${username}`)} />
+  <link rel="canonical" href={canonicalUrl} />
+  {#if page > 1}<link rel="prev" href={absoluteUrl(buildUrl(page - 1))} />{/if}
+  {#if page < articles.meta.totalPages}<link rel="next" href={absoluteUrl(buildUrl(page + 1))} />{/if}
   <meta property="og:type" content="profile" />
   <meta property="og:title" content="@{username} — {siteName}" />
   <meta property="og:description" content={user.description ?? `Lihat profil, artikel, dan pencapaian dari ${user.name} di ${siteName}.`} />
   {#if user.img}<meta property="og:image" content={user.img} />{/if}
-  <meta property="og:url" content={absoluteUrl(`/@${username}`)} />
+  <meta property="og:url" content={canonicalUrl} />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="@{username} — {siteName}" />
   <meta name="twitter:description" content={user.description ?? `Lihat profil, artikel, dan pencapaian dari ${user.name} di ${siteName}.`} />

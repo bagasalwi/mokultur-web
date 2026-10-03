@@ -4,6 +4,7 @@
   import { absoluteUrl, buildBreadcrumb } from '$lib/seo';
   import { timeAgo, imgFallback } from '$lib/format';
   import { imgUrl } from '$lib/img';
+  import { paginationPath } from '$lib/pagination';
 
   export let data: PageData;
 
@@ -12,9 +13,10 @@
   $: supporting = isFirstPage ? data.articles.slice(1, 5) : [];
   $: remaining = isFirstPage ? data.articles.slice(5) : [];
   $: flatArticles = !isFirstPage ? data.articles : [];
+  $: canonicalUrl = absoluteUrl(paginationPath(`/tag/${data.tag.slug}`, data.meta.page));
 
   function buildUrl(page: number): string {
-    return `/tag/${data.tag.slug}?page=${page}`;
+    return paginationPath(`/tag/${data.tag.slug}`, page);
   }
 
 
@@ -23,18 +25,18 @@
 <svelte:head>
   <title>#{data.tag.name} - {data.settings?.site_name ?? 'Mokultur'}</title>
   <meta name="description" content="Artikel dengan tag {data.tag.name} — {data.meta.total.toLocaleString('id-ID')} artikel" />
-  <link rel="canonical" href={absoluteUrl(`/tag/${data.tag.slug}`)} />
+  <link rel="canonical" href={canonicalUrl} />
   <meta name="robots" content="index, follow" />
   {#if data.meta.page > 1}
-    <link rel="prev" href={absoluteUrl(`/tag/${data.tag.slug}?page=${data.meta.page - 1}`)} />
+    <link rel="prev" href={absoluteUrl(buildUrl(data.meta.page - 1))} />
   {/if}
   {#if data.meta.page < data.meta.totalPages}
-    <link rel="next" href={absoluteUrl(`/tag/${data.tag.slug}?page=${data.meta.page + 1}`)} />
+    <link rel="next" href={absoluteUrl(buildUrl(data.meta.page + 1))} />
   {/if}
   <meta property="og:type" content="website" />
   <meta property="og:title" content={data.seo?.og.title ?? `#${data.tag.name}`} />
   <meta property="og:description" content={data.seo?.og.description ?? `Artikel dengan tag ${data.tag.name}`} />
-  <meta property="og:url" content={data.seo?.og.url ?? absoluteUrl(`/tag/${data.tag.slug}`)} />
+  <meta property="og:url" content={canonicalUrl} />
   {#if data.seo?.og.image}<meta property="og:image" content={data.seo.og.image} />{/if}
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={data.seo?.twitter.title ?? `#${data.tag.name}`} />
@@ -44,7 +46,7 @@
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     name: data.seo?.title ?? `#${data.tag.name}`,
-    url: data.seo?.canonical ?? absoluteUrl(`/tag/${data.tag.slug}`),
+    url: canonicalUrl,
     mainEntity: {
       '@type': 'ItemList',
       itemListElement: data.articles.slice(0, 10).map((a, i) => ({

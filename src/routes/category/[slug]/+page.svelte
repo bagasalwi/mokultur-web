@@ -4,6 +4,7 @@
   import { absoluteUrl, buildBreadcrumb } from '$lib/seo';
   import { timeAgo, imgFallback } from '$lib/format';
   import { imgUrl } from '$lib/img';
+  import { paginationPath } from '$lib/pagination';
 
   export let data: PageData;
 
@@ -13,11 +14,13 @@
   $: supporting = isFirstPage && !isSearch ? data.articles.slice(1, 5) : [];
   $: remaining = isFirstPage && !isSearch ? data.articles.slice(5) : [];
   $: flatArticles = !isFirstPage || isSearch ? data.articles : [];
+  $: canonicalUrl = absoluteUrl(paginationPath(`/category/${data.category.slug}`, isSearch ? 1 : data.meta.page));
 
   function buildUrl(page: number): string {
     const q = new URLSearchParams({ page: String(page) });
     if (data.search) q.set('search', data.search);
-    return `/category/${data.category.slug}?${q}`;
+    if (page === 1) q.delete('page');
+    return `/category/${data.category.slug}${q.size ? `?${q}` : ''}`;
   }
 
 
@@ -27,23 +30,23 @@
   <title>{isSearch ? `Cari "${data.search}" di ${data.category.name}` : data.category.name} - {data.settings?.site_name ?? 'Mokultur'}</title>
   <meta name="description" content={data.category.description ?? `Artikel kategori ${data.category.name}`} />
   {#if !isSearch}
-    <link rel="canonical" href={absoluteUrl(`/category/${data.category.slug}`)} />
+    <link rel="canonical" href={canonicalUrl} />
     <meta name="robots" content="index, follow" />
   {:else}
     <meta name="robots" content="noindex, follow" />
   {/if}
   {#if !isSearch}
     {#if data.meta.page > 1}
-      <link rel="prev" href={absoluteUrl(`/category/${data.category.slug}?page=${data.meta.page - 1}`)} />
+      <link rel="prev" href={absoluteUrl(paginationPath(`/category/${data.category.slug}`, data.meta.page - 1))} />
     {/if}
     {#if data.meta.page < data.meta.totalPages}
-      <link rel="next" href={absoluteUrl(`/category/${data.category.slug}?page=${data.meta.page + 1}`)} />
+      <link rel="next" href={absoluteUrl(paginationPath(`/category/${data.category.slug}`, data.meta.page + 1))} />
     {/if}
   {/if}
   <meta property="og:type" content="website" />
   <meta property="og:title" content={data.seo?.og.title ?? data.category.name} />
   <meta property="og:description" content={data.seo?.og.description ?? (data.category.description ?? `Artikel kategori ${data.category.name}`)} />
-  <meta property="og:url" content={data.seo?.og.url ?? absoluteUrl(`/category/${data.category.slug}`)} />
+  <meta property="og:url" content={canonicalUrl} />
   {#if data.seo?.og.image}<meta property="og:image" content={data.seo.og.image} />{/if}
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={data.seo?.twitter.title ?? data.category.name} />
@@ -54,7 +57,7 @@
     '@type': isSearch ? 'SearchResultsPage' : 'CollectionPage',
     name: data.seo?.title ?? data.category.name,
     description: data.category.description ?? undefined,
-    url: data.seo?.canonical ?? absoluteUrl(`/category/${data.category.slug}`),
+    url: canonicalUrl,
     mainEntity: {
       '@type': 'ItemList',
       itemListElement: data.articles.slice(0, 10).map((a, i) => ({
