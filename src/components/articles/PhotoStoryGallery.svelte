@@ -84,6 +84,7 @@
 </script>
 
 {#if story.photos.length}
+<div class="photo-story-shell article-detail__reader">
 <section class="photo-story" aria-labelledby="photo-story-gallery-title" aria-roledescription="carousel">
   <div class="photo-story__heading">
     <h2 id="photo-story-gallery-title">Galeri Photo Story</h2>
@@ -122,9 +123,14 @@
     </nav>
   {/if}
 </section>
+</div>
 {/if}
 
 <style>
+  .photo-story-shell { padding-inline: 0; }
+  @media (min-width: 992px) {
+    .photo-story-shell { max-width: 70ch; margin-inline: auto; padding-inline: clamp(1rem, 3vw, 1.75rem); font-size: 1.05rem; }
+  }
   .photo-story { min-width: 0; margin-top: 2rem; padding: 1.25rem; border-radius: 16px; color: #fff; background: radial-gradient(circle at top right, color-mix(in srgb, var(--site-accent-glow, #f1ff32) 45%, transparent), transparent 55%), linear-gradient(135deg, var(--site-dark, #0a0a0a) 0%, #101827 55%, #1f2937 100%); box-shadow: 0 10px 28px rgb(10 10 10 / 15%); }
   .photo-story__heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: .5rem; }
   .photo-story__heading h2 { color: #fff; font-size: 1.25rem; font-weight: 800; letter-spacing: -.015em; margin: 0; }
