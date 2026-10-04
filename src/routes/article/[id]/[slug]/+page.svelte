@@ -461,7 +461,11 @@
       <div class="bodyArticle article-detail__reader pt-lg-2">
         {@html a.content}
       </div>
-      {#if a.photoStory}<PhotoStoryGallery story={a.photoStory} onopen={(index) => storyViewer?.open(index)} />{/if}
+      {#if a.photoStory}
+        {#key a.id}
+          <PhotoStoryGallery story={a.photoStory} onopen={(index) => storyViewer?.open(index)} />
+        {/key}
+      {/if}
 
       <!-- Ad after content -->
       <AdBanner ad={data.adAfterContent} adSlot="article_ad_3" />
