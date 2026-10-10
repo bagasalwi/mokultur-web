@@ -541,6 +541,18 @@
         {/key}
       {/if}
       </div>
+      <!-- On phones the sidebar ends up below the comments; offer the next read
+           where the article ends instead. Desktop keeps it in the sidebar. -->
+      {#if data.related.length > 0}
+        <section class="article-next d-lg-none" aria-labelledby="article-next-title">
+          <h2 class="article-next__title" id="article-next-title">Baca selanjutnya</h2>
+          <div class="d-flex flex-column">
+            {#each data.related.slice(0, 4) as article, i (article.id)}
+              <ArticleRankItem {article} rank={i + 1} />
+            {/each}
+          </div>
+        </section>
+      {/if}
       {#if !data.isPreview}
         {#key a.id}
           <ReadingHistory postId={a.id} loggedIn={!!data.user} state={readerState} />
@@ -671,7 +683,7 @@
         {/if}
 
         {#if data.related.length > 0}
-          <div class="mb-4">
+          <div class="mb-4 d-none d-lg-block">
             <div class="line-heading mb-3">
               <h3 class="fw-bold h5 mb-0"><span>Rekomendasi</span></h3>
             </div>

@@ -4,11 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "vite dev",
+    "prebuild": "node scripts/build-icons.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "start": "node build/index.js",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "icons": "node scripts/build-icons.mjs"
   },
   "devDependencies": {
     "@sveltejs/adapter-node": "^5.2.0",
@@ -16,6 +18,7 @@
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
     "@types/node": "^22.19.19",
     "sass": "^1.87.0",
+    "subset-font": "^2.9.0",
     "svelte": "^5.0.0",
     "svelte-check": "^4.0.0",
     "typescript": "^5.0.0",

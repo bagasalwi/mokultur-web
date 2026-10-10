@@ -4,11 +4,44 @@
 // 1. Design tokens & Bootstrap overrides
 @import 'variables';
 
-// 2. Bootstrap 5.3
-@import 'bootstrap/scss/bootstrap';
+// 2. Bootstrap 5.3: only the components the site renders. Left out because
+//    nothing in the web app, the API's HTML or stored articles/pages uses them:
+//    accordion, button-group, list-group, toasts, tooltip, popover, spinners,
+//    offcanvas. Re-add a line here before using one.
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/variables-dark';
+@import 'bootstrap/scss/maps';
+@import 'bootstrap/scss/mixins';
+@import 'bootstrap/scss/utilities';
+@import 'bootstrap/scss/root';
+@import 'bootstrap/scss/reboot';
+@import 'bootstrap/scss/type';
+@import 'bootstrap/scss/images';
+@import 'bootstrap/scss/containers';
+@import 'bootstrap/scss/grid';
+@import 'bootstrap/scss/tables';
+@import 'bootstrap/scss/forms';
+@import 'bootstrap/scss/buttons';
+@import 'bootstrap/scss/transitions';
+@import 'bootstrap/scss/dropdown';
+@import 'bootstrap/scss/nav';
+@import 'bootstrap/scss/navbar';
+@import 'bootstrap/scss/card';
+@import 'bootstrap/scss/breadcrumb';
+@import 'bootstrap/scss/pagination';
+@import 'bootstrap/scss/badge';
+@import 'bootstrap/scss/alert';
+@import 'bootstrap/scss/progress';
+@import 'bootstrap/scss/close';
+@import 'bootstrap/scss/modal';
+@import 'bootstrap/scss/carousel';
+@import 'bootstrap/scss/placeholders';
+@import 'bootstrap/scss/helpers';
+@import 'bootstrap/scss/utilities/api';
 
-// 3. Bootstrap Icons
-@import 'bootstrap-icons/font/bootstrap-icons.css';
+// 3. Bootstrap Icons: a subset with only the icons in use (scripts/build-icons.mjs, run on prebuild)
+@import 'generated/bootstrap-icons-subset';
 
 // 4. Mokultur custom design system
 @import 'custom';

@@ -8263,3 +8263,18 @@ button.emoji-picker {
         outline-color: #ffffff;
     }
 }
+
+/* "Baca selanjutnya" right after the article body on phones (the sidebar sits below the comments there). */
+.article-next {
+    margin: 2rem 0 0.5rem;
+    padding: 1.25rem 1rem 0.5rem;
+    border-radius: 16px;
+    background: #f4f4f1;
+}
+
+.article-next__title {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
