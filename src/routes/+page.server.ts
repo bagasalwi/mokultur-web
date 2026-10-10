@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { listArticles, getPopularTags, getPopularArticles, listWriters, getAd, listCurhatan, listReels, getCurrentSeasonTop, getAiringToday, listEvents } from '$lib/api';
+import { type ArticleListItem, listArticles, getPopularTags, getPopularArticles, listWriters, getAd, listCurhatan, listReels, getCurrentSeasonTop, getAiringToday, listEvents } from '$lib/api';
 import { fetchTopThreads } from '$lib/threads';
 import { LOUNGE_ENABLED } from '$lib/features';
 import { loadReader } from '$lib/server/reader';
@@ -19,7 +19,13 @@ export const load: PageServerLoad = async ({ setHeaders, url, fetch, parent, loc
     listArticles({ page: 1, perPage: 15 }),
     listArticles({ page: 2, perPage: 28 }),
     getPopularTags(15),
-    getPopularArticles(5),
+    // One list per tab on the popular card. Each range fails on its own, so
+    // a slow "today" never blanks the whole card.
+    Promise.all(
+      (['today', 'week', 'month'] as const).map((range) =>
+        getPopularArticles(5, range).then((r) => r.data).catch(() => [] as ArticleListItem[]),
+      ),
+    ),
     listArticles({ page: 1, perPage: 14, category: 'event' }),
     listWriters(1, 3),
     listArticles({ page: 1, perPage: 12, category: 'tech' }),
@@ -49,7 +55,9 @@ export const load: PageServerLoad = async ({ setHeaders, url, fetch, parent, loc
     personalFeed: readerRes.status === 'fulfilled' ? readerRes.value : null,
     moreArticles,
     popularTags: tagsRes.status === 'fulfilled' ? tagsRes.value.data : [],
-    popularArticles: popularRes.status === 'fulfilled' ? popularRes.value.data : [],
+    popular: popularRes.status === 'fulfilled'
+      ? { today: popularRes.value[0], week: popularRes.value[1], month: popularRes.value[2] }
+      : { today: [] as ArticleListItem[], week: [] as ArticleListItem[], month: [] as ArticleListItem[] },
     eventArticles: eventRes.status === 'fulfilled' ? eventRes.value.data : [],
     writers: writersRes.status === 'fulfilled' ? writersRes.value.data : [],
     techArticles: techRes.status === 'fulfilled' ? techRes.value.data : [],

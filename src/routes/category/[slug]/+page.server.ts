@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { getCategoryArticles, getPopularArticles, type ArticleListItem, type ArticleSort } from '$lib/api';
+import { getCategoryArticles, getPopularArticles, type ArticleListItem, type ArticleSort, type PopularRange } from '$lib/api';
 import { error, isHttpError } from '@sveltejs/kit';
 import { pageNumber, paginationTotal } from '$lib/pagination';
 import { COOKIE_NAME } from '$lib/auth';
@@ -9,14 +9,16 @@ import { interestForCategory, type ReaderInterest } from '$lib/reader';
 const PER_PAGE = 15;
 
 /**
- * Category popularity, newest window first: this calendar month, falling back
- * to all time when a quieter category has not had three hits yet this month.
+ * Category popularity per window, for the tabs on the popular card: today,
+ * this week and this month, in parallel (the API caches each for 5 minutes).
+ * A quieter category with fewer than three hits this month also gets an
+ * all-time list, and opens on it, as the single-list card used to.
  */
-async function popularIn(slug: string): Promise<{ articles: ArticleListItem[]; scope: 'month' | 'all' }> {
-  const month = await getPopularArticles(5, 'month', slug).catch(() => null);
-  if (month && month.data.length >= 3) return { articles: month.data, scope: 'month' };
-  const all = await getPopularArticles(5, 'all', slug).catch(() => null);
-  return { articles: all?.data ?? month?.data ?? [], scope: 'all' };
+async function popularIn(slug: string): Promise<{ ranges: Record<PopularRange, ArticleListItem[]>; initial: PopularRange }> {
+  const pick = (range: PopularRange) => getPopularArticles(5, range, slug).then((r) => r.data).catch(() => [] as ArticleListItem[]);
+  const [today, week, month] = await Promise.all([pick('today'), pick('week'), pick('month')]);
+  const all = month.length >= 3 ? [] : await pick('all');
+  return { ranges: { today, week, month, all }, initial: month.length >= 3 ? 'month' : 'all' };
 }
 
 export const load: PageServerLoad = async ({ params, url, setHeaders, locals, cookies, fetch }) => {
@@ -51,8 +53,8 @@ export const load: PageServerLoad = async ({ params, url, setHeaders, locals, co
       page,
       search: search ?? null,
       sort,
-      popularArticles: popular.articles,
-      popularScope: popular.scope,
+      popular: popular.ranges,
+      popularInitial: popular.initial,
       interest,
       interests,
     };

@@ -4,7 +4,7 @@
   import SectionHead from '$components/ui/SectionHead.svelte';
   import NewsroomBlock from '$components/home/NewsroomBlock.svelte';
   import LatestList from '$components/home/LatestList.svelte';
-  import PopularArticlesCard from '$components/common/PopularArticlesCard.svelte';
+  import PopularArticlesCard, { RANGE_LABELS } from '$components/common/PopularArticlesCard.svelte';
   import FollowTopic from '$components/reader/FollowTopic.svelte';
   import { absoluteUrl, buildBreadcrumb } from '$lib/seo';
   import { timeAgo } from '$lib/format';
@@ -177,8 +177,12 @@
 
     <aside class="cat-aside" aria-label="Pelengkap {category.name}">
       <PopularArticlesCard
-        title={data.popularScope === 'month' ? `Populer bulan ini` : `Populer di ${category.name}`}
-        articles={data.popularArticles}
+        title="Populer di {category.name}"
+        headingId="cat-popular"
+        ranges={(['today', 'week', 'month', 'all'] as const).map((key) => ({ key, label: RANGE_LABELS[key], articles: data.popular[key] }))}
+        initial={data.popularInitial}
+        moreHref={href(1, 'popular')}
+        showCategory={false}
       />
 
       {#if data.interest && !followed}

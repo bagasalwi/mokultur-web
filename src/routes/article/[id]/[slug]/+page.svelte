@@ -10,6 +10,7 @@
   import CurhatPromoCard from "$components/curhatan/CurhatPromoCard.svelte";
   import EventPromoCard from "$components/event/EventPromoCard.svelte";
   import ArticleRankItem from "$components/common/ArticleRankItem.svelte";
+  import SideCard from "$components/sidebar/SideCard.svelte";
   import ShareSheet from "$components/common/ShareSheet.svelte";
   import { onMount } from "svelte";
   import { PUBLIC_API_URL } from "$env/static/public";
@@ -548,11 +549,11 @@
       {#if data.related.length > 0}
         <section class="article-next d-lg-none" aria-labelledby="article-next-title">
           <h2 class="article-next__title" id="article-next-title">Baca selanjutnya</h2>
-          <div class="d-flex flex-column">
+          <ul class="list-unstyled mb-0">
             {#each data.related.slice(0, 4) as article, i (article.id)}
-              <ArticleRankItem {article} rank={i + 1} />
+              <li><ArticleRankItem {article} rank={i + 1} ranked={false} /></li>
             {/each}
-          </div>
+          </ul>
         </section>
       {/if}
       {#if !data.isPreview}
@@ -685,15 +686,14 @@
         {/if}
 
         {#if data.related.length > 0}
-          <div class="mb-4 d-none d-lg-block">
-            <div class="line-heading mb-3">
-              <h3 class="fw-bold h5 mb-0"><span>Rekomendasi</span></h3>
-            </div>
-            <div class="d-flex flex-column">
-              {#each data.related as article, i}
-                <ArticleRankItem {article} rank={i + 1} />
-              {/each}
-            </div>
+          <div class="d-none d-lg-block">
+            <SideCard title="Rekomendasi" headingId="article-related">
+              <ul class="list-unstyled mb-0">
+                {#each data.related as article, i (article.id)}
+                  <li><ArticleRankItem {article} rank={i + 1} ranked={false} /></li>
+                {/each}
+              </ul>
+            </SideCard>
           </div>
         {/if}
 
