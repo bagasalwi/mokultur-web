@@ -4285,6 +4285,20 @@ input[readonly="readonly"] {
     }
 }
 
+// The editor stores text-align: justify inline (745 of 799 articles, headings
+// included). A justified heading spreads two words across the line, and on a
+// phone-width column justified paragraphs open wide gaps; centred captions and
+// image paragraphs are left alone because only "justify" is matched.
+.bodyArticle :is(h1, h2, h3, h4, h5, h6)[style*="justify"] {
+    text-align: start !important;
+}
+
+@media (max-width: 767.98px) {
+    .bodyArticle [style*="justify"] {
+        text-align: start !important;
+    }
+}
+
 // Legacy class from mokuspace.css — article body image classes
 .b-gambar {
     width: 100%;
