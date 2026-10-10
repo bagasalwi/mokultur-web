@@ -54,7 +54,7 @@
   const HERO_COUNT: Record<string, number> = { ticker: 6, 'spotlight-stack': 6, masthead: 4 };
   $: heroType = data.settings?.hero_type ?? 'cinematic';
   $: heroIds = new Set(data.headlines.slice(0, HERO_COUNT[heroType] ?? 5).map((a) => a.id));
-  $: latestList = data.latest.filter((a) => !heroIds.has(a.id)).slice(0, newsList ? 10 : 9);
+  $: latestList = data.latest.filter((a) => !heroIds.has(a.id)).slice(0, newsList ? 15 : 9);
   $: shownIds = new Set([...heroIds, ...latestList.map((a) => a.id)]);
   // Signed-in readers get their feed; guests get slightly older stories they
   // may have missed, which also keeps the pick row distinct from Terbaru.
@@ -151,7 +151,7 @@
             <a slot="action" href="/index-article" class="theme-btn theme-btn--see-all theme-btn--sm">Lihat Semua <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
           </SectionHead>
           {#if newsList}
-            <LatestList articles={latestList} />
+            <LatestList articles={latestList} desktopOnlyFrom={10} />
           {:else}
             <div class="row g-4">
               {#each latestList as article (article.id)}

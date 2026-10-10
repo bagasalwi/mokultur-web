@@ -13,13 +13,19 @@
   export let showCategory = true;
   /** Off on an author's own page, where every row has the same byline. */
   export let showAuthor = true;
+  /**
+   * Rows from this index on show only on desktop (≥992px). The homepage uses
+   * it so the feed runs as long as the sidebar beside it; on phones the
+   * sidebar stacks below and the extra rows would only lengthen the page.
+   */
+  export let desktopOnlyFrom: number | null = null;
 
   const href = (a: ArticleListItem) => `/article/${a.id}/${a.slug}`;
 </script>
 
 <ul class="latest-list">
-  {#each articles as a (a.id)}
-    <li>
+  {#each articles as a, i (a.id)}
+    <li class:latest-list__desktop={desktopOnlyFrom !== null && i >= desktopOnlyFrom}>
       <a class="latest-row" href={href(a)}>
         <span class="latest-row__thumb">
           <img src={imgUrl(a.image, 480) ?? '/images/noimage.png'} srcset={imgSrcset(a.image, 240)} sizes="(max-width: 575px) 112px, 240px" alt="" loading="lazy" decoding="async" on:error={imgFallback} />
@@ -42,6 +48,7 @@
 <style>
   .latest-list { list-style: none; margin: 0; padding: 0; }
   .latest-list li + li { border-top: 1px solid #ececec; }
+  @media (max-width: 991.98px) { .latest-list__desktop { display: none; } }
 
   .latest-row {
     display: flex;

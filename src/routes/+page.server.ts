@@ -16,7 +16,9 @@ export const load: PageServerLoad = async ({ setHeaders, url, fetch, parent, loc
 
   const [headlinesRes, latestRes, moreRes, tagsRes, popularRes, eventRes, writersRes, techRes, ad0Res, ad1Res, ad2Res, ad3Res, curhatanRes, threadsRes, reelsRes, seasonAnimeRes, airingRes, upcomingEventsRes, readerRes] = await Promise.allSettled([
     listArticles({ page: 1, perPage: 6 }),
-    listArticles({ page: 1, perPage: 15 }),
+    // 22, not 15: the hero takes the first few, and the desktop feed shows 15
+    // rows so it runs as long as the sidebar beside it.
+    listArticles({ page: 1, perPage: 22 }),
     listArticles({ page: 2, perPage: 28 }),
     getPopularTags(15),
     // One list per tab on the popular card. Each range fails on its own, so
