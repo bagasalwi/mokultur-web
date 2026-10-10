@@ -1,70 +1,47 @@
-import { fail, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import { PUBLIC_API_URL } from '$env/static/public';
 import { setSessionCookie } from '$lib/auth';
+import { authFail, modalUrl, safeNext } from '$lib/server/auth-flow';
 import type { Actions, PageServerLoad } from './$types';
 
-const DEFAULT_DESTINATION = '/dashboard';
-
 /**
- * Only same-site paths may be redirected to.
- *
- * `startsWith('/')` alone is not enough: `//evil.com` is a protocol-relative
- * URL, so a browser reads it as another origin and leaves the site. Anything
- * that is not a plain absolute path falls back to the dashboard.
+ * There is no login page any more: logging in happens in the site-wide modal.
+ * A visit here (old links, server redirects from private pages) is forwarded
+ * to the page the reader wanted, with the modal open over it.
  */
-function safeNext(value: string | null | undefined): string {
-  if (!value) return DEFAULT_DESTINATION;
-  if (!value.startsWith('/')) return DEFAULT_DESTINATION;
-  if (value.startsWith('//')) return DEFAULT_DESTINATION;
-  // Backslashes are normalised to slashes by some browsers, so /\evil.com
-  // would escape the same way //evil.com does.
-  if (value.startsWith('/\\')) return DEFAULT_DESTINATION;
-  return value;
-}
-
 export const load: PageServerLoad = ({ locals, url }) => {
-  if (locals.user) {
-    throw redirect(303, safeNext(url.searchParams.get('redirect')));
-  }
-  return {};
+  const next = safeNext(url.searchParams.get('redirect'));
+  if (locals.user) throw redirect(303, next);
+  throw redirect(303, modalUrl(url.origin, 'login', next));
 };
 
 export const actions: Actions = {
-  default: async ({ request, cookies, fetch }) => {
+  default: async ({ request, cookies, fetch, url }) => {
     const fd = await request.formData();
     const email = String(fd.get('email') ?? '').trim();
     const password = String(fd.get('password') ?? '');
-    const redirectTo = safeNext(String(fd.get('redirect') ?? ''));
+    const next = safeNext(String(fd.get('redirect') ?? ''));
+    const fail = (status: number, code: Parameters<typeof authFail>[5]) =>
+      authFail(request, url.origin, 'login', next, status, code, { email });
 
-    if (!email || !password) {
-      return fail(400, { error: 'Email & password wajib diisi.', email });
-    }
+    if (!email || !password) return fail(400, 'required');
 
+    let user: unknown;
     try {
       const res = await fetch(`${PUBLIC_API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        return fail(res.status === 401 ? 401 : 400, {
-          error: err.error ?? 'Email atau password salah.',
-          email,
-        });
-      }
-
-      const { user } = await res.json();
-      if (!user) {
-        return fail(500, { error: 'Respons login tidak valid.', email });
-      }
-
-      await setSessionCookie(cookies, user);
-    } catch (e) {
-      return fail(503, { error: 'Server lagi sibuk, coba lagi sebentar.', email });
+      // Any rejection reads the same to the reader; the API's English text never reaches them.
+      if (!res.ok) return fail(res.status === 401 ? 401 : 400, 'invalid');
+      ({ user } = await res.json());
+    } catch {
+      return fail(503, 'busy');
     }
+    if (!user) return fail(500, 'busy');
 
-    throw redirect(303, redirectTo);
+    await setSessionCookie(cookies, user as Parameters<typeof setSessionCookie>[1]);
+    throw redirect(303, next);
   },
 };

@@ -40,7 +40,10 @@ export function imgUrl(src: string | null | undefined, width: number): string | 
   const rel = variantKey(src);
   if (!rel) return src ?? null;
 
-  return `${API}/img/${width}/${rel}`;
+  // The image route only serves the WIDTHS above; anything else is a 400, so
+  // round up to the next size it actually has.
+  const served = WIDTHS.find((w) => w >= width) ?? WIDTHS[WIDTHS.length - 1];
+  return `${API}/img/${served}/${rel}`;
 }
 
 /**

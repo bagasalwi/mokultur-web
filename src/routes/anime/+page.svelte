@@ -180,7 +180,7 @@
   {#if data.animeArticles.length}
     <section class="mb-5">
       <SectionHead title="Berita Anime" sub="Liputan dan ulasan anime dari redaksi Mokultur.">
-        <a slot="action" href="/category/anime" class="theme-btn theme-btn--surface theme-btn--sm flex-shrink-0">
+        <a slot="action" href="/category/anime" class="theme-btn theme-btn--see-all theme-btn--sm flex-shrink-0">
           Lihat Semua <i class="bi bi-arrow-right"></i>
         </a>
       </SectionHead>

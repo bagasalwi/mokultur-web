@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import { PUBLIC_API_URL } from '$env/static/public';
 import { COOKIE_NAME } from '$lib/auth';
+import { meGet, type MeSummary } from '$lib/server/me';
 import type { PageServerLoad } from './$types';
 
 export type MyPost = {
@@ -40,6 +41,8 @@ export const load: PageServerLoad = async ({ parent, cookies, fetch, url }) => {
 
   const token = cookies.get(COOKIE_NAME) ?? '';
 
+  const summary = meGet<MeSummary>(fetch, token, 'summary');
+
   try {
     const res = await fetch(`${PUBLIC_API_URL}/api/me/posts?${query}`, {
       headers: { cookie: `${COOKIE_NAME}=${token}` },
@@ -56,8 +59,9 @@ export const load: PageServerLoad = async ({ parent, cookies, fetch, url }) => {
       perPage: PER_PAGE,
       filter,
       failed: false,
+      summary: await summary,
     };
   } catch {
-    return { posts: [] as MyPost[], total: 0, page, perPage: PER_PAGE, filter, failed: true };
+    return { posts: [] as MyPost[], total: 0, page, perPage: PER_PAGE, filter, failed: true, summary: await summary };
   }
 };

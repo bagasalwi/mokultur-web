@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import { absoluteUrl } from '$lib/seo';
+  import { absoluteUrl, buildBreadcrumb } from '$lib/seo';
   import type { CurhatanItem } from '$lib/api';
   import { PUBLIC_API_URL } from '$env/static/public';
   import CurhatCard from '$components/curhatan/CurhatCard.svelte';
@@ -59,6 +59,11 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Curhatan {siteName} — Cerita Jujur Komunitas" />
   <meta name="twitter:description" content="Kumpulan cerita jujur dari komunitas {siteName}. Baca, upvote, dan bagikan ceritamu sendiri." />
+  {#if data.settings?.og_image}
+    <meta property="og:image" content={data.settings.og_image} />
+    <meta name="twitter:image" content={data.settings.og_image} />
+  {/if}
+  {@html `<script type="application/ld+json">${JSON.stringify(buildBreadcrumb([{ name: 'Curhatan', path: '/curhatan' }]))}<\/script>`}
 </svelte:head>
 
 <section class="section-md container-xl">

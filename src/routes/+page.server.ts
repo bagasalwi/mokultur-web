@@ -2,24 +2,27 @@ import type { PageServerLoad } from './$types';
 import { listArticles, getPopularTags, getPopularArticles, listWriters, getAd, listCurhatan, listReels, getCurrentSeasonTop, getAiringToday, listEvents } from '$lib/api';
 import { fetchTopThreads } from '$lib/threads';
 import { LOUNGE_ENABLED } from '$lib/features';
+import { loadReader } from '$lib/server/reader';
+import type { ReaderFeed } from '$lib/reader';
+import { COOKIE_NAME } from '$lib/auth';
 
-export const load: PageServerLoad = async ({ setHeaders, url, fetch, parent }) => {
+export const load: PageServerLoad = async ({ setHeaders, url, fetch, parent, locals, cookies }) => {
   const preview = url.searchParams.get('preview_ads') === 'true';
   // Settings already came down with the layout load, so this costs no request.
   const { settings } = await parent();
   const animeOn = settings?.anime_enabled !== false;
   const eventOn = settings?.event_enabled !== false;
-  if (!preview) setHeaders({ 'cache-control': 'public, max-age=60, stale-while-revalidate=300' });
+  if (!preview) setHeaders({ 'cache-control': locals.user ? 'private, no-store' : 'public, max-age=60, stale-while-revalidate=300' });
 
-  const [headlinesRes, latestRes, moreRes, tagsRes, popularRes, eventRes, writersRes, techRes, ad0Res, ad1Res, ad2Res, ad3Res, curhatanRes, threadsRes, reelsRes, seasonAnimeRes, airingRes, upcomingEventsRes] = await Promise.allSettled([
+  const [headlinesRes, latestRes, moreRes, tagsRes, popularRes, eventRes, writersRes, techRes, ad0Res, ad1Res, ad2Res, ad3Res, curhatanRes, threadsRes, reelsRes, seasonAnimeRes, airingRes, upcomingEventsRes, readerRes] = await Promise.allSettled([
     listArticles({ page: 1, perPage: 6 }),
     listArticles({ page: 1, perPage: 15 }),
-    listArticles({ page: 2, perPage: 20 }),
+    listArticles({ page: 2, perPage: 28 }),
     getPopularTags(15),
     getPopularArticles(5),
-    listArticles({ page: 1, perPage: 8, category: 'event' }),
+    listArticles({ page: 1, perPage: 14, category: 'event' }),
     listWriters(1, 3),
-    listArticles({ page: 1, perPage: 5, category: 'tech' }),
+    listArticles({ page: 1, perPage: 12, category: 'tech' }),
     getAd('ad_0', preview),
     getAd('ad_1', preview),
     getAd('ad_2', preview),
@@ -30,6 +33,7 @@ export const load: PageServerLoad = async ({ setHeaders, url, fetch, parent }) =
     animeOn ? getCurrentSeasonTop(8) : Promise.resolve(null),
     animeOn ? getAiringToday() : Promise.resolve(null),
     eventOn ? listEvents('upcoming', 8) : Promise.resolve(null),
+    locals.user ? loadReader<ReaderFeed>(fetch, cookies.get(COOKIE_NAME) ?? '', 'feed') : Promise.resolve(null),
   ]);
 
   const headlines = headlinesRes.status === 'fulfilled' ? headlinesRes.value.data : [];
@@ -37,11 +41,12 @@ export const load: PageServerLoad = async ({ setHeaders, url, fetch, parent }) =
   const seenIds = new Set([...headlines, ...latest].map((a) => a.id));
   const moreArticles = (moreRes.status === 'fulfilled' ? moreRes.value.data : [])
     .filter((a) => !seenIds.has(a.id))
-    .slice(0, 16);
+    .slice(0, 24);
 
   return {
     headlines,
     latest,
+    personalFeed: readerRes.status === 'fulfilled' ? readerRes.value : null,
     moreArticles,
     popularTags: tagsRes.status === 'fulfilled' ? tagsRes.value.data : [],
     popularArticles: popularRes.status === 'fulfilled' ? popularRes.value.data : [],

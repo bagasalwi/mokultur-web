@@ -21,11 +21,14 @@ let _cacheAt = 0;
  * than trusted: they land in markup and component branches.
  */
 const PREVIEWABLE = {
-  hero_type: ['cinematic', 'split', 'ticker', 'masthead', 'editorial-grid', 'spotlight-stack'],
+  hero_type: ['cinematic', 'split', 'ticker', 'masthead', 'top-stories', 'editorial-grid', 'spotlight-stack'],
   card_style: ['vertical', 'horizontal', 'magazine', 'minimal', 'compact-news', 'feature-tile', 'borderless-feed'],
   article_detail_style: ['classic', 'immersive', 'editorial', 'clean'],
-  event_section_style: ['standard', 'immersive', 'magazine'],
-  tech_section_style: ['standard', 'immersive', 'magazine'],
+  event_section_style: ['standard', 'immersive', 'magazine', 'newsroom'],
+  tech_section_style: ['standard', 'immersive', 'magazine', 'newsroom'],
+  latest_section_style: ['card-grid', 'news-list'],
+  home_layout: ['news-first', 'classic'],
+  anime_section_style: ['trio', 'poster-rail'],
   navbar_style: ['times', 'compact', 'masthead', 'split', 'minimal'],
 } as const satisfies Record<string, readonly string[]>;
 

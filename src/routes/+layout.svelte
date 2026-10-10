@@ -8,6 +8,8 @@
   import ChatWidget from '$components/chat/ChatWidget.svelte';
   import NavProgress from '$components/common/NavProgress.svelte';
   import CookieConsent from '$components/common/CookieConsent.svelte';
+  import AuthModal from '$components/auth/AuthModal.svelte';
+  import SearchPalette from '$components/search/SearchPalette.svelte';
   import Analytics from '$components/common/Analytics.svelte';
   import type { LayoutData } from './$types';
   import { isAnimePath } from '$lib/route-policy';
@@ -15,7 +17,7 @@
   export let data: LayoutData;
 
   afterNavigate(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    if (!window.location.hash) window.scrollTo({ top: 0, behavior: 'instant' });
   });
 
   onMount(async () => {
@@ -56,9 +58,8 @@
     '@type': 'NewsMediaOrganization',
     name: siteName,
     url: origin,
-    logo: data.settings?.site_logo
-      ? { '@type': 'ImageObject', url: data.settings.site_logo }
-      : undefined,
+    // The same logo file the article publisher markup uses (API schema builder).
+    logo: { '@type': 'ImageObject', url: `${origin}/assets/mokultur/MOKULTUR-LOGO.png` },
     sameAs: (data.socials ?? []).map((s) => s.url),
   });
 
@@ -71,7 +72,7 @@
     url: origin,
     potentialAction: {
       '@type': 'SearchAction',
-      target: `${origin}/index-article?search={search_term_string}`,
+      target: `${origin}/search?q={search_term_string}`,
       'query-input': 'required name=search_term_string',
     },
   });
@@ -81,8 +82,24 @@
   {#if isAnimePath($page.url.pathname)}
     <meta name="robots" content="noindex, follow" />
   {/if}
+  <!-- Google Reader Revenue Manager (Subscribe with Google, open access). Public pages only. -->
+  {#if !isPrivateRoute}
+    <script async type="application/javascript" src="https://news.google.com/swg/js/v1/swg-basic.js"></script>
+    {@html `<script>
+  (self.SWG_BASIC = self.SWG_BASIC || []).push( basicSubscriptions => {
+    basicSubscriptions.init({
+      type: "NewsArticle",
+      isPartOfType: ["Product"],
+      isPartOfProductId: "CAowgYTIDA:openaccess",
+      clientOptions: { theme: "light", lang: "id" },
+    });
+  });
+<\/script>`}
+  {/if}
   {#if data.settings?.site_favicon}
     <link rel="icon" href={data.settings.site_favicon} />
+  {:else}
+    <link rel="icon" href="/icons/icon-32.png" sizes="32x32" type="image/png" />
   {/if}
   <meta property="og:locale" content="id_ID" />
   <meta property="og:site_name" content={siteName} />
@@ -126,6 +143,12 @@
 {/if}
 
 <CookieConsent />
+<!-- Site-wide search: the navbar icon, "/" or Ctrl/⌘+K. -->
+<SearchPalette categories={data.categories} />
+{#if !data.user}
+  <!-- Logging in and signing up happen here, over whatever page the reader is on. -->
+  <AuthModal siteName={data.settings?.site_name ?? 'Mokultur'} logo={data.settings?.site_logo ?? null} />
+{/if}
 <Analytics
   measurementId={data.settings?.google_analytics ?? null}
   adsenseEnabled={data.settings?.adsense_enabled ?? false}

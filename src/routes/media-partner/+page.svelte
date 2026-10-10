@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import { absoluteUrl } from '$lib/seo';
+  import { absoluteUrl, buildBreadcrumb } from '$lib/seo';
   import { imgFallback } from '$lib/format';
 
   export let data: PageData;
@@ -20,9 +20,14 @@
   <meta property="og:title" content="Media Partner — {siteName}" />
   <meta property="og:description" content="Daftar media partner dan kolaborasi {siteName}. Bergabunglah bersama kami." />
   <meta property="og:url" content={absoluteUrl('/media-partner')} />
-  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:card" content={data.settings?.og_image ? 'summary_large_image' : 'summary'} />
+  {#if data.settings?.og_image}
+    <meta property="og:image" content={data.settings.og_image} />
+    <meta name="twitter:image" content={data.settings.og_image} />
+  {/if}
   <meta name="twitter:title" content="Media Partner — {siteName}" />
   <meta name="twitter:description" content="Daftar media partner dan kolaborasi {siteName}. Bergabunglah bersama kami." />
+  {@html `<script type="application/ld+json">${JSON.stringify(buildBreadcrumb([{ name: 'Media Partner', path: '/media-partner' }]))}<\/script>`}
 </svelte:head>
 
 <div class="media-partner-page section-md container-xl">

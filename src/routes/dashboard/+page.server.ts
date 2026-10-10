@@ -1,49 +1,26 @@
-import { PUBLIC_API_URL } from '$env/static/public';
 import { COOKIE_NAME } from '$lib/auth';
+import { loadReader } from '$lib/server/reader';
+import { INTEREST_OPTIONS, type ReaderCollection, type ReaderFeed } from '$lib/reader';
 import type { PageServerLoad } from './$types';
 
-export type MeSummary = {
-  total: number;
-  published: number;
-  drafts: number;
-  views: number;
-};
+const emptyFeed = (): ReaderFeed => ({
+  data: [], interests: [], availableInterests: INTEREST_OPTIONS,
+  meta: { page: 1, perPage: 20, hasMore: false, asOf: new Date().toISOString() },
+});
 
-export type MeActivity = {
-  type: 'comment' | 'like';
-  id: number;
-  createdAt: string | null;
-  postId: number;
-  postTitle: string | null;
-  postSlug: string | null;
-  excerpt: string | null;
-};
-
-export const load: PageServerLoad = async ({ parent, cookies, fetch }) => {
-  const { profile } = await parent();
+/** "Untuk Kamu": the personal feed, plus the two shelves beside it. */
+export const load: PageServerLoad = async ({ cookies, fetch }) => {
   const token = cookies.get(COOKIE_NAME) ?? '';
-  const headers = { cookie: `${COOKIE_NAME}=${token}` };
-
-  const get = async <T>(path: string): Promise<T | null> => {
-    try {
-      const res = await fetch(`${PUBLIC_API_URL}${path}`, { headers });
-      return res.ok ? ((await res.json()) as T) : null;
-    } catch {
-      // Each card renders its own empty state, so one dead endpoint costs one
-      // card rather than the page.
-      return null;
-    }
-  };
-
-  const [summary, activity] = await Promise.all([
-    // Only writers have articles; asking for a summary of nothing is a wasted
-    // round trip on every reader's dashboard.
-    profile.canWrite ? get<MeSummary>('/api/me/summary') : Promise.resolve(null),
-    get<{ data: MeActivity[] }>('/api/me/activity'),
+  const [feed, history, saved] = await Promise.all([
+    loadReader<ReaderFeed>(fetch, token, 'feed').then((data) => ({ data, error: null as string | null }))
+      .catch(() => ({ data: emptyFeed(), error: 'Feed belum dapat dimuat. Coba lagi.' })),
+    loadReader<ReaderCollection>(fetch, token, 'history?page=1').catch(() => null),
+    loadReader<ReaderCollection>(fetch, token, 'saved?page=1').catch(() => null),
   ]);
-
   return {
-    summary,
-    activity: activity?.data ?? [],
+    feed: feed.data,
+    feedError: feed.error,
+    recentlyRead: history?.data.slice(0, 4) ?? [],
+    recentlySaved: saved?.data.slice(0, 4) ?? [],
   };
 };

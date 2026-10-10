@@ -1,208 +1,223 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import { absoluteUrl, buildBreadcrumb, buildPageTitle } from '$lib/seo';
-  import EventCard from '$components/event/EventCard.svelte';
+  import { monthKey, monthLabel } from '$lib/event';
+  import type { EventItem } from '$lib/api';
+  import EventSpotlight from '$components/event/EventSpotlight.svelte';
+  import EventAgendaRow from '$components/event/EventAgendaRow.svelte';
 
   export let data: PageData;
 
   $: siteName = data.settings?.site_name ?? 'Mokultur';
-
-  // Same contact plumbing the /contact hero uses, with the message pre-filled
-  // so the sender does not have to explain why they are writing.
-  $: whatsapp =
-    data.settings?.contact_whatsapp && data.settings.contact_whatsapp !== '-'
-      ? data.settings.contact_whatsapp.replace(/\D/g, '')
-      : null;
-  $: email = data.settings?.contact_email ?? null;
-  $: waUrl = whatsapp
-    ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(
-        `Halo ${siteName}, saya mau daftarkan event saya ke Jadwal Event.`
-      )}`
-    : null;
-  $: mailUrl = email
-    ? `mailto:${email}?subject=${encodeURIComponent('Daftarkan Event ke Jadwal Event Mokultur')}`
-    : null;
-
   $: pageTitle = buildPageTitle('Jadwal Event', siteName);
-  $: description = `Jadwal event anime, manga, cosplay, dan pop culture yang sedang dan akan berlangsung, dikurasi ${siteName}.`;
-  $: canonical = absoluteUrl('/event');
+  $: description = `Jadwal event anime, game, cosplay, dan pop culture terdekat di Indonesia — lengkap dengan tanggal, lokasi, dan link tiket dari ${siteName}.`;
+
+  // Filters run on the client: the whole schedule is already on the page, and
+  // without JS every event simply stays visible.
+  let city = 'all';
+  let month = 'all';
+
+  $: cities = [...new Set(data.upcoming.map((e) => e.city).filter(Boolean) as string[])].sort((a, b) => a.localeCompare(b, 'id'));
+  $: months = [...new Set(data.upcoming.map((e) => monthKey(e.startDate)))].sort();
+  $: filtering = city !== 'all' || month !== 'all';
+  $: spotlight = data.upcoming[0] ?? null;
+  $: matches = data.upcoming.filter((e) => (city === 'all' || e.city === city) && (month === 'all' || monthKey(e.startDate) === month));
+  // The spotlight already shows the next event; repeat it only inside a filter.
+  $: listed = filtering ? matches : matches.filter((e) => e !== spotlight);
+  $: groups = listed.reduce<{ key: string; events: EventItem[] }[]>((acc, e) => {
+    const key = monthKey(e.startDate);
+    const last = acc[acc.length - 1];
+    if (last?.key === key) last.events.push(e);
+    else acc.push({ key, events: [e] });
+    return acc;
+  }, []);
+
 </script>
 
 <svelte:head>
   <title>{pageTitle}</title>
   <meta name="description" content={description} />
-  <link rel="canonical" href={canonical} />
+  <link rel="canonical" href={absoluteUrl('/event')} />
   <meta name="robots" content="index, follow" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content={pageTitle} />
   <meta property="og:description" content={description} />
-  <meta property="og:url" content={canonical} />
-  <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content={pageTitle} />
-  <meta name="twitter:description" content={description} />
-  {@html `<script type="application/ld+json">${JSON.stringify(
-    buildBreadcrumb([{ name: 'Jadwal Event', path: '/event' }])
-  )}<\/script>`}
+  <meta property="og:url" content={absoluteUrl('/event')} />
+  {#if spotlight?.poster}<meta property="og:image" content={spotlight.poster} />{/if}
+  <meta name="twitter:card" content="summary_large_image" />
+  {@html `<script type="application/ld+json">${JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Jadwal Event',
+    itemListElement: data.upcoming.slice(0, 20).map((e, i) => ({ '@type': 'ListItem', position: i + 1, url: absoluteUrl(`/event/${e.slug}`), name: e.name })),
+  })}<\/script>`}
+  {@html `<script type="application/ld+json">${JSON.stringify(buildBreadcrumb([{ name: 'Jadwal Event', path: '/event' }]))}<\/script>`}
 </svelte:head>
 
-<section class="section-md container-xl event-page">
-  <!-- The dark gradient hero is this app's signature page opener; /contact uses
-       the same one. The CTA lives inside it rather than as a card floating
-       beside it, which left a large hole on desktop. -->
-  <header class="event-page__hero mb-4">
-    <div class="row g-4 align-items-center">
-      <div class="col-12 col-lg-7">
-        <span class="badge badge-main mb-3">Jadwal</span>
-        <h1 class="event-page__title mb-2">Jadwal Event</h1>
-        <p class="event-page__description mb-0">
-          Acara anime, manga, cosplay, game, dan pop culture yang sedang dan akan berlangsung.
-        </p>
-      </div>
+<div class="agenda container-xl">
+  <header class="agenda-head">
+    <div>
+      <h1>Jadwal Event</h1>
+      <p class="agenda-head__sub">Event anime, game, cosplay, dan pop culture yang bisa kamu datangi. Tambahkan ke kalender supaya tidak terlewat.</p>
+    </div>
+    <p class="agenda-head__count">
+      <strong>{data.upcoming.length}</strong> event mendatang
+    </p>
+  </header>
 
-      {#if waUrl || mailUrl}
-        <div class="col-12 col-lg-5">
-          <div class="event-page__cta">
-            <h2 class="h6 fw-bold text-white mb-1">Mau event kamu masuk sini?</h2>
-            <p class="event-page__cta-text mb-3">
-              Kirim detail acaranya ke kami — kalau cocok, kami tayangkan di Jadwal Event.
-            </p>
-            <div class="d-flex flex-column flex-sm-row gap-2">
-              {#if waUrl}
-                <a
-                  href={waUrl}
-                  class="theme-btn theme-btn--primary w-100 justify-content-center"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <i class="bi bi-whatsapp me-2"></i>WhatsApp
-                </a>
-              {/if}
-              {#if mailUrl}
-                <a href={mailUrl} class="theme-btn theme-btn--surface w-100 justify-content-center">
-                  <i class="bi bi-envelope me-2"></i>Email
-                </a>
-              {/if}
-            </div>
-          </div>
+  {#if spotlight}
+    <EventSpotlight event={spotlight} />
+  {/if}
+
+  {#if data.upcoming.length > 1}
+    <div class="agenda-filters" role="group" aria-label="Saring jadwal">
+      {#if cities.length > 1}
+        <div class="agenda-filters__set">
+          <span class="agenda-filters__label">Kota</span>
+          <button type="button" class:is-on={city === 'all'} aria-pressed={city === 'all'} on:click={() => (city = 'all')}>Semua</button>
+          {#each cities as name}
+            <button type="button" class:is-on={city === name} aria-pressed={city === name} on:click={() => (city = name)}>{name}</button>
+          {/each}
+        </div>
+      {/if}
+      {#if months.length > 1}
+        <div class="agenda-filters__set">
+          <span class="agenda-filters__label">Bulan</span>
+          <button type="button" class:is-on={month === 'all'} aria-pressed={month === 'all'} on:click={() => (month = 'all')}>Semua</button>
+          {#each months as key}
+            <button type="button" class:is-on={month === key} aria-pressed={month === key} on:click={() => (month = key)}>{monthLabel(key)}</button>
+          {/each}
         </div>
       {/if}
     </div>
-  </header>
-
-  {#if data.upcoming.length > 0}
-    <h2 class="event-page__section-head">Mendatang</h2>
-    <div class="event-grid">
-      {#each data.upcoming as event (event.slug)}
-        <EventCard {event} />
-      {/each}
-    </div>
-  {:else}
-    <div class="event-empty">
-      <i class="bi bi-calendar-x"></i>
-      <p class="mb-0">Belum ada event mendatang yang terjadwal. Cek lagi nanti ya.</p>
-    </div>
   {/if}
 
-  {#if data.past.length > 0}
-    <h2 class="event-page__section-head event-page__section-head--past">Sudah Lewat</h2>
-    <div class="event-grid">
-      {#each data.past as event (event.slug)}
-        <EventCard {event} />
+  <section class="agenda-list" aria-label="Agenda event" aria-live="polite">
+    {#if groups.length}
+      {#each groups as group (group.key)}
+        <h2 class="agenda-month">{monthLabel(group.key)}</h2>
+        {#each group.events as event (event.slug)}
+          <EventAgendaRow {event} />
+        {/each}
       {/each}
+    {:else if filtering}
+      <div class="agenda-empty">
+        <p>Belum ada event untuk pilihan ini.</p>
+        <button type="button" class="theme-btn theme-btn--see-all theme-btn--sm" on:click={() => { city = 'all'; month = 'all'; }}>Tampilkan semua</button>
+      </div>
+    {:else if !spotlight}
+      <div class="agenda-empty">
+        <i class="bi bi-calendar2-week" aria-hidden="true"></i>
+        <p>Belum ada event mendatang. Pantau terus, jadwal baru ditambahkan setiap minggu.</p>
+      </div>
+    {/if}
+  </section>
+
+  <aside class="agenda-cta">
+    <div>
+      <h2>Punya event?</h2>
+      <p>Kirim detail event-mu. Kami bantu masukkan ke jadwal dan bicarakan liputannya.</p>
     </div>
+    <a class="theme-btn theme-btn--primary" href="/contact?type=event"><i class="bi bi-send" aria-hidden="true"></i> Daftarkan event</a>
+  </aside>
+
+  {#if data.past.length}
+    <details class="agenda-past">
+      <summary>
+        <span>Sudah lewat</span>
+        <small>{data.past.length} event</small>
+        <i class="bi bi-chevron-down" aria-hidden="true"></i>
+      </summary>
+      <div class="agenda-past__list">
+        {#each data.past as event (event.slug)}
+          <EventAgendaRow {event} past />
+        {/each}
+      </div>
+    </details>
   {/if}
-</section>
+</div>
 
 <style>
-  .event-page__hero {
-    border-radius: 28px;
-    padding: 2rem;
-    color: #fff;
-    background:
-      radial-gradient(
-        circle at top right,
-        color-mix(in srgb, var(--site-accent-glow, #f1ff32) 75%, transparent),
-        transparent 22%
-      ),
-      linear-gradient(135deg, #0a0a0a 0%, #111827 48%, #1f2937 100%);
-    box-shadow: 0 24px 80px rgb(10 10 10 / 15%);
+  .agenda { padding-top: 2rem; padding-bottom: 4rem; }
+
+  .agenda-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 0.75rem 2rem; margin-bottom: 1.5rem; }
+  .agenda-head h1 { margin: 0; font-size: clamp(1.75rem, 3vw, 2.5rem); font-weight: 900; letter-spacing: -0.03em; }
+  .agenda-head__sub { margin: 0.5rem 0 0; max-width: 60ch; color: #4b5563; font-size: 0.9375rem; }
+  .agenda-head__count { margin: 0; color: #6b7280; font-size: 0.875rem; }
+  .agenda-head__count strong { font-size: 1.5rem; color: #1a1a1a; font-variant-numeric: tabular-nums; margin-right: 0.15rem; }
+
+  .agenda-filters { display: grid; gap: 0.6rem; margin: 2rem 0 0.5rem; }
+  .agenda-filters__set { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
+  .agenda-filters__label { min-width: 3.5rem; font-size: 0.8125rem; font-weight: 700; color: #6b7280; }
+  .agenda-filters button {
+    min-height: 36px;
+    padding: 0 0.9rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 999px;
+    background: #fff;
+    color: #374151;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    transition: border-color 160ms ease, background-color 160ms ease;
+  }
+  .agenda-filters button:hover { border-color: var(--site-dark, #111); }
+  .agenda-filters button.is-on { border-color: transparent; background: var(--site-primary, #f1ff32); color: var(--site-primary-contrast, #111); }
+  .agenda-filters button:focus-visible { outline: 3px solid var(--site-dark, #111); outline-offset: 2px; }
+
+  .agenda-list { margin-top: 0.5rem; }
+  .agenda-month {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    margin: 1.75rem 0 0;
+    padding: 0.6rem 0;
+    background: #fff;
+    border-bottom: 2px solid #1a1a1a;
+    font-size: 1.125rem;
+    font-weight: 900;
+    letter-spacing: -0.01em;
   }
 
-  .event-page__title {
-    font-size: clamp(2rem, 3vw, 2.8rem);
+  .agenda-empty { padding: 2.5rem 1rem; text-align: center; color: #6b7280; }
+  .agenda-empty i { display: block; font-size: 1.75rem; margin-bottom: 0.5rem; color: #9ca3af; }
+  .agenda-empty p { margin: 0 0 0.75rem; }
+
+  .agenda-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    margin: 2.5rem 0 0;
+    padding: 1.25rem 1.5rem;
+    border: 1px dashed #d1d5db;
+    border-radius: 18px;
+  }
+  .agenda-cta h2 { margin: 0; font-size: 1.125rem; font-weight: 800; }
+  .agenda-cta p { margin: 0.2rem 0 0; color: #6b7280; font-size: 0.875rem; }
+  .agenda-cta .theme-btn { box-shadow: none; }
+
+  .agenda-past { margin-top: 2rem; }
+  .agenda-past summary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid #ececec;
+    cursor: pointer;
+    list-style: none;
+    font-size: 1rem;
     font-weight: 800;
-    letter-spacing: -0.03em;
-    color: #fff;
   }
+  .agenda-past summary::-webkit-details-marker { display: none; }
+  .agenda-past summary small { color: #6b7280; font-weight: 600; font-size: 0.8125rem; }
+  .agenda-past summary i { margin-left: auto; transition: transform 200ms ease; }
+  .agenda-past[open] summary i { transform: rotate(180deg); }
+  .agenda-past summary:focus-visible { outline: 3px solid var(--site-dark, #111); outline-offset: 2px; border-radius: 6px; }
 
-  .event-page__description {
-    color: rgb(255 255 255 / 78%);
+  @media (max-width: 575px) {
+    .agenda { padding-top: 1.25rem; }
+    .agenda-filters__label { min-width: 100%; }
   }
-
-  .event-page__cta {
-    border-radius: 16px;
-    padding: 1.25rem;
-    background: rgb(255 255 255 / 6%);
-    border: 1px solid rgb(255 255 255 / 12%);
-  }
-
-  .event-page__cta-text {
-    color: rgb(255 255 255 / 66%);
-    font-size: 0.85rem;
-  }
-
-  .event-page__section-head {
-    margin: 0 0 1rem;
-    font-size: 1.1rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    padding-left: 0.75rem;
-    border-left: 4px solid var(--site-primary, #f1ff32);
-  }
-
-  .event-page__section-head--past {
-    margin-top: 2.75rem;
-    border-left-color: var(--bs-border-color, #dee2e6);
-  }
-
-  /* Four across like the homepage rows, so a schedule page and an article row
-     line up when a reader moves between them. */
-  .event-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-  }
-
-  .event-empty {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: var(--bs-secondary-color, #6c757d);
-    border: 1px dashed var(--bs-border-color, #dee2e6);
-    border-radius: 14px;
-  }
-
-  .event-empty i {
-    font-size: 2.5rem;
-    display: block;
-    margin-bottom: 0.75rem;
-    opacity: 0.5;
-  }
-
-  @media (max-width: 991.98px) {
-    .event-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-
-  @media (max-width: 767.98px) {
-    .event-page__hero {
-      border-radius: 20px;
-      padding: 1.5rem;
-    }
-
-    .event-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0.75rem;
-    }
-  }
+  @media (prefers-reduced-motion: reduce) { .agenda-past summary i { transition: none; } }
 </style>

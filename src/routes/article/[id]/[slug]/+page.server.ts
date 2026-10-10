@@ -3,10 +3,12 @@ import { getArticle, getPopularTags, getAd, listCurhatan, listEvents } from '$li
 import { error, redirect, fail } from '@sveltejs/kit';
 import { PUBLIC_API_URL } from '$env/static/public';
 import type { Actions } from './$types';
+import { loadReader } from '$lib/server/reader';
+import type { ReaderArticleState } from '$lib/reader';
 
 const COOKIE = 'mokultur_token';
 
-export const load: PageServerLoad = async ({ params, request, setHeaders, url }) => {
+export const load: PageServerLoad = async ({ params, request, setHeaders, url, locals, cookies, fetch }) => {
   const id = Number(params.id);
   if (!Number.isFinite(id) || id <= 0) throw error(404, 'Not found');
 
@@ -51,7 +53,12 @@ export const load: PageServerLoad = async ({ params, request, setHeaders, url })
       throw redirect(301, `/article/${id}/${res.data?.slug ?? params.slug}${suffix}`);
     }
 
+    const readerState = locals.user && !previewToken
+      ? await loadReader<{ data: ReaderArticleState }>(fetch, cookies.get(COOKIE) ?? '', `articles/${id}`).then((r) => r.data).catch(() => null)
+      : null;
+
     return {
+      readerState,
       article: res.data,
       related: res.related,
       seo: res.seo,

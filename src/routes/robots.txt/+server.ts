@@ -13,6 +13,11 @@ export const GET: RequestHandler = async () => {
     // Signed-in only, and every URL under it is per-user. Nothing here belongs
     // in an index.
     'Disallow: /dashboard',
+    'Disallow: /artikel-tersimpan',
+    'Disallow: /untuk-kamu',
+    'Disallow: /api/reader/',
+    // Confirm/unsubscribe links carry a personal token.
+    'Disallow: /newsletter/',
     '',
     `Sitemap: ${PUBLIC_SITE_URL}/sitemap.xml`,
     // Declared separately: Google reads the news sitemap on its own cadence and

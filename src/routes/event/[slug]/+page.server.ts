@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { getEvent } from '$lib/api';
+import { getEvent, listEvents } from '$lib/api';
 import { error } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ params, setHeaders, parent }) => {
@@ -23,9 +23,16 @@ export const load: PageServerLoad = async ({ params, setHeaders, parent }) => {
    */
   setHeaders({ 'cache-control': 'no-store' });
 
-  const res = await getEvent(params.slug).catch(() => null);
+  const [res, upcoming] = await Promise.all([
+    getEvent(params.slug).catch(() => null),
+    listEvents('upcoming', 6).catch(() => null),
+  ]);
 
   if (!res) throw error(404, 'Event tidak ditemukan');
 
-  return { event: res.data };
+  return {
+    event: res.data,
+    // "Event lain": what else is coming, never the page's own event.
+    others: (upcoming?.data ?? []).filter((e) => e.slug !== res.data.slug).slice(0, 3),
+  };
 };

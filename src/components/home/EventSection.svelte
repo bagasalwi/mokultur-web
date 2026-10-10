@@ -16,7 +16,7 @@
 </script>
 
 {#if articles.length > 0}
-  {#if style === 'immersive' || style === 'magazine'}
+  {#if style === 'immersive' || style === 'magazine' || style === 'newsroom'}
     <TechSection {articles} {style} {title} {description} {categorySlug} />
   {:else}
   <section class="section-md article-list-big article-list-big--standard" style="background-color: #fafafa;">
@@ -28,7 +28,7 @@
             <p class="article-list-big__description text-muted small mb-0">{description}</p>
           {/if}
         </div>
-        <a href="/category/{categorySlug}" class="theme-btn theme-btn--ghost theme-btn--sm flex-shrink-0 ms-3">
+        <a href="/category/{categorySlug}" class="theme-btn theme-btn--see-all theme-btn--sm flex-shrink-0 ms-3">
           Lihat Semua <i class="bi bi-arrow-right"></i>
         </a>
       </div>

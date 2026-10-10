@@ -49,6 +49,7 @@
     <div class="p-3 pt-2 d-flex flex-column flex-grow-1">
       <span class="event-card__date">{formatDateRange(event.startDate, event.endDate)}</span>
       <h3 class="event-card__name">{event.name}</h3>
+      {#if event.priceLabel}<span class="event-card__price">{event.priceLabel}</span>{/if}
       {#if place}
         <span class="event-card__place mt-auto">
           <i class="bi bi-geo-alt"></i>
@@ -124,6 +125,17 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+
+  .event-card__price {
+    align-self: flex-start;
+    margin: -0.15rem 0 0.4rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 5px;
+    background: #f3f4f6;
+    color: #1a1a1a;
+    font-size: 0.6875rem;
+    font-weight: 800;
   }
 
   .event-card__place {

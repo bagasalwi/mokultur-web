@@ -1,5 +1,15 @@
 # Deploy Guide — mokultur-web (SvelteKit + Node.js)
 
+## Personalisasi pembaca
+
+Halaman `/artikel-tersimpan`, `/untuk-kamu`, dan proxy `/api/reader/*` memakai modul `/api/me/reader` di proyek `mokultur-elysia`. Terapkan migrasi `0006_reader_personalization` di API sebelum menjalankan frontend baru. Migrasi ini hanya menambahkan `mm_reader_articles`, `mm_reader_interests`, foreign key, dan indeksnya; tidak mengubah tabel konten bersama.
+
+Pengujian API: `bun run test` untuk suite unit, lalu `RUN_READER_INTEGRATION=1 bun test tests/reader-integration.test.ts` untuk autentikasi, database, dan konflik bookmark/riwayat. Tes integrasi membuat dua akun sementara dan menghapusnya beserta data pembaca setelah pengujian.
+
+Pengujian browser di server ini: `node scripts/check-reader.mjs`. Script memakai Chrome serta dependensi dari `/var/www/mokultur-elysia`, memuat konfigurasi API untuk membuat satu akun sementara, menguji situs publik, dan membersihkan akun setelah selesai. Screenshot disimpan di `.impeccable/review/` dan hasil di `/tmp/mokultur-reader-ui-results.json`; tidak ada token yang dicetak.
+
+Data pembaca menggunakan respons `private, no-store`. Jangan memasukkan halaman personal atau `/api/reader/*` ke cache publik. Jika rollback diperlukan, kembalikan source/build terlebih dahulu dan pertahankan kedua tabel agar bookmark, minat, serta riwayat tidak hilang.
+
 ## Prasyarat
 
 - Node.js >= 20 LTS
@@ -147,7 +157,14 @@ server {
         add_header         Cache-Control "public, max-age=31536000, immutable";
     }
 
-    # File statis di /static (gambar, robots.txt, sitemap, dll)
+    # Endpoint crawler memakai Cache-Control dari aplikasi.
+    location ~ ^/(robots\.txt|sitemap(-index)?\.xml|news-sitemap\.xml|sitemaps/[^/]+\.xml)$ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+
+    # File aset statis
     location ~* \.(ico|png|jpg|webp|svg|woff2|txt|xml)$ {
         proxy_pass         http://127.0.0.1:3000;
         proxy_http_version 1.1;
@@ -283,3 +300,11 @@ Variabel di `env_production` di-inject saat `pm2 start ... --env production`.
 - **Layout cache** (settings, navbar, categories) di-cache per-process selama 5 menit. Dengan 2 cluster instances, masing-masing punya cache sendiri — ini normal.
 - **`PUBLIC_API_URL`** di-embed ke dalam bundle JavaScript saat `npm run build`. Jika URL API berubah, perlu build ulang.
 - Setelah mengubah `.env`, perlu `npm run build` ulang (bukan hanya `pm2 reload`) karena variabel `PUBLIC_*` di-inline saat build.
+
+### SEO dan sitemap
+
+`/sitemap.xml` adalah sitemap index; `/sitemap-index.xml` mengarah permanen ke sana. `/sitemaps/pages.xml` memuat halaman publik dan `/sitemaps/articles-N.xml` memuat artikel yang sudah terbit dalam rentang ID tetap 5.000 artikel. Tidak ada batas total 5.000 artikel. Artikel terjadwal dan draft tidak disertakan; tag harus memiliki minimal tiga artikel terbit. `/news-sitemap.xml` tetap tersedia untuk berita 48 jam terakhir. Endpoint XML gagal dengan 503 dan no-store bila API tidak tersedia.
+
+Indeks artikel memiliki canonical per halaman; pencarian, filter, dan halaman kosong memakai noindex. Halaman pembaca pribadi tidak masuk sitemap. Periksa dengan `node scripts/check-seo.mjs` di server ini setelah API dan web diperbarui.
+
+Nginx memisahkan endpoint crawler dinamis dari aturan aset TXT/XML yang memakai cache 24 jam. Konfigurasi live: `/etc/nginx/sites-available/mokultur.com`. Setelah perubahan robots/sitemap, purge URL yang bersangkutan di Cloudflare; cache CDN lama tidak hilang hanya dengan restart origin. Untuk memeriksa robots origin saat CDN masih stale, jalankan `CHECK_SEO_ORIGIN=1 node scripts/check-seo.mjs` (sitemap dan metadata tetap diperiksa lewat domain publik).

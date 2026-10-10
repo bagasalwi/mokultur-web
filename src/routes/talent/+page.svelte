@@ -33,6 +33,11 @@
   <meta property="og:description" content={description} />
   <meta property="og:type" content="website" />
   <meta property="og:url" content={canonical} />
+  <meta name="twitter:card" content={data.settings?.og_image ? 'summary_large_image' : 'summary'} />
+  {#if data.settings?.og_image}
+    <meta property="og:image" content={data.settings.og_image} />
+    <meta name="twitter:image" content={data.settings.og_image} />
+  {/if}
 </svelte:head>
 
 <TalentHero featured={data.featured} stats={data.stats} {description} />

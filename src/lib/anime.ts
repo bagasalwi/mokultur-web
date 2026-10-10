@@ -24,6 +24,21 @@ export const ANIME_SEASONS = [
   { value: 'fall', label: 'Fall' },
 ] as const;
 
+const DAY_LABEL: Record<string, string> = {
+  Sundays: 'Minggu',
+  Mondays: 'Senin',
+  Tuesdays: 'Selasa',
+  Wednesdays: 'Rabu',
+  Thursdays: 'Kamis',
+  Fridays: 'Jumat',
+  Saturdays: 'Sabtu',
+};
+
+/** MAL's English plural broadcast day ("Thursdays") in Indonesian ("Kamis"). */
+export function airingDayLabel(day: string | null): string | null {
+  return day ? (DAY_LABEL[day] ?? day) : null;
+}
+
 export function seasonLabel(season: string | null): string {
   if (!season) return '';
   return season.charAt(0).toUpperCase() + season.slice(1);

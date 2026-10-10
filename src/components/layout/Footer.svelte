@@ -1,4 +1,5 @@
 <script lang="ts">
+  import NewsletterSignup from '$components/sidebar/NewsletterSignup.svelte';
   import { clearConsent } from '$lib/consent';
   import type { SiteSettings, NavbarItem, SocialMediaItem, Category } from '$lib/api';
 
@@ -52,6 +53,9 @@
         <p class="text-white-50 small mb-3" style="max-width: 280px;">
           {tagline}
         </p>
+        <div class="mb-3" style="max-width: 360px;">
+          <NewsletterSignup variant="footer" source="footer" />
+        </div>
         {#if socials.length > 0}
           <div class="d-flex gap-2 flex-wrap">
             {#each socials as s}
@@ -128,6 +132,8 @@
 </footer>
 
 <style>
+  .row { --bs-gutter-x: inherit; }
+
   .footer-cookie-btn {
     background: none;
     border: 0;

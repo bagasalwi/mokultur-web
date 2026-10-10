@@ -2,7 +2,7 @@
   import type { PageData } from './$types';
   import { absoluteUrl, buildBreadcrumb } from '$lib/seo';
   import PopularTags from '$components/common/PopularTags.svelte';
-  import SocialMediaCard from '$components/common/SocialMediaCard.svelte';
+  import SocialFollowCard from '$components/sidebar/SocialFollowCard.svelte';
 
   export let data: PageData;
 
@@ -24,7 +24,11 @@
   <meta property="og:title" content={pageTitle} />
   <meta property="og:description" content={metaDesc} />
   <meta property="og:url" content={pageUrl} />
-  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:card" content={data.settings?.og_image ? 'summary_large_image' : 'summary'} />
+  {#if data.settings?.og_image}
+    <meta property="og:image" content={data.settings.og_image} />
+    <meta name="twitter:image" content={data.settings.og_image} />
+  {/if}
   <meta name="twitter:title" content={pageTitle} />
   <meta name="twitter:description" content={metaDesc} />
   {@html `<script type="application/ld+json">${JSON.stringify(
@@ -50,7 +54,7 @@
 
     <div class="col-12 col-lg-4">
       <div class="sticky-top" style="top: 80px;">
-        <SocialMediaCard socials={data.socials} />
+        <SocialFollowCard socials={data.socials} siteName={data.settings?.site_name ?? 'Mokultur'} />
         <PopularTags tags={data.popularTags} />
       </div>
     </div>

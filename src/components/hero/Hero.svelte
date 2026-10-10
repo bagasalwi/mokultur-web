@@ -7,7 +7,7 @@
   export let articles: ArticleListItem[] = [];
   export let type: string = 'cinematic';
 
-  const TYPES = ['cinematic', 'split', 'ticker', 'masthead', 'editorial-grid', 'spotlight-stack'];
+  const TYPES = ['cinematic', 'split', 'ticker', 'masthead', 'top-stories', 'editorial-grid', 'spotlight-stack'];
   $: variant = TYPES.includes(type) ? type : 'cinematic';
 
   $: main = articles[0] ?? null;
@@ -59,6 +59,41 @@
                 </a>
               {/each}
             </div>
+          {/if}
+        </div>
+      {/if}
+    </div>
+  </section>
+
+{:else if variant === 'top-stories'}
+  <section class="home-collab-card anime-hero-full">
+    <div class="container-fluid container-xl section-sm px-3 px-md-4">
+      {#if main}
+        <div class="hero-top-stories">
+          <a href={href(main)} class="hero-top-stories__main text-decoration-none">
+            <img src={imgUrl(img(main), 1080)} srcset={imgSrcset(img(main), 800)} sizes="(max-width: 991px) 100vw, 800px" alt="" loading="eager" fetchpriority="high" on:error={onErr} />
+            <div class="hero-top-stories__body">
+              {#if main.category}<span class="badge badge-main">{main.category.name}</span>{/if}
+              <h2 class="hero-top-stories__title">{main.title}</h2>
+              {#if main.description}<p class="hero-top-stories__description">{main.description}</p>{/if}
+              <span class="hero-top-stories__meta">{timeAgo(main.publishDate)}</span>
+            </div>
+          </a>
+          {#if rest.length}
+            <ul class="hero-top-stories__rail">
+              {#each rest.slice(0, 4) as a (a.id)}
+                <li>
+                  <a href={href(a)} class="hero-top-stories__rail-item text-decoration-none">
+                    <span class="hero-top-stories__thumb"><img src={imgUrl(img(a), 320)} srcset={imgSrcset(img(a), 152)} sizes="152px" alt="" loading="eager" on:error={onErr} /></span>
+                    <span class="hero-top-stories__rail-body">
+                      {#if a.category}<span class="hero-top-stories__rail-cat">{a.category.name}</span>{/if}
+                      <h3 class="hero-top-stories__rail-title">{a.title}</h3>
+                      <span class="hero-top-stories__rail-meta">{timeAgo(a.publishDate)}</span>
+                    </span>
+                  </a>
+                </li>
+              {/each}
+            </ul>
           {/if}
         </div>
       {/if}

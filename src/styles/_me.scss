@@ -1,0 +1,181 @@
+// ---- Personal space (/dashboard) ----
+// Shared by every tab: a section head, the feed/aside grid, quiet cards for
+// the side column, compact story rows, empty states and the pager.
+
+.me-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  margin-bottom: 1rem;
+
+  h2 { margin: 0; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; }
+  p { margin: 0.2rem 0 0; color: #6b7280; font-size: 0.8125rem; }
+}
+
+.me-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+  gap: 2.5rem;
+  align-items: start;
+
+  @media (max-width: 991px) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+  }
+}
+
+.me-aside {
+  position: sticky;
+  top: 72px;
+  display: grid;
+  gap: 1rem;
+
+  @media (max-width: 991px) { position: static; }
+}
+
+.me-card {
+  padding: 1.1rem 1.15rem;
+  border: 1px solid #ececec;
+  border-radius: 16px;
+  background: #fff;
+
+  > h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0 0 0.65rem;
+    font-size: 0.875rem;
+    font-weight: 800;
+
+    i { color: #6b7280; }
+  }
+
+  &--dark {
+    border: 0;
+    color: #fff;
+    background:
+      radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--site-accent-glow, #a51d2d) 60%, transparent), transparent 45%),
+      linear-gradient(135deg, var(--site-dark, #0a0a0a), #1f2937);
+
+    > h3, > h3 i { color: #fff; }
+    p { color: rgba(255, 255, 255, 0.75); }
+  }
+}
+
+.me-card__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-decoration: underline;
+  text-decoration-color: var(--site-primary, #f1ff32);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+// Compact story row for side cards.
+.me-mini {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li + li { border-top: 1px solid #f3f4f6; }
+
+  a {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 0.6rem 0;
+    color: inherit;
+    text-decoration: none;
+
+    &:hover strong { text-decoration: underline; text-decoration-color: var(--site-primary, #f1ff32); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+    &:focus-visible { outline: 3px solid var(--site-dark, #111); outline-offset: 2px; border-radius: 8px; }
+  }
+
+  li:first-child a { padding-top: 0; }
+  li:last-child a { padding-bottom: 0; }
+
+  img, .me-mini__ph {
+    flex: 0 0 76px;
+    width: 76px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 8px;
+    background: #f0f0f0;
+  }
+
+  span { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+
+  strong {
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    color: #1a1a1a;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  small { font-size: 0.6875rem; color: #6b7280; }
+}
+
+.me-empty {
+  padding: 2.5rem 1.5rem;
+  border: 1px dashed #d1d5db;
+  border-radius: 18px;
+  text-align: center;
+
+  > i { display: block; margin-bottom: 0.5rem; font-size: 1.75rem; color: #9ca3af; }
+  h3 { margin: 0 0 0.35rem; font-size: 1rem; font-weight: 800; }
+  p { max-width: 46ch; margin: 0 auto 1rem; color: #6b7280; font-size: 0.8125rem; }
+
+  &--small { padding: 1rem; border-radius: 12px; text-align: left; p { margin: 0 0 0.5rem; font-size: 0.8125rem; } }
+}
+
+.me-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.75rem 0 0;
+  font-variant-numeric: tabular-nums;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.me-list .reader-item:first-child { padding-top: 0; }
+.me-list .reader-item:last-child { border-bottom: 0; }
+
+// Feed rows at personal-space scale: the reader pages' sizes are tuned for a
+// full-width list, this column sits beside an aside.
+.me-list {
+  .reader-item { gap: 1.1rem; padding: 1.1rem 0; }
+  .reader-item__image { width: 136px; }
+  .reader-item :is(h2, h3) { font-size: 1rem; line-height: 1.35; font-weight: 700; }
+  .reader-item__meta { font-size: 0.6875rem; margin-bottom: 0.35rem; }
+  .reader-item__meta .badge-main { font-size: 0.625rem; }
+  .reader-item__description { font-size: 0.8125rem; margin-top: 0.35rem; }
+  .reader-item__reason { font-size: 0.75rem; margin-top: 0.5rem; }
+  .reader-item--lead { gap: 1.5rem; padding-bottom: 1.5rem; }
+  .reader-item--lead .reader-item__image { width: min(48%, 420px); }
+  .reader-item--lead :is(h2, h3) { font-size: clamp(1.125rem, 1.6vw, 1.375rem); line-height: 1.25; font-weight: 800; }
+  .reader-item--lead .reader-item__description { font-size: 0.875rem; }
+
+  // Keep the reader pages' stacked lead below md; this block outranks it.
+  @media (max-width: 767px) {
+    .reader-item--lead .reader-item__image { width: 100%; }
+  }
+
+  @media (max-width: 575px) {
+    .reader-item__image { width: 88px; }
+    .reader-item :is(h2, h3) { font-size: 0.9375rem; }
+    .reader-item--lead :is(h2, h3) { font-size: 1.125rem; }
+  }
+}

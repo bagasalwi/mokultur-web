@@ -3,24 +3,15 @@
   import AiringCard from './AiringCard.svelte';
   import Carousel from '$components/ui/Carousel.svelte';
   import SectionHead from '$components/ui/SectionHead.svelte';
+  import { airingDayLabel } from '$lib/anime';
 
   export let anime: AnimeCardType[] = [];
   export let limit = 9;
 
-  const DAY_LABEL: Record<string, string> = {
-    Sundays: 'Minggu',
-    Mondays: 'Senin',
-    Tuesdays: 'Selasa',
-    Wednesdays: 'Rabu',
-    Thursdays: 'Kamis',
-    Fridays: 'Jumat',
-    Saturdays: 'Sabtu',
-  };
-
   /** English plural from MAL, e.g. "Thursdays". */
   export let day: string | null = null;
 
-  $: dayLabel = day ? (DAY_LABEL[day] ?? day) : null;
+  $: dayLabel = airingDayLabel(day);
   $: shown = anime.slice(0, limit);
 
   /**

@@ -17,7 +17,7 @@
   <section class="section-md">
     <div class="container-xl">
       <SectionHead {title} {sub}>
-        <a slot="action" class="event-section__more" href="/event">
+        <a slot="action" class="theme-btn theme-btn--see-all theme-btn--sm flex-shrink-0" href="/event">
           Lihat Semua <i class="bi bi-arrow-right"></i>
         </a>
       </SectionHead>
@@ -40,17 +40,6 @@
     gap: 1rem;
   }
 
-  .event-section__more {
-    font-size: 0.85rem;
-    font-weight: 700;
-    text-decoration: none;
-    color: inherit;
-    white-space: nowrap;
-  }
-
-  .event-section__more:hover {
-    color: var(--site-primary, #55ad9b);
-  }
 
   @media (max-width: 991.98px) {
     .event-section__grid {

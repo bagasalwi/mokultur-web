@@ -43,3 +43,10 @@ export function timeAgo(d: string | null | undefined, emptyLabel = ''): string {
 export function imgFallback(e: Event) {
   (e.target as HTMLImageElement).src = FALLBACK_IMAGE;
 }
+
+/** Compact Indonesian count: 169.161 → "169 rb", 1.2M → "1,2 jt". */
+export function compactNumber(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toLocaleString('id-ID', { maximumFractionDigits: 1 })} jt`;
+  if (n >= 10_000) return `${Math.round(n / 1000).toLocaleString('id-ID')} rb`;
+  return n.toLocaleString('id-ID');
+}

@@ -23,10 +23,11 @@
 </script>
 
 <svelte:head>
-  <title>#{data.tag.name} - {data.settings?.site_name ?? 'Mokultur'}</title>
+  <title>#{data.tag.name}{data.meta.page > 1 ? ` · Halaman ${data.meta.page}` : ''} - {data.settings?.site_name ?? 'Mokultur'}</title>
   <meta name="description" content="Artikel dengan tag {data.tag.name} — {data.meta.total.toLocaleString('id-ID')} artikel" />
   <link rel="canonical" href={canonicalUrl} />
-  <meta name="robots" content="index, follow" />
+  <!-- Tags with fewer than three articles stay out of the index (and the sitemap). -->
+  <meta name="robots" content={data.meta.total >= 3 ? 'index, follow' : 'noindex, follow'} />
   {#if data.meta.page > 1}
     <link rel="prev" href={absoluteUrl(buildUrl(data.meta.page - 1))} />
   {/if}

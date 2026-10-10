@@ -49,6 +49,22 @@ export const handle: Handle = async ({ event, resolve }) => {
     response.headers.set('Cache-Control', 'private, no-store');
   }
 
+  // Let Google show large image previews (Discover, image results) site-wide;
+  // pages that are noindex already carry their own X-Robots-Tag.
+  if (!response.headers.has('X-Robots-Tag') && (response.headers.get('content-type') ?? '').includes('text/html')) {
+    response.headers.set('X-Robots-Tag', 'max-image-preview:large');
+  }
+
+  /*
+   * Guest pages (and their __data.json) are publicly cacheable for a minute or
+   * more. Without this the browser keeps serving that guest copy after the
+   * reader logs in on the same URL, so the navbar still says "Masuk" until a
+   * manual refresh. Varying on Cookie makes the new session a cache miss.
+   */
+  if (/\bpublic\b/.test(response.headers.get('cache-control') ?? '')) {
+    response.headers.append('Vary', 'Cookie');
+  }
+
   response.headers.set('X-Frame-Options', 'SAMEORIGIN');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');

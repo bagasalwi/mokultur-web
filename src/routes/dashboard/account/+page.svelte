@@ -3,6 +3,7 @@
   import { enhance } from '$app/forms';
   import { imgUrl, initials } from '$lib/threads';
   import { invalidateAll } from '$app/navigation';
+  import PushPrompt from '$components/push/PushPrompt.svelte';
 
   export let data: PageData;
   export let form: ActionData;
@@ -38,12 +39,18 @@
 </svelte:head>
 
 <header class="acc-head">
-  <h1>Pengaturan Akun</h1>
+  <h2>Pengaturan Akun</h2>
   <p>Update profil, avatar, dan keamanan akun.</p>
 </header>
 
     <div class="acc-grid">
       <div class="acc-col">
+    <!-- Notifications -->
+    <div class="acc-card">
+      <h2><i class="bi bi-bell"></i> Notifikasi</h2>
+      <PushPrompt variant="setting" />
+    </div>
+
     <!-- Profile -->
     <div class="acc-card">
       <h2><i class="bi bi-person"></i> Profil</h2>
@@ -241,7 +248,7 @@
 
 <style>
   .acc-head { margin: 0 0 18px; }
-  .acc-head h1 { font-size: 24px; margin: 0; }
+  .acc-head h2 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; margin: 0; }
   .acc-head p { color: #6b7280; margin: 4px 0 0; }
 
   .acc-grid {

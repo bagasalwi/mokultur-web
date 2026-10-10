@@ -49,7 +49,7 @@
             </a>
           {/each}
         </ul>
-        <a class="mt-promo__more" href="/lounge">Lihat semua thread <i class="bi bi-arrow-right"></i></a>
+        <a class="mt-promo__more theme-btn theme-btn--see-all theme-btn--on-dark theme-btn--sm" href="/lounge">Lihat semua thread <i class="bi bi-arrow-right"></i></a>
       </div>
     {:else}
       <div class="mt-promo__art" aria-hidden="true">
@@ -120,7 +120,7 @@
   .mt-promo__item-stats { display: flex; gap: 12px; font-size: 11px; color: #94a3b8; align-items: center; }
   .mt-promo__item-stats i { margin-right: 3px; }
   .mt-promo__tag { background: rgba(255,255,255,0.1); padding: 1px 7px; border-radius: 999px; color: #e2e8f0; }
-  .mt-promo__more { margin-top: 8px; font-size: 12.5px; font-weight: 600; color: var(--site-primary, #f1ff32); text-decoration: none; display: inline-flex; align-items: center; gap: 5px; align-self: flex-start; }
+  .mt-promo__more { margin-top: 8px; align-self: flex-start; }
 
   .mt-promo__art { position: relative; width: 170px; height: 150px; flex-shrink: 0; z-index: 1; }
   .mt-promo__bubble {

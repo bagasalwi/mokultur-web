@@ -33,15 +33,27 @@
 </script>
 
 <svelte:head>
-  <title>Artikel Saya — Mokultur</title>
+  <title>Artikel Saya | {data.settings?.site_name ?? 'Mokultur'}</title>
 </svelte:head>
 
-<header class="art-head">
+<header class="me-head">
   <div>
-    <h1>Artikel Saya</h1>
+    <h2>Artikel Saya</h2>
     <p>{formatNumber(data.total)} artikel atas nama kamu.</p>
   </div>
+  {#if data.profile.username}
+    <a class="theme-btn theme-btn--see-all theme-btn--sm" href="/@{data.profile.username}">Lihat di profil publik <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+  {/if}
 </header>
+
+{#if data.summary}
+  <dl class="art-stats">
+    <div><dt>Total artikel</dt><dd>{formatNumber(data.summary.total)}</dd></div>
+    <div><dt>Tayang</dt><dd>{formatNumber(data.summary.published)}</dd></div>
+    <div><dt>Draf</dt><dd>{formatNumber(data.summary.drafts)}</dd></div>
+    <div><dt>Kali dibaca</dt><dd>{formatNumber(data.summary.views)}</dd></div>
+  </dl>
+{/if}
 
 <div class="art-filters">
   {#each filters as f}
@@ -105,9 +117,11 @@
 {/if}
 
 <style>
-  .art-head { margin-bottom: 16px; }
-  .art-head h1 { font-size: 24px; margin: 0; }
-  .art-head p { color: #6b7280; margin: 4px 0 0; font-size: 14px; }
+  .art-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; margin: 0 0 1.25rem; }
+  .art-stats div { padding: 0.9rem 1rem; border: 1px solid #ececec; border-radius: 14px; background: #fff; }
+  .art-stats dt { font-size: 0.6875rem; font-weight: 700; color: #6b7280; }
+  .art-stats dd { margin: 0.2rem 0 0; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  @media (max-width: 575px) { .art-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
   .art-filters { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
 

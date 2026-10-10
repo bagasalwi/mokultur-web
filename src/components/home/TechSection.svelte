@@ -2,6 +2,8 @@
   import { imgSrcset, imgUrl } from '$lib/img';
   import type { ArticleListItem } from '$lib/api';
   import { timeAgo, imgFallback } from '$lib/format';
+  import SectionHead from '$components/ui/SectionHead.svelte';
+  import NewsroomBlock from '$components/home/NewsroomBlock.svelte';
 
   export let articles: ArticleListItem[] = [];
   export let style: string = 'immersive';
@@ -13,6 +15,7 @@
 
   $: lead = articles[0] ?? null;
   $: supporting = articles.slice(1, 5);
+  $: headingId = `home-section-${categorySlug}`;
 </script>
 
 {#if articles.length > 0}
@@ -26,7 +29,7 @@
               <p class="article-list-big__description text-muted small mb-0">{description}</p>
             {/if}
           </div>
-          <a href="/category/{categorySlug}" class="theme-btn theme-btn--ghost theme-btn--sm flex-shrink-0 ms-3">
+          <a href="/category/{categorySlug}" class="theme-btn theme-btn--see-all theme-btn--sm flex-shrink-0 ms-3">
             Lihat Semua <i class="bi bi-arrow-right"></i>
           </a>
         </div>
@@ -64,6 +67,21 @@
       </div>
     </section>
 
+  {:else if style === 'newsroom'}
+    <!-- Newsroom: a light news-desk block. Lead story beside a tight list of
+         four, headed like every other homepage section. -->
+    <section class="newsroom" aria-labelledby={headingId}>
+      <div class="container-xl">
+        <SectionHead {title} sub={description || null} {headingId}>
+          <a slot="action" href="/category/{categorySlug}" class="theme-btn theme-btn--see-all theme-btn--sm flex-shrink-0">
+            Lihat Semua <i class="bi bi-arrow-right" aria-hidden="true"></i>
+          </a>
+        </SectionHead>
+
+        <NewsroomBlock {articles} />
+      </div>
+    </section>
+
   {:else if style === 'magazine'}
     <section class="section-md article-list-big article-list-big--magazine">
       <div class="container-xl">
@@ -74,7 +92,7 @@
               <p class="article-list-big__description text-muted small mb-0">{description}</p>
             {/if}
           </div>
-          <a href="/category/{categorySlug}" class="theme-btn theme-btn--ghost theme-btn--sm flex-shrink-0 ms-3">
+          <a href="/category/{categorySlug}" class="theme-btn theme-btn--see-all theme-btn--sm flex-shrink-0 ms-3">
             Lihat Semua <i class="bi bi-arrow-right"></i>
           </a>
         </div>
@@ -129,7 +147,7 @@
               <p class="article-list-big__description small mb-0">{description}</p>
             {/if}
           </div>
-          <a href="/category/{categorySlug}" class="theme-btn theme-btn--ghost theme-btn--sm flex-shrink-0 ms-3">
+          <a href="/category/{categorySlug}" class="theme-btn theme-btn--see-all theme-btn--on-dark theme-btn--sm flex-shrink-0 ms-3">
             Lihat Semua <i class="bi bi-arrow-right"></i>
           </a>
         </div>
@@ -174,3 +192,8 @@
     </section>
   {/if}
 {/if}
+
+<style>
+  .newsroom { padding: 2rem 0; }
+  @media (max-width: 575px) { .newsroom { padding: 1.5rem 0; } }
+</style>

@@ -51,7 +51,7 @@
       <a href="/curhatan#submitCurhat" class="theme-btn theme-btn--primary curhat-promo__cta">
         <i class="bi bi-pencil"></i> Tulis sekarang
       </a>
-      <a href="/curhatan" class="theme-btn theme-btn--ghost curhat-promo__cta-ghost">
+      <a href="/curhatan" class="theme-btn theme-btn--see-all theme-btn--on-dark curhat-promo__cta-ghost">
         Lihat semua <i class="bi bi-arrow-right"></i>
       </a>
     </div>

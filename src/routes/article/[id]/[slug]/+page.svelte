@@ -2,7 +2,10 @@
   import type { PageData } from "./$types";
   import ArticleCard from "$components/articles/ArticleCard.svelte";
   import PopularTags from "$components/common/PopularTags.svelte";
-  import SocialMediaCard from "$components/common/SocialMediaCard.svelte";
+  import SocialFollowCard from "$components/sidebar/SocialFollowCard.svelte";
+  import GoogleNewsFollow from "$components/sidebar/GoogleNewsFollow.svelte";
+  import NewsletterSignup from "$components/sidebar/NewsletterSignup.svelte";
+  import PushPrompt from "$components/push/PushPrompt.svelte";
   import AdBanner from "$components/common/AdBanner.svelte";
   import CurhatPromoCard from "$components/curhatan/CurhatPromoCard.svelte";
   import EventPromoCard from "$components/event/EventPromoCard.svelte";
@@ -16,6 +19,9 @@
   import PhotoStoryHeader from '$components/articles/PhotoStoryHeader.svelte';
   import PhotoStoryGallery from '$components/articles/PhotoStoryGallery.svelte';
   import PhotoStoryViewer from '$components/articles/PhotoStoryViewer.svelte';
+  import BookmarkButton from '$components/reader/BookmarkButton.svelte';
+  import ReadingHistory from '$components/reader/ReadingHistory.svelte';
+  import ArticleStoryShare from '$components/articles/ArticleStoryShare.svelte';
 
   export let data: PageData;
 
@@ -23,6 +29,7 @@
   $: seo = data.seo;
   $: siteName = data.settings?.site_name ?? "Mokultur";
   $: detailStyle = data.settings?.article_detail_style ?? "classic";
+  $: readerState = data.readerState;
 
   // Like state
   let liked = false;
@@ -215,7 +222,7 @@
     {@html `<script type="application/ld+json">${JSON.stringify(schema).replace(/</g, '\\u003c')}<\/script>`}
   {/each}
   {#if a.image && !a.photoStory}
-    <link rel="preload" as="image" href={a.image} fetchpriority="high" />
+    <link rel="preload" as="image" href={imgUrl(a.image, 1080) ?? a.image} imagesrcset={imgSrcset(a.image, 480)} imagesizes="(max-width: 991px) 100vw, 480px" fetchpriority="high" />
   {/if}
 </svelte:head>
 
@@ -345,7 +352,17 @@
             url={seo.canonical}
             title={`${a.title} — ${siteName}`}
             triggerClass="share-social-card__button"
-          />
+          >
+            <svelte:fragment slot="extra" let:close>
+              {#if !data.isPreview}
+                <ArticleStoryShare src={`/article/${a.id}/${a.slug}/story.png`} title={a.title} filename={`mokultur-story-${a.slug}.png`} {close} />
+              {/if}
+            </svelte:fragment>
+          </ShareSheet>
+
+          {#if !data.isPreview}
+            <BookmarkButton variant="share" postId={a.id} state={readerState} loggedIn={!!data.user} returnTo={$page.url.pathname} on:updated={(event) => { readerState = event.detail; }} />
+          {/if}
 
           <a
             href="#komentar"
@@ -458,6 +475,7 @@
       {/if}
 
       <!-- Article content -->
+      <div id={`reader-content-${a.id}`}>
       <div class="bodyArticle article-detail__reader pt-lg-2">
         {@html a.content}
       </div>
@@ -465,6 +483,14 @@
         {#key a.id}
           <PhotoStoryGallery story={a.photoStory} onopen={(index) => storyViewer?.open(index)} />
         {/key}
+      {/if}
+      </div>
+      {#if !data.isPreview}
+        {#key a.id}
+          <ReadingHistory postId={a.id} loggedIn={!!data.user} state={readerState} />
+        {/key}
+        <GoogleNewsFollow settings={data.settings} variant="inline" />
+        <PushPrompt />
       {/if}
 
       <!-- Ad after content -->
@@ -575,7 +601,9 @@
     <div class="col-12 col-lg-4 mt-4 mt-lg-0">
       <div class="sticky-top" style="top: 80px;">
         <AdBanner ad={data.adSidebar} adSlot="article_ad_2" size="sidebar" />
-        <SocialMediaCard socials={data.socials} />
+        <SocialFollowCard socials={data.socials} {siteName} />
+        <GoogleNewsFollow settings={data.settings} />
+        <NewsletterSignup source="article" />
 
         <!-- The schedule takes this slot when there is one; the curhatan promo
              keeps it only when there are no upcoming events, so the sidebar is

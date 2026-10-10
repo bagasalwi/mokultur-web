@@ -1,0 +1,397 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-08T09:34:41Z",
+  "title": "Design System: Mokultur",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Aksen situs",
+        "tonalRamp": [
+          "oklch(from var(--site-primary) 0.15 c h)",
+          "oklch(from var(--site-primary) 0.26 c h)",
+          "oklch(from var(--site-primary) 0.38 c h)",
+          "oklch(from var(--site-primary) 0.49 c h)",
+          "oklch(from var(--site-primary) 0.61 c h)",
+          "oklch(from var(--site-primary) 0.72 c h)",
+          "oklch(from var(--site-primary) 0.84 c h)",
+          "oklch(from var(--site-primary) 0.95 c h)"
+        ]
+      },
+      "primary-contrast": {
+        "role": "neutral",
+        "displayName": "Kontras aksen",
+        "tonalRamp": [
+          "oklch(from var(--site-primary-contrast) 0.15 c h)",
+          "oklch(from var(--site-primary-contrast) 0.26 c h)",
+          "oklch(from var(--site-primary-contrast) 0.38 c h)",
+          "oklch(from var(--site-primary-contrast) 0.49 c h)",
+          "oklch(from var(--site-primary-contrast) 0.61 c h)",
+          "oklch(from var(--site-primary-contrast) 0.72 c h)",
+          "oklch(from var(--site-primary-contrast) 0.84 c h)",
+          "oklch(from var(--site-primary-contrast) 0.95 c h)"
+        ]
+      },
+      "dark": {
+        "role": "neutral",
+        "displayName": "Jangkar gelap",
+        "tonalRamp": [
+          "oklch(from var(--site-dark) 0.15 c h)",
+          "oklch(from var(--site-dark) 0.26 c h)",
+          "oklch(from var(--site-dark) 0.38 c h)",
+          "oklch(from var(--site-dark) 0.49 c h)",
+          "oklch(from var(--site-dark) 0.61 c h)",
+          "oklch(from var(--site-dark) 0.72 c h)",
+          "oklch(from var(--site-dark) 0.84 c h)",
+          "oklch(from var(--site-dark) 0.95 c h)"
+        ]
+      },
+      "accent-glow": {
+        "role": "primary",
+        "displayName": "Cahaya aksen",
+        "tonalRamp": [
+          "oklch(from var(--site-accent-glow) 0.15 c h)",
+          "oklch(from var(--site-accent-glow) 0.26 c h)",
+          "oklch(from var(--site-accent-glow) 0.38 c h)",
+          "oklch(from var(--site-accent-glow) 0.49 c h)",
+          "oklch(from var(--site-accent-glow) 0.61 c h)",
+          "oklch(from var(--site-accent-glow) 0.72 c h)",
+          "oklch(from var(--site-accent-glow) 0.84 c h)",
+          "oklch(from var(--site-accent-glow) 0.95 c h)"
+        ]
+      },
+      "badge-text": {
+        "role": "neutral",
+        "displayName": "Teks badge",
+        "tonalRamp": [
+          "oklch(from var(--site-badge-text) 0.15 c h)",
+          "oklch(from var(--site-badge-text) 0.26 c h)",
+          "oklch(from var(--site-badge-text) 0.38 c h)",
+          "oklch(from var(--site-badge-text) 0.49 c h)",
+          "oklch(from var(--site-badge-text) 0.61 c h)",
+          "oklch(from var(--site-badge-text) 0.72 c h)",
+          "oklch(from var(--site-badge-text) 0.84 c h)",
+          "oklch(from var(--site-badge-text) 0.95 c h)"
+        ]
+      },
+      "navbar-bg": {
+        "role": "neutral",
+        "displayName": "Latar navbar",
+        "tonalRamp": [
+          "oklch(from var(--navbar-bg) 0.15 c h)",
+          "oklch(from var(--navbar-bg) 0.26 c h)",
+          "oklch(from var(--navbar-bg) 0.38 c h)",
+          "oklch(from var(--navbar-bg) 0.49 c h)",
+          "oklch(from var(--navbar-bg) 0.61 c h)",
+          "oklch(from var(--navbar-bg) 0.72 c h)",
+          "oklch(from var(--navbar-bg) 0.84 c h)",
+          "oklch(from var(--navbar-bg) 0.95 c h)"
+        ]
+      },
+      "navbar-text": {
+        "role": "neutral",
+        "displayName": "Teks navbar",
+        "tonalRamp": [
+          "oklch(from var(--navbar-text) 0.15 c h)",
+          "oklch(from var(--navbar-text) 0.26 c h)",
+          "oklch(from var(--navbar-text) 0.38 c h)",
+          "oklch(from var(--navbar-text) 0.49 c h)",
+          "oklch(from var(--navbar-text) 0.61 c h)",
+          "oklch(from var(--navbar-text) 0.72 c h)",
+          "oklch(from var(--navbar-text) 0.84 c h)",
+          "oklch(from var(--navbar-text) 0.95 c h)"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "Putih",
+        "tonalRamp": [
+          "oklch(from #ffffff 0.15 c h)",
+          "oklch(from #ffffff 0.26 c h)",
+          "oklch(from #ffffff 0.38 c h)",
+          "oklch(from #ffffff 0.49 c h)",
+          "oklch(from #ffffff 0.61 c h)",
+          "oklch(from #ffffff 0.72 c h)",
+          "oklch(from #ffffff 0.84 c h)",
+          "oklch(from #ffffff 0.95 c h)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Permukaan lembut",
+        "tonalRamp": [
+          "oklch(from #fafafa 0.15 c h)",
+          "oklch(from #fafafa 0.26 c h)",
+          "oklch(from #fafafa 0.38 c h)",
+          "oklch(from #fafafa 0.49 c h)",
+          "oklch(from #fafafa 0.61 c h)",
+          "oklch(from #fafafa 0.72 c h)",
+          "oklch(from #fafafa 0.84 c h)",
+          "oklch(from #fafafa 0.95 c h)"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Teks utama",
+        "tonalRamp": [
+          "oklch(from #1a1a1a 0.15 c h)",
+          "oklch(from #1a1a1a 0.26 c h)",
+          "oklch(from #1a1a1a 0.38 c h)",
+          "oklch(from #1a1a1a 0.49 c h)",
+          "oklch(from #1a1a1a 0.61 c h)",
+          "oklch(from #1a1a1a 0.72 c h)",
+          "oklch(from #1a1a1a 0.84 c h)",
+          "oklch(from #1a1a1a 0.95 c h)"
+        ]
+      },
+      "text-secondary": {
+        "role": "neutral",
+        "displayName": "Teks pendukung",
+        "tonalRamp": [
+          "oklch(from #6b7280 0.15 c h)",
+          "oklch(from #6b7280 0.26 c h)",
+          "oklch(from #6b7280 0.38 c h)",
+          "oklch(from #6b7280 0.49 c h)",
+          "oklch(from #6b7280 0.61 c h)",
+          "oklch(from #6b7280 0.72 c h)",
+          "oklch(from #6b7280 0.84 c h)",
+          "oklch(from #6b7280 0.95 c h)"
+        ]
+      },
+      "reader-secondary": {
+        "role": "neutral",
+        "displayName": "Teks pendukung pembaca",
+        "tonalRamp": [
+          "oklch(from #555555 0.15 c h)",
+          "oklch(from #555555 0.26 c h)",
+          "oklch(from #555555 0.38 c h)",
+          "oklch(from #555555 0.49 c h)",
+          "oklch(from #555555 0.61 c h)",
+          "oklch(from #555555 0.72 c h)",
+          "oklch(from #555555 0.84 c h)",
+          "oklch(from #555555 0.95 c h)"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Garis pemisah",
+        "tonalRamp": [
+          "oklch(from #e5e5e5 0.15 c h)",
+          "oklch(from #e5e5e5 0.26 c h)",
+          "oklch(from #e5e5e5 0.38 c h)",
+          "oklch(from #e5e5e5 0.49 c h)",
+          "oklch(from #e5e5e5 0.61 c h)",
+          "oklch(from #e5e5e5 0.72 c h)",
+          "oklch(from #e5e5e5 0.84 c h)",
+          "oklch(from #e5e5e5 0.95 c h)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Judul arsip",
+        "purpose": "Header arsip; override mobile pembaca terdapat pada Layout."
+      },
+      "section-title": {
+        "displayName": "Judul bagian",
+        "purpose": "SectionHead beranda."
+      },
+      "reader-title": {
+        "displayName": "Judul daftar",
+        "purpose": "Daftar pembaca satu kolom."
+      },
+      "body": {
+        "displayName": "Isi antarmuka",
+        "purpose": "Teks situs umum."
+      },
+      "article-body": {
+        "displayName": "Isi artikel",
+        "purpose": "Rich text maksimum 70ch."
+      },
+      "label": {
+        "displayName": "Kategori",
+        "purpose": "Badge kategori incumbent."
+      }
+    },
+    "shadows": [
+      {
+        "name": "button-primary",
+        "value": "0 12px 28px color-mix(in srgb, var(--site-primary) 24%, transparent)",
+        "purpose": "Tombol utama incumbent; ditiadakan pada beranda."
+      },
+      {
+        "name": "button-surface",
+        "value": "0 12px 24px color-mix(in srgb, var(--site-dark) 10%, transparent)",
+        "purpose": "Tombol surface incumbent; ditiadakan pada bookmark dan beranda."
+      },
+      {
+        "name": "card-hover",
+        "value": "0 8px 24px rgba(0, 0, 0, 0.08)",
+        "purpose": "Hover kartu artikel umum."
+      },
+      {
+        "name": "archive-header",
+        "value": "0 24px 80px rgba(10, 10, 10, 0.15)",
+        "purpose": "Header arsip gelap incumbent."
+      }
+    ],
+    "motion": [
+      {
+        "name": "button-transition",
+        "value": "transform 160ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 160ms ease, background 160ms ease, border-color 160ms ease, color 160ms ease",
+        "purpose": "State theme-btn incumbent."
+      },
+      {
+        "name": "standard-transition",
+        "value": "all 0.2s ease-in-out",
+        "purpose": "Kartu dan tautan incumbent."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "reader-phone-max",
+        "value": "575px"
+      },
+      {
+        "name": "home-grid-two-columns-max",
+        "value": "767px"
+      },
+      {
+        "name": "site-mobile-gutter-max",
+        "value": "768px"
+      },
+      {
+        "name": "bootstrap-lg",
+        "value": "992px"
+      },
+      {
+        "name": "bootstrap-xl",
+        "value": "1200px"
+      },
+      {
+        "name": "bootstrap-xxl",
+        "value": "1400px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Varian theme-btn incumbent; preview menggunakan target pembaca 44px.",
+      "html": "<button class=\"ds-btn\" type=\"button\">Simpan minat</button>",
+      "css": ".ds-btn{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:44px;border:1px solid transparent;border-radius:999px;padding:.7rem 1rem;font-weight:850;line-height:1.1;text-decoration:none;cursor:pointer;transition:transform 160ms cubic-bezier(.23,1,.32,1),box-shadow 160ms ease,background 160ms ease,border-color 160ms ease,color 160ms ease;color:var(--site-primary-contrast);background:var(--site-primary);box-shadow:0 12px 28px color-mix(in srgb,var(--site-primary) 24%,transparent);}.ds-btn:hover{transform:translateY(-1px);text-decoration:none}.ds-btn:active{transform:scale(.97)}.ds-btn:focus-visible{outline:3px solid var(--site-dark);outline-offset:3px}.ds-btn:disabled{opacity:.6;cursor:wait}.ds-btn:hover{background:color-mix(in srgb,var(--site-primary) 88%,#fff)}"
+    },
+    {
+      "name": "Surface Button",
+      "kind": "button",
+      "refersTo": "button-surface",
+      "description": "Varian theme-btn incumbent; preview menggunakan target pembaca 44px.",
+      "html": "<button class=\"ds-btn\" type=\"button\">Ubah minat</button>",
+      "css": ".ds-btn{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:44px;border:1px solid transparent;border-radius:999px;padding:.7rem 1rem;font-weight:850;line-height:1.1;text-decoration:none;cursor:pointer;transition:transform 160ms cubic-bezier(.23,1,.32,1),box-shadow 160ms ease,background 160ms ease,border-color 160ms ease,color 160ms ease;color:var(--site-dark);background:#fff;border-color:color-mix(in srgb,var(--site-dark) 12%,transparent);box-shadow:0 12px 24px color-mix(in srgb,var(--site-dark) 10%,transparent);}.ds-btn:hover{transform:translateY(-1px);text-decoration:none}.ds-btn:active{transform:scale(.97)}.ds-btn:focus-visible{outline:3px solid var(--site-dark);outline-offset:3px}.ds-btn:disabled{opacity:.6;cursor:wait}.ds-btn:hover{border-color:color-mix(in srgb,var(--site-primary) 50%,transparent)}"
+    },
+    {
+      "name": "Dark Button",
+      "kind": "button",
+      "refersTo": "button-dark",
+      "description": "Varian theme-btn incumbent; preview menggunakan target pembaca 44px.",
+      "html": "<button class=\"ds-btn\" type=\"button\">Lihat artikel</button>",
+      "css": ".ds-btn{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:44px;border:1px solid transparent;border-radius:999px;padding:.7rem 1rem;font-weight:850;line-height:1.1;text-decoration:none;cursor:pointer;transition:transform 160ms cubic-bezier(.23,1,.32,1),box-shadow 160ms ease,background 160ms ease,border-color 160ms ease,color 160ms ease;color:#fff;background:var(--site-dark);box-shadow:0 14px 30px color-mix(in srgb,var(--site-dark) 22%,transparent);}.ds-btn:hover{transform:translateY(-1px);text-decoration:none}.ds-btn:active{transform:scale(.97)}.ds-btn:focus-visible{outline:3px solid var(--site-dark);outline-offset:3px}.ds-btn:disabled{opacity:.6;cursor:wait}.ds-btn:hover{background:color-mix(in srgb,var(--site-dark) 88%,var(--site-primary))}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Varian theme-btn incumbent; preview menggunakan target pembaca 44px.",
+      "html": "<div class=\"ds-dark-surface\"><button class=\"ds-btn\" type=\"button\">Lihat semua</button></div>",
+      "css": ".ds-btn{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:44px;border:1px solid transparent;border-radius:999px;padding:.7rem 1rem;font-weight:850;line-height:1.1;text-decoration:none;cursor:pointer;transition:transform 160ms cubic-bezier(.23,1,.32,1),box-shadow 160ms ease,background 160ms ease,border-color 160ms ease,color 160ms ease;color:#fff;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.36);}.ds-btn:hover{transform:translateY(-1px);text-decoration:none}.ds-btn:active{transform:scale(.97)}.ds-btn:focus-visible{outline:3px solid var(--site-dark);outline-offset:3px}.ds-btn:disabled{opacity:.6;cursor:wait}.ds-btn:hover{color:var(--site-dark);background:#fff;border-color:#fff}.ds-btn:focus-visible{outline-color:#fff}.ds-dark-surface{background:var(--site-dark);padding:24px;border-radius:28px}"
+    },
+    {
+      "name": "Category Badge",
+      "kind": "chip",
+      "refersTo": "badge-category",
+      "description": "Kategori konten, bukan kicker dekoratif.",
+      "html": "<span class=\"ds-badge\">Anime</span>",
+      "css": ".ds-badge{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;display:inline-block;background:var(--site-primary);color:var(--site-badge-text);font-weight:700;padding:.3rem .6rem;border-radius:6px;font-size:.75rem;letter-spacing:.02em;max-width:100%;white-space:normal;text-align:left;line-height:1.3}"
+    },
+    {
+      "name": "Interest Checkbox",
+      "kind": "input",
+      "refersTo": "interest-option",
+      "description": "Checkbox asli dengan label pill; klik mengubah state preview.",
+      "html": "<label class=\"ds-interest\"><input type=\"checkbox\" checked>Anime</label>",
+      "css": ".ds-interest{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 14px;border:1px solid #ccc;border-radius:999px;cursor:pointer;color:#111;font-size:.875rem}.ds-interest:has(input:checked){background:var(--site-primary);color:var(--site-primary-contrast);border-color:transparent}.ds-interest input{accent-color:#111;width:16px;height:16px}.ds-interest input:focus-visible{outline:3px solid var(--site-dark);outline-offset:3px}"
+    },
+    {
+      "name": "Reader Navigation",
+      "kind": "nav",
+      "refersTo": "archive-header",
+      "description": "Navigasi halaman personal di atas header arsip gelap.",
+      "html": "<nav class=\"ds-reader-nav\" aria-label=\"Personalisasi pembaca\"><a href=\"/untuk-kamu\" aria-current=\"page\">Untuk Kamu</a><a href=\"/artikel-tersimpan\">Artikel Tersimpan</a></nav>",
+      "css": ".ds-reader-nav{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;display:flex;flex-wrap:wrap;gap:.65rem;padding:24px;border-radius:28px;background:radial-gradient(circle at top right,color-mix(in srgb,var(--site-accent-glow) 78%,transparent),transparent 22%),linear-gradient(135deg,var(--site-dark) 0%,#111827 48%,#1f2937 100%)}.ds-reader-nav a{display:inline-flex;align-items:center;min-height:44px;padding:.5rem .8rem;border-radius:999px;border:1px solid rgba(255,255,255,.36);background:#111827;color:#fff;font-size:.8rem;font-weight:600;text-decoration:none;transition:all .2s ease-in-out}.ds-reader-nav a:hover{transform:translateY(-2px);background:#1f2937;color:#fff}.ds-reader-nav a[aria-current=\"page\"],.ds-reader-nav a[aria-current=\"page\"]:hover{border-color:var(--site-primary);background:var(--site-primary);color:var(--site-primary-contrast)}.ds-reader-nav a:focus-visible{outline:3px solid #fff;outline-offset:3px}"
+    },
+    {
+      "name": "Article Card",
+      "kind": "card",
+      "refersTo": "article-card",
+      "description": "Kartu vertikal incumbent; contoh tanpa foto memakai fallback bidang kosong.",
+      "html": "<article class=\"ds-card\"><a href=\"/index-article\"><div class=\"ds-card-photo\"></div><div class=\"ds-card-body\"><span class=\"ds-card-category\">Anime</span><h3>Judul artikel Mokultur</h3><p>Ringkasan artikel tampil di bawah judul.</p><small>8 Okt 2026</small></div></a></article>",
+      "css": ".ds-card{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#fff;border-radius:12px;transition:all .2s ease-in-out}.ds-card a{display:block;color:inherit;height:100%;text-decoration:none}.ds-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.08)}.ds-card:active{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.06)}.ds-card a:focus-visible{outline:auto}.ds-card-photo{height:160px;background:#f0f0f0;border-radius:8px 8px 0 0}.ds-card-body{padding:16px}.ds-card-category{display:inline-block;background:var(--site-primary);color:var(--site-badge-text);font-weight:700;padding:.3rem .6rem;border-radius:6px;font-size:.75rem;letter-spacing:.02em}.ds-card h3{font-size:1rem;font-weight:700;line-height:1.2;margin:8px 0}.ds-card p{font-size:.875em;color:var(--bs-secondary-color,#6c757d);margin:0 0 8px}.ds-card small{color:var(--bs-secondary-color,#6c757d)}"
+    },
+    {
+      "name": "Reader Row",
+      "kind": "custom",
+      "description": "Baris daftar tanpa foto, sesuai dukungan komponen; judul, metadata, dan alasan.",
+      "html": "<article class=\"ds-reader-row\"><div class=\"ds-reader-meta\"><span class=\"ds-reader-category\">Anime</span><time datetime=\"2026-10-08\">8 Okt 2026</time></div><h2><a href=\"/index-article\">Judul artikel pilihan untuk pembaca</a></h2><p class=\"ds-reader-description\">Ringkasan singkat artikel.</p><p class=\"ds-reader-reason\">Sesuai minat Anime</p></article>",
+      "css": ".ds-reader-row{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;padding:24px 0;border-bottom:1px solid #ddd}.ds-reader-meta{display:flex;flex-wrap:wrap;gap:8px 14px;color:#555;font-size:.75rem;margin-bottom:8px}.ds-reader-category{background:var(--site-primary);color:var(--site-primary-contrast);font-weight:700;padding:.3rem .6rem;border-radius:6px;letter-spacing:.02em}.ds-reader-row h2{font-size:1.25rem;line-height:1.4;font-weight:750;margin:0;overflow-wrap:anywhere}.ds-reader-row h2 a{color:var(--site-dark);text-decoration:none}.ds-reader-row h2 a:hover{text-decoration:underline;text-underline-offset:3px}.ds-reader-row a:focus-visible{outline:3px solid var(--site-dark);outline-offset:3px}.ds-reader-description{color:#555;font-size:.875rem;line-height:1.6;margin:8px 0 0}.ds-reader-reason{margin:10px 0 0;color:#555;font-size:.8125rem}@media(max-width:575px){.ds-reader-row{padding:20px 0}.ds-reader-row h2{font-size:1.0625rem}.ds-reader-description{display:none}}"
+    },
+    {
+      "name": "Section Heading",
+      "kind": "custom",
+      "description": "SectionHead incumbent: garis aksen, judul, dan subjudul.",
+      "html": "<div class=\"ds-section\"><h2>Untuk Kamu</h2><p>Temukan bacaan sesuai minatmu.</p></div>",
+      "css": ".ds-section{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;align-self:start;margin-bottom:1rem;padding-left:.75rem;border-left:4px solid var(--site-primary)}.ds-section h2{margin:0;font-size:1.1rem;font-weight:800;letter-spacing:-.02em;color:#1a1a1a}.ds-section p{margin:.15rem 0 0;font-size:.85rem;color:var(--bs-secondary-color,#6c757d)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Editorial Mokultur",
+    "overview": "Dokumen ini mencatat identitas situs yang sudah dibangun: halaman putih, judul tebal, foto artikel, aksen dari dashboard, dan header arsip gelap. Nama di atas merupakan deskripsi incumbent, bukan arah merek baru. Bahasa antarmuka pembaca adalah Indonesia; konten dan judul menjadi pusat perhatian.\n\nSistem menggunakan SvelteKit, Bootstrap 5.3, Inter yang di-host sendiri, dan ikon Bootstrap. Halaman pembaca memperluas komponen beranda dan arsip yang sama. Varian navbar, kartu artikel, dan detail artikel tetap mengikuti pengaturan situs; satu varian bukan aturan untuk seluruh situs.",
+    "keyCharacteristics": [
+      "Judul tebal dan foto konten sebagai penanda hierarki.",
+      "Latar baca putih, header arsip gelap, aksen yang mengikuti dashboard.",
+      "Tombol pill, badge kategori bersudut kecil, dan garis aksen pada judul bagian.",
+      "Komposisi responsif dengan aksi yang dapat membungkus di ponsel."
+    ],
+    "rules": [
+      {
+        "name": "The Live Palette Rule",
+        "body": "Ambil warna merek dari custom property yang diisi `src/routes/+layout.svelte`; jangan menjadikan warna dashboard saat ini sebagai konstanta baru. `--site-secondary` saat ini adalah alias primary, bukan aksen kedua.",
+        "section": "colors"
+      },
+      {
+        "name": "The Title First Rule",
+        "body": "Judul membawa hierarki konten. Metadata dan alasan rekomendasi tetap lebih kecil serta memakai warna pendukung.",
+        "section": "typography"
+      },
+      {
+        "name": "The Wrap Before Squeeze Rule",
+        "body": "Aksi dan pilihan membungkus ke baris berikutnya; isi flex memakai lebar minimum nol agar judul tidak mendorong halaman keluar layar.",
+        "section": "layout"
+      }
+    ],
+    "dos": [
+      "**Do** gunakan token dashboard dan logo situs sebagai sumber identitas.",
+      "**Do** pertahankan bahasa Indonesia dan hierarki judul, foto, lalu metadata.",
+      "**Do** pakai komponen SectionHead, ArticleCard, dan theme-btn ketika memperluas permukaan publik yang sejenis.",
+      "**Do** pertahankan target aksi pembaca minimal 44px, fokus terlihat, dan aksi yang membungkus.",
+      "**Do** uji teks serta keadaan aktif di atas aksen dashboard dan latar header gelap."
+    ],
+    "donts": [
+      "**Don't** membekukan warna atau varian dashboard sebagai aturan universal.",
+      "**Don't** menyamakan semua sudut; badge, thumbnail, kartu, header, dan aksi memiliki bentuk berbeda.",
+      "**Don't** mengganti identitas incumbent ketika menambah fitur pembaca.",
+      "**Don't** memperluas kicker dekoratif lama atau bayangan pencarian ber-offset keras menjadi pola baru; keduanya bukan bagian kanonis sistem ini."
+    ]
+  }
+}

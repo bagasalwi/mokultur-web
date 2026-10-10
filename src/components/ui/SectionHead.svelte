@@ -7,11 +7,12 @@
    */
   export let title: string;
   export let sub: string | null = null;
+  export let headingId: string | undefined = undefined;
 </script>
 
 <div class="section-head" class:section-head--split={$$slots.action}>
   <div class="section-head__text">
-    <h2 class="section-head__title">{title}</h2>
+    <h2 id={headingId} class="section-head__title">{title}</h2>
     {#if sub}<p class="section-head__sub">{sub}</p>{/if}
   </div>
   <slot name="action" />

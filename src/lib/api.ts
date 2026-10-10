@@ -86,6 +86,8 @@ export function listArticles(params: {
   category?: string;
   search?: string;
   reviewOnly?: boolean;
+  /** 'YYYY-MM' archive month. */
+  month?: string;
 }) {
   const q = new URLSearchParams();
   if (params.page) q.set('page', String(params.page));
@@ -93,7 +95,13 @@ export function listArticles(params: {
   if (params.category) q.set('category', params.category);
   if (params.search) q.set('search', params.search);
   if (params.reviewOnly) q.set('reviewOnly', 'true');
+  if (params.month) q.set('month', params.month);
   return apiFetch<{ data: ArticleListItem[]; meta: ArticleMeta }>(`/api/articles?${q}`);
+}
+
+/** Published article count per month ('YYYY-MM'), newest first. */
+export function getArticleArchive() {
+  return apiFetch<{ data: { month: string; count: number }[] }>('/api/articles/archive');
 }
 
 export function getArticle(id: number, slug: string, ifNoneMatch?: string, preview?: string) {
@@ -122,12 +130,91 @@ export function listCategories() {
   return apiFetch<{ data: Category[] }>('/api/categories');
 }
 
-export function getCategoryArticles(slug: string, page = 1, search?: string) {
+export type ArticleSort = 'latest' | 'popular';
+
+export function getCategoryArticles(slug: string, page = 1, search?: string, sort: ArticleSort = 'latest', perPage?: number) {
   const q = new URLSearchParams({ page: String(page) });
   if (search) q.set('search', search);
+  if (sort === 'popular') q.set('sort', 'popular');
+  if (perPage) q.set('perPage', String(perPage));
   return apiFetch<{ data: ArticleListItem[]; meta: ArticleMeta; category: Category; seo: ArticleSeo }>(
     `/api/categories/${slug}/articles?${q}`,
   );
+}
+
+// ---- Search ----
+
+export type SearchSort = 'relevance' | 'latest' | 'popular';
+export type SearchPeriod = 'week' | 'month' | 'year';
+
+export interface SearchArticle extends ArticleListItem {
+  /** Plain text around the first matching word; highlight it client-side. */
+  snippet: string | null;
+}
+
+export interface SearchEntities {
+  topics: { id: string; label: string; href: string }[];
+  tags: { name: string; slug: string; count: number }[];
+  categories: { name: string; slug: string; count: number }[];
+  authors: { name: string; username: string; img?: string | null; count: number }[];
+}
+
+export interface SearchResponse {
+  query: string;
+  tokens: string[];
+  /** 'all' = every word matched; 'any' = closest matches; 'phrase' = literal title match. */
+  mode: 'all' | 'any' | 'phrase' | 'none';
+  didYouMean: string | null;
+  data: SearchArticle[];
+  meta: ArticleMeta;
+  filters: { category?: string; author?: string; tag?: string; period?: SearchPeriod; sort: SearchSort };
+  facets: {
+    categories: { name: string; slug: string; count: number }[];
+    authors: { name: string; username: string; count: number }[];
+  };
+  entities: SearchEntities | null;
+}
+
+export interface SearchParams {
+  q: string;
+  page?: number;
+  perPage?: number;
+  sort?: SearchSort;
+  period?: SearchPeriod;
+  category?: string;
+  author?: string;
+  tag?: string;
+}
+
+export function searchArticles(params: SearchParams, init?: RequestInit) {
+  const q = new URLSearchParams({ q: params.q });
+  for (const key of ['page', 'perPage', 'sort', 'period', 'category', 'author', 'tag'] as const) {
+    const value = params[key];
+    if (value !== undefined && value !== '' && !(key === 'sort' && value === 'relevance') && !(key === 'page' && value === 1)) {
+      q.set(key, String(value));
+    }
+  }
+  return apiFetch<SearchResponse>(`/api/search?${q}`, init);
+}
+
+export interface SearchSuggestions extends SearchEntities {
+  query: string;
+  total?: number;
+  articles: { id: number; slug: string; title: string; image: string | null; category: string | null; publishDate: string | null }[];
+}
+
+/**
+ * Called per keystroke from the browser, so it skips apiFetch's JSON
+ * content-type: a plain GET needs no CORS preflight, halving the round trips.
+ */
+export async function searchSuggest(q: string, signal?: AbortSignal): Promise<SearchSuggestions> {
+  const res = await fetch(`${BASE}/api/search/suggest?q=${encodeURIComponent(q)}`, { signal });
+  if (!res.ok) throw Object.assign(new Error('Saran gagal dimuat'), { status: res.status });
+  return res.json() as Promise<SearchSuggestions>;
+}
+
+export function getTrendingSearches() {
+  return apiFetch<{ data: string[] }>('/api/search/trending');
 }
 
 // ---- Tags ----
@@ -143,8 +230,9 @@ export function getPopularTags(limit = 15) {
 }
 
 export function getTagArticles(slug: string, page = 1) {
-  return apiFetch<{ data: ArticleListItem[]; meta: ArticleMeta; tag: { name: string; slug: string }; seo: ArticleSeo }>(
-    `/api/tags/${slug}/articles?page=${page}`,
+  // `redirect` is set when the slug is an old or variant spelling of a live tag.
+  return apiFetch<{ data: ArticleListItem[]; meta: ArticleMeta; tag: { name: string; slug: string }; seo: ArticleSeo; redirect?: string }>(
+    `/api/tags/${encodeURIComponent(slug)}/articles?page=${page}`,
   );
 }
 
@@ -162,19 +250,35 @@ export interface Writer {
   totalArticles: number;
   totalViews: number;
   latestPublishDate: string | null;
+  /** Their most-used categories, most first. */
+  beats?: WriterBeat[];
+  articles30d?: number;
+  latestArticle?: { id: number; slug: string; title: string; image: string | null; publishDate: string | null } | null;
+}
+
+export interface WriterBeat {
+  name: string;
+  slug: string;
+  count: number;
 }
 
 export function listWriters(page = 1, perPage = 12) {
   return apiFetch<{ data: Writer[]; meta: ArticleMeta }>(`/api/users/writers?page=${page}&perPage=${perPage}`);
 }
 
-export function getUserProfile(username: string, page = 1) {
+export type ProfileSort = 'latest' | 'popular';
+
+export function getUserProfile(username: string, page = 1, sort: ProfileSort = 'latest') {
+  const q = new URLSearchParams({ page: String(page) });
+  if (sort === 'popular') q.set('sort', 'popular');
   return apiFetch<{
     user: Writer & { createdAt: string | null };
     stats: { totalArticles: number; totalViews: number; totalLikes: number };
+    latestPublishDate: string | null;
+    beats: WriterBeat[];
     achievements: string[];
-    articles: { data: ArticleListItem[]; meta: ArticleMeta };
-  }>(`/api/users/${username}/profile?page=${page}`);
+    articles: { data: ArticleListItem[]; meta: ArticleMeta; sort: ProfileSort };
+  }>(`/api/users/${encodeURIComponent(username)}/profile?${q}`);
 }
 
 // ---- Social Media ----
@@ -197,10 +301,10 @@ export function getSocialMedia() {
 
 export type PopularRange = 'today' | 'week' | 'month' | 'all';
 
-export function getPopularArticles(limit = 5, range: PopularRange = 'week') {
-  return apiFetch<{ data: ArticleListItem[]; range: PopularRange }>(
-    `/api/articles/popular?limit=${limit}&range=${range}`
-  );
+export function getPopularArticles(limit = 5, range: PopularRange = 'week', category?: string) {
+  const q = new URLSearchParams({ limit: String(limit), range });
+  if (category) q.set('category', category);
+  return apiFetch<{ data: ArticleListItem[]; range: PopularRange }>(`/api/articles/popular?${q}`);
 }
 
 // ---- Settings ----
@@ -222,6 +326,12 @@ export interface SiteSettings {
   event_section_style: string | null;
   tech_section_style: string | null;
   navbar_style: string | null;
+  /** Terbaru on the homepage: 'card-grid' (follows card_style) or 'news-list'. */
+  latest_section_style: string | null;
+  /** Homepage section order: 'news-first' or 'classic'. */
+  home_layout: string | null;
+  /** Homepage anime block: 'trio' (three columns) or 'poster-rail'. */
+  anime_section_style: string | null;
   anime_enabled: boolean;
   quiz_enabled: boolean;
   event_enabled: boolean;
@@ -241,6 +351,8 @@ export interface SiteSettings {
   meta_description: string | null;
   meta_keywords: string | null;
   og_image: string | null;
+  /** Mokultur's publication page on Google News, when set in Site Settings. */
+  google_news_url?: string | null;
 }
 
 export function getSettings() {
@@ -445,9 +557,13 @@ export interface EventItem {
   startDate: string;
   endDate: string | null;
   startTime: string | null;
+  /** "HH:MM", WIB. */
+  endTime: string | null;
   location: string | null;
   city: string | null;
   ticketUrl: string | null;
+  /** Free text from the editor: "Mulai Rp75.000", "Gratis". */
+  priceLabel: string | null;
   status: EventStatus;
   /** Whole days until it opens; negative once it has started. */
   daysUntil: number | null;
@@ -470,6 +586,11 @@ export interface EventArticle {
 export interface EventDetail extends EventItem {
   description: string | null;
   endDateEffective: string;
+  organizer: string | null;
+  /** Handle without the @. */
+  organizerInstagram: string | null;
+  address: string | null;
+  mapsUrl: string | null;
   articles: EventArticle[];
 }
 
