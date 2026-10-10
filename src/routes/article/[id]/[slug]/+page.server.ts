@@ -49,7 +49,8 @@ export const load: PageServerLoad = async ({ params, request, setHeaders, url, l
 
     res = articleRes.value;
 
-    if ((res as any).redirect) {
+    // fetch() follows the API's own 301, so a stale slug shows up as a slug mismatch, not as `redirect`.
+    if ((res as any).redirect || (res.data?.slug && res.data.slug !== params.slug)) {
       const suffix = previewToken ? `?preview=${encodeURIComponent(previewToken)}` : '';
       throw redirect(301, `/article/${id}/${res.data?.slug ?? params.slug}${suffix}`);
     }
