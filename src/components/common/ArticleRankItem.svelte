@@ -1,6 +1,6 @@
 <script lang="ts">
   import { imgSrcset, imgUrl } from '$lib/img';
-  import { compactNumber, imgFallback, timeAgo } from '$lib/format';
+  import { imgFallback, timeAgo } from '$lib/format';
   import type { ArticleListItem } from '$lib/api';
 
   export let article: ArticleListItem;
@@ -17,7 +17,6 @@
   export let showCategory = true;
 
   $: href = `/article/${article.id}/${article.slug}`;
-  $: views = typeof article.viewCount === 'number' && article.viewCount > 0 ? `${compactNumber(article.viewCount)} dibaca` : '';
   $: when = timeAgo(article.publishDate);
   $: isoDate = article.publishDate ? article.publishDate.replace(' ', 'T') : undefined;
 </script>
@@ -45,11 +44,8 @@
     <span class="rank__title">
       {#if ranked}<span class="visually-hidden">Peringkat {rank}: </span>{/if}{article.title}
     </span>
-    {#if views || when}
-      <span class="rank__meta">
-        {#if views}<span>{views}</span>{/if}
-        {#if when}<time datetime={isoDate}>{when}</time>{/if}
-      </span>
+    {#if when}
+      <span class="rank__meta"><time datetime={isoDate}>{when}</time></span>
     {/if}
   </span>
 
@@ -147,11 +143,6 @@
     color: #6b7280;
     font-size: 0.75rem;
     font-variant-numeric: tabular-nums;
-  }
-
-  .rank__meta > * + *::before {
-    content: '·';
-    margin-right: 0.5rem;
   }
 
   .rank__thumb {
