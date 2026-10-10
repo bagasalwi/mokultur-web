@@ -4586,6 +4586,10 @@ header.sticky-top {
 
     img {
         height: 28px;
+        // The <img> carries width="160" for layout reservation; without an
+        // explicit auto width that attribute wins and the logo squashes to
+        // 160x28 instead of keeping its own ~2.9:1 shape.
+        width: auto;
         display: block;
     }
 
