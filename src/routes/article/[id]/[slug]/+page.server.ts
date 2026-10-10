@@ -26,7 +26,8 @@ export const load: PageServerLoad = async ({ params, request, setHeaders, url, l
     setHeaders({ 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex, nofollow' });
   }
 
-  const ifNoneMatch = previewToken ? undefined : (request.headers.get('if-none-match') ?? undefined);
+  // The browser's If-None-Match is not forwarded: a 304 from the API would make apiFetch throw and the page 500.
+  const ifNoneMatch = undefined;
 
   let res;
   try {

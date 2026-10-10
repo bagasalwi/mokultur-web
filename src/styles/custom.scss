@@ -1316,6 +1316,12 @@ a {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
+/* Size unknown to the gallery: reserve the usual 16:9 so the text does not jump. */
+.article-hero-img--unsized {
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
 .article-hero-breadcrumb {
     display: inline-flex;
     align-items: center;

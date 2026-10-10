@@ -16,13 +16,44 @@
 
   export let data: LayoutData;
 
+  // Bootstrap's JS (≈80 KB) is only needed by markup that uses its data API;
+  // no page does today, so it loads on demand instead of on every visit.
+  let bootstrapRequested = false;
+  function loadBootstrapIfNeeded() {
+    if (bootstrapRequested || !document.querySelector('[data-bs-toggle], [data-bs-ride], .carousel')) return;
+    bootstrapRequested = true;
+    void import('bootstrap/dist/js/bootstrap.bundle.min.js');
+  }
+
+  // Subscribe with Google is not needed to read: fetch it once the page is idle
+  // so its ≈80 KB never competes with the article. The inline SWG_BASIC queue
+  // in <svelte:head> holds the init call until the script arrives.
+  let swgRequested = false;
+  function loadSwg() {
+    if (swgRequested) return;
+    swgRequested = true;
+    const inject = () => {
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://news.google.com/swg/js/v1/swg-basic.js';
+      document.head.appendChild(script);
+    };
+    if ('requestIdleCallback' in window) window.requestIdleCallback(inject, { timeout: 4000 });
+    else setTimeout(inject, 3000);
+  }
+
+  let mounted = false;
   afterNavigate(() => {
     if (!window.location.hash) window.scrollTo({ top: 0, behavior: 'instant' });
+    loadBootstrapIfNeeded();
   });
 
-  onMount(async () => {
-    await import('bootstrap/dist/js/bootstrap.bundle.min.js');
+  onMount(() => {
+    mounted = true;
+    loadBootstrapIfNeeded();
   });
+
+  $: if (mounted && !isPrivateRoute) loadSwg();
 
   $: if (typeof document !== 'undefined') {
     const r = document.documentElement.style;
@@ -84,7 +115,6 @@
   {/if}
   <!-- Google Reader Revenue Manager (Subscribe with Google, open access). Public pages only. -->
   {#if !isPrivateRoute}
-    <script async type="application/javascript" src="https://news.google.com/swg/js/v1/swg-basic.js"></script>
     {@html `<script>
   (self.SWG_BASIC = self.SWG_BASIC || []).push( basicSubscriptions => {
     basicSubscriptions.init({

@@ -51,6 +51,9 @@ export interface TocItem {
 }
 
 export interface ArticleSingle extends ArticleListItem {
+  /** Pixel size of the hero image when the gallery knows it; reserves its space before it loads. */
+  imageWidth?: number | null;
+  imageHeight?: number | null;
   photoStory?: PhotoStory | null;
   content: string;
   toc: TocItem[];

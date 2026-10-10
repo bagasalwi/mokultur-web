@@ -3,6 +3,7 @@
   import type { EventItem } from '$lib/api';
   import { countdownLabel, formatDateRange, STATUS_LABELS } from '$lib/event';
   import { imgFallback } from '$lib/format';
+  import { imgUrl } from '$lib/img';
 
   export let events: EventItem[] = [];
 
@@ -66,7 +67,7 @@
           >
             <div class="event-promo__thumb">
               {#if event.poster}
-                <img src={event.poster} alt="" loading="lazy" on:error={imgFallback} />
+                <img src={imgUrl(event.poster, 160) ?? event.poster} alt="" width="62" height="78" loading="lazy" on:error={imgFallback} />
               {:else}
                 <i class="bi bi-calendar-event" aria-hidden="true"></i>
               {/if}

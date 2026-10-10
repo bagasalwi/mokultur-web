@@ -22,6 +22,8 @@
   import BookmarkButton from '$components/reader/BookmarkButton.svelte';
   import ReadingHistory from '$components/reader/ReadingHistory.svelte';
   import ArticleStoryShare from '$components/articles/ArticleStoryShare.svelte';
+  import { openAuth } from '$lib/stores/auth-modal';
+  import { tick } from 'svelte';
 
   export let data: PageData;
 
@@ -41,32 +43,67 @@
   let commentBody = "";
   let storyViewer: PhotoStoryViewer;
 
+  /*
+   * Views are counted here, in the reader's browser: the server render reaches
+   * the API from 127.0.0.1 and cached pages never reach it at all. Previews
+   * don't count. The API dedupes per reader for 30 minutes.
+   */
+  function countView(id: number) {
+    if ($page.url.searchParams.has('preview')) return;
+    const url = `${PUBLIC_API_URL}/api/articles/${id}/view`;
+    try {
+      if (navigator.sendBeacon?.(url)) return;
+    } catch {}
+    void fetch(url, { method: 'POST', keepalive: true, mode: 'no-cors' }).catch(() => {});
+  }
+
+  // Likes go through the same-origin proxy so the reader's login cookie counts.
+  let engagement: AbortController | null = null;
+  async function loadEngagement(id: number) {
+    engagement?.abort();
+    const controller = (engagement = new AbortController());
+    const [interactions, list] = await Promise.all([
+      fetch(`/api/articles/${id}/interactions`, { signal: controller.signal }).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch(`${PUBLIC_API_URL}/api/articles/${id}/comments`, { signal: controller.signal }).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+    ]);
+    if (controller.signal.aborted) return;
+    likeCount = Number(interactions?.likes ?? 0);
+    liked = Boolean(interactions?.liked);
+    comments = list?.data ?? [];
+  }
+
+  // The component is reused when navigating from one article to another, so key on the id, not on mount.
+  let mounted = false;
+  let engagedId = 0;
+  $: if (mounted && a?.id && a.id !== engagedId) {
+    engagedId = a.id;
+    liked = false;
+    likeCount = 0;
+    comments = [];
+    countView(a.id);
+    void loadEngagement(a.id);
+    void processEmbeds();
+  }
+
+  // Instagram's embed.js is loaded once, and only when the story has an embed.
+  // A <script> inside {@html} never runs after client-side navigation, so the
+  // shortcode no longer ships one; process() renders new blockquotes each time.
+  async function processEmbeds() {
+    await tick();
+    if (!document.querySelector('.bodyArticle .instagram-media')) return;
+    const w = window as typeof window & { instgrm?: { Embeds: { process(): void } } };
+    if (w.instgrm) return w.instgrm.Embeds.process();
+    if (document.getElementById('ig-embed-js')) return;
+    const script = document.createElement('script');
+    script.id = 'ig-embed-js';
+    script.async = true;
+    script.src = 'https://www.instagram.com/embed.js';
+    script.onload = () => w.instgrm?.Embeds.process();
+    document.body.appendChild(script);
+  }
+
   onMount(() => {
-    const controller = new AbortController();
-    void (async () => {
-    try {
-      const res = await fetch(
-        `${PUBLIC_API_URL}/api/articles/${a.id}/interactions`,
-        { signal: controller.signal },
-      );
-      if (res.ok) {
-        const d = await res.json();
-        likeCount = d.data?.likeCount ?? 0;
-      }
-    } catch {}
-
-    try {
-      const res = await fetch(
-        `${PUBLIC_API_URL}/api/articles/${a.id}/comments`,
-        { signal: controller.signal },
-      );
-      if (res.ok) {
-        const d = await res.json();
-        comments = d.data ?? [];
-      }
-    } catch {}
-
-    })();
+    mounted = true;
 
     if (typeof window !== "undefined") {
       document.querySelectorAll(".carousel").forEach((el) => {
@@ -151,7 +188,7 @@
     window.addEventListener('keydown', onKeydown);
 
     return () => {
-      controller.abort();
+      engagement?.abort();
       articleBody?.removeEventListener('click', onGalleryClick);
       window.removeEventListener('keydown', onKeydown);
       lb.remove();
@@ -161,31 +198,43 @@
 
   async function toggleLike() {
     if (likeLoading) return;
+    if (!data.user) {
+      openAuth('login');
+      return;
+    }
     likeLoading = true;
     try {
-      const res = await fetch(`${PUBLIC_API_URL}/api/articles/${a.id}/like`, {
-        method: "POST",
-      });
+      const res = await fetch(`/api/articles/${a.id}/like`, { method: "POST" });
+      if (res.status === 401) {
+        openAuth('login');
+        return;
+      }
       if (res.ok) {
         const d = await res.json();
-        liked = d.data?.liked ?? !liked;
-        likeCount = d.data?.likeCount ?? likeCount;
+        const next = Boolean(d.liked);
+        if (next !== liked) likeCount = Math.max(0, likeCount + (next ? 1 : -1));
+        liked = next;
       }
+    } catch {
     } finally {
       likeLoading = false;
     }
   }
 
+  // Dates are stored in UTC; readers and the newsroom work in WIB. Slicing the
+  // UTC date showed stories published 00:00–06:59 WIB under the previous day.
   function formatDate(d: string | null) {
     if (!d) return "";
-    // Slice date part only (YYYY-MM-DD) to avoid UTC→local timezone shift
-    const [year, month, day] = d.slice(0, 10).split("-").map(Number);
-    return new Date(year, month - 1, day).toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+    const date = new Date(d);
+    if (Number.isNaN(date.getTime())) return "";
+    return date.toLocaleDateString("id-ID", { timeZone: "Asia/Jakarta", day: "numeric", month: "long", year: "numeric" });
   }
+
+  // Shown only for a real later edit, not the save right after publishing.
+  $: updatedLabel =
+    a.updatedAt && a.publishDate && new Date(a.updatedAt).getTime() - new Date(a.publishDate).getTime() > 3_600_000
+      ? formatDate(a.updatedAt)
+      : "";
 </script>
 
 <svelte:head>
@@ -222,7 +271,8 @@
     {@html `<script type="application/ld+json">${JSON.stringify(schema).replace(/</g, '\\u003c')}<\/script>`}
   {/each}
   {#if a.image && !a.photoStory}
-    <link rel="preload" as="image" href={imgUrl(a.image, 1080) ?? a.image} imagesrcset={imgSrcset(a.image, 480)} imagesizes="(max-width: 991px) 100vw, 480px" fetchpriority="high" />
+    <link rel="preconnect" href={PUBLIC_API_URL} />
+    <link rel="preload" as="image" href={imgUrl(a.image, 1080) ?? a.image} imagesrcset={imgSrcset(a.image, 540)} imagesizes="(max-width: 991px) 100vw, 540px" fetchpriority="high" />
   {/if}
 </svelte:head>
 
@@ -297,6 +347,9 @@
               >{formatDate(a.publishDate)}</time
             >
           </span>
+          {#if updatedLabel && updatedLabel !== formatDate(a.publishDate)}
+            <span>Diperbarui <time datetime={a.updatedAt ?? ""}>{updatedLabel}</time></span>
+          {/if}
         </div>
       </div>
 
@@ -308,10 +361,13 @@
           <figure class="article-hero-figure mb-0">
             <img
               src={imgUrl(a.image, 1080) ?? a.image}
-              srcset={imgSrcset(a.image, 480)}
-              sizes="(max-width: 991px) 100vw, 480px"
+              srcset={imgSrcset(a.image, 540)}
+              sizes="(max-width: 991px) 100vw, 540px"
+              width={a.imageWidth ?? undefined}
+              height={a.imageHeight ?? undefined}
               alt={a.title}
               class="article-hero-img w-100"
+              class:article-hero-img--unsized={!a.imageWidth}
               fetchpriority="high"
               loading="eager"
               decoding="async"
