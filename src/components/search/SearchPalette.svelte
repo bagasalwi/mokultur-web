@@ -231,6 +231,9 @@
   }
 
   onMount(() => {
+    // The layout loads this component on demand, often because the reader just
+    // opened search: the reactive sync above ran before the <dialog> existed.
+    void sync($searchPalette.open);
     const onGlobalKey = (event: KeyboardEvent) => {
       if ((event.key === 'k' || event.key === 'K') && (event.metaKey || event.ctrlKey) && !event.altKey) {
         event.preventDefault();

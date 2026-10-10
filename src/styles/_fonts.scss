@@ -1,6 +1,7 @@
+// ?v=… lets nginx cache /fonts/ for a year: bump it when a font file is replaced.
 @font-face {
   font-family: 'Inter';
-  src: url('/fonts/Inter.woff2') format('woff2');
+  src: url('/fonts/Inter.woff2?v=1') format('woff2');
   font-style: normal;
   font-weight: 400 800;
   font-display: swap;
@@ -8,7 +9,7 @@
 
 @font-face {
   font-family: 'Nunito';
-  src: url('/fonts/Nunito.woff2') format('woff2');
+  src: url('/fonts/Nunito.woff2?v=1') format('woff2');
   font-style: normal;
   font-weight: 300 800;
   font-display: swap;

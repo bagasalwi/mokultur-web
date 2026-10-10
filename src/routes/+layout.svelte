@@ -5,11 +5,11 @@
   import { page } from '$app/stores';
   import Navbar from '$components/layout/Navbar.svelte';
   import Footer from '$components/layout/Footer.svelte';
-  import ChatWidget from '$components/chat/ChatWidget.svelte';
   import NavProgress from '$components/common/NavProgress.svelte';
   import CookieConsent from '$components/common/CookieConsent.svelte';
   import AuthModal from '$components/auth/AuthModal.svelte';
-  import SearchPalette from '$components/search/SearchPalette.svelte';
+  import { openSearchPalette, searchPalette } from '$lib/stores/search-palette';
+  import { ICON_FONT_URL } from '$lib/generated/icon-font';
   import Analytics from '$components/common/Analytics.svelte';
   import type { LayoutData } from './$types';
   import { isAnimePath } from '$lib/route-policy';
@@ -25,21 +25,57 @@
     void import('bootstrap/dist/js/bootstrap.bundle.min.js');
   }
 
-  // Subscribe with Google is not needed to read: fetch it once the page is idle
-  // so its ≈80 KB never competes with the article. The inline SWG_BASIC queue
-  // in <svelte:head> holds the init call until the script arrives.
+  /**
+   * Runs `run` once, on the reader's first scroll, tap, key or pointer move,
+   * or after `fallbackMs`. Extras that nobody needs to start reading load here
+   * so they never block the first paint or the page becoming responsive.
+   */
+  function onFirstInteraction(run: () => void, fallbackMs: number) {
+    let done = false;
+    const events = ['pointerdown', 'pointermove', 'keydown', 'scroll', 'touchstart'] as const;
+    const fire = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      for (const name of events) window.removeEventListener(name, fire);
+      run();
+    };
+    const timer = setTimeout(fire, fallbackMs);
+    for (const name of events) window.addEventListener(name, fire, { once: true, passive: true });
+  }
+
+  // Subscribe with Google (≈80 KB, ~300 ms of script on a phone) is not needed
+  // to read. The inline SWG_BASIC queue in <svelte:head> holds the init call
+  // until the script arrives.
   let swgRequested = false;
   function loadSwg() {
     if (swgRequested) return;
     swgRequested = true;
-    const inject = () => {
+    onFirstInteraction(() => {
       const script = document.createElement('script');
       script.async = true;
       script.src = 'https://news.google.com/swg/js/v1/swg-basic.js';
       document.head.appendChild(script);
-    };
-    if ('requestIdleCallback' in window) window.requestIdleCallback(inject, { timeout: 4000 });
-    else setTimeout(inject, 3000);
+    }, 10_000);
+  }
+
+  // The chat widget and the search palette are loaded on demand, not with every page.
+  let ChatWidget: typeof import('$components/chat/ChatWidget.svelte').default | null = null;
+  let SearchPalette: typeof import('$components/search/SearchPalette.svelte').default | null = null;
+  function loadSearchPalette() {
+    if (SearchPalette) return;
+    void import('$components/search/SearchPalette.svelte').then((m) => (SearchPalette = m.default));
+  }
+  $: if ($searchPalette.open) loadSearchPalette();
+  // Until the palette is loaded, this stands in for its "/" and Ctrl/⌘+K shortcuts; it then takes them over.
+  function searchShortcut(event: KeyboardEvent) {
+    if (SearchPalette) return;
+    const el = event.target as HTMLElement | null;
+    const typing = !!el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
+    if (((event.key === 'k' || event.key === 'K') && (event.metaKey || event.ctrlKey) && !event.altKey) || (event.key === '/' && !event.metaKey && !event.ctrlKey && !event.altKey && !typing)) {
+      event.preventDefault();
+      openSearchPalette();
+    }
   }
 
   let mounted = false;
@@ -51,6 +87,9 @@
   onMount(() => {
     mounted = true;
     loadBootstrapIfNeeded();
+    if (data.settings?.ai_chat_enabled) {
+      onFirstInteraction(() => void import('$components/chat/ChatWidget.svelte').then((m) => (ChatWidget = m.default)), 8_000);
+    }
   });
 
   $: if (mounted && !isPrivateRoute) loadSwg();
@@ -110,6 +149,7 @@
 </script>
 
 <svelte:head>
+  <link rel="preload" href={ICON_FONT_URL} as="font" type="font/woff2" crossorigin="anonymous" />
   {#if isAnimePath($page.url.pathname)}
     <meta name="robots" content="noindex, follow" />
   {/if}
@@ -163,8 +203,11 @@
 
 <Footer settings={data.settings} footerItems={data.navFooter} socials={data.socials} categories={data.categories} />
 
-{#if data.settings?.ai_chat_enabled && !isPrivateRoute}
-  <ChatWidget
+<svelte:window on:keydown={searchShortcut} />
+
+{#if ChatWidget && data.settings?.ai_chat_enabled && !isPrivateRoute}
+  <svelte:component
+    this={ChatWidget}
     title={data.settings.ai_chat_title}
     greeting={data.settings.ai_chat_greeting}
     placeholder={data.settings.ai_chat_placeholder}
@@ -174,7 +217,7 @@
 
 <CookieConsent />
 <!-- Site-wide search: the navbar icon, "/" or Ctrl/⌘+K. -->
-<SearchPalette categories={data.categories} />
+{#if SearchPalette}<svelte:component this={SearchPalette} categories={data.categories} />{/if}
 {#if !data.user}
   <!-- Logging in and signing up happen here, over whatever page the reader is on. -->
   <AuthModal siteName={data.settings?.site_name ?? 'Mokultur'} logo={data.settings?.site_logo ?? null} />

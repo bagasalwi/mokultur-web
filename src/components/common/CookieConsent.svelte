@@ -125,6 +125,7 @@
   }
 
   .cookie-consent__title {
+    color: inherit;
     font-size: 1rem;
     font-weight: 700;
     margin: 0 0 0.35rem;

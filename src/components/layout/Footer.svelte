@@ -38,14 +38,14 @@
   $: col2 = footerItems.slice(mid);
 </script>
 
-<footer class="bg-black text-white">
+<footer class="bg-black text-white site-footer">
   <div class="container-xl">
     <div class="row py-4 py-lg-5">
       <!-- Brand column -->
       <div class="col-lg-4 col-md-5 mb-4 mb-md-0">
         <a href="/" class="d-inline-block mb-3">
           {#if siteLogo}
-            <img src={siteLogo} alt={siteName} height="28" />
+            <img src={siteLogo} alt={siteName} width="81" height="28" />
           {:else}
             <span class="fw-boldest fs-5 text-white">{siteName}</span>
           {/if}
@@ -70,7 +70,7 @@
       <!-- Kategori column -->
       {#if categories.length > 0}
         <div class="col-6 col-md-2 offset-lg-1 mb-3 mb-md-0">
-          <h6 class="fw-bold text-white-50 text-uppercase small mb-3" style="letter-spacing: 0.05em;">Kategori</h6>
+          <h2 class="h6 fw-bold text-white-50 text-uppercase small mb-3" style="letter-spacing: 0.05em;">Kategori</h2>
           <ul class="list-unstyled mb-0">
             {#each categories.slice(0, 7) as cat}
               <li class="mb-2">
@@ -83,7 +83,7 @@
 
       <!-- Menu column -->
       <div class="col-6 col-md-2 {categories.length === 0 ? 'offset-lg-2' : ''} mb-3 mb-md-0">
-        <h6 class="fw-bold text-white-50 text-uppercase small mb-3" style="letter-spacing: 0.05em;">Menu</h6>
+        <h2 class="h6 fw-bold text-white-50 text-uppercase small mb-3" style="letter-spacing: 0.05em;">Menu</h2>
         <ul class="list-unstyled mb-0">
           {#each col1 as item}
             <li class="mb-2">
@@ -96,7 +96,7 @@
       <!-- Lainnya column -->
       {#if col2.length > 0}
         <div class="col-6 col-md-2 mb-3 mb-md-0">
-          <h6 class="fw-bold text-white-50 text-uppercase small mb-3" style="letter-spacing: 0.05em;">Lainnya</h6>
+          <h2 class="h6 fw-bold text-white-50 text-uppercase small mb-3" style="letter-spacing: 0.05em;">Lainnya</h2>
           <ul class="list-unstyled mb-0">
             {#each col2 as item}
               <li class="mb-2">

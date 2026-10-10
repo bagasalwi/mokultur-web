@@ -347,7 +347,7 @@
 {#snippet brand()}
   <a href="/" class="navbar-logo-link">
     {#if siteLogo}
-      <img src={imgUrl(siteLogo, 160)} alt={siteName} />
+      <img src={imgUrl(siteLogo, 160)} alt={siteName} width="160" height="56" />
     {:else}
       <span class="logo-text">{siteName}</span>
     {/if}

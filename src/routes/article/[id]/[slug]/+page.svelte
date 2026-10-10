@@ -399,6 +399,8 @@
             on:click={toggleLike}
             disabled={likeLoading}
             title={liked ? "Batalkan love" : "Love artikel"}
+            aria-label={liked ? `Batalkan love (${likeCount})` : `Love artikel (${likeCount})`}
+            aria-pressed={liked}
           >
             <i class="bi {liked ? 'bi-heart-fill' : 'bi-heart'}"></i>
             <span>{likeCount}</span>
@@ -567,12 +569,12 @@
       <!-- Tags -->
       {#if a.tags && a.tags.length > 0}
         <div class="mt-4 pt-4 border-top">
-          <h6
-            class="fw-bold mb-2 text-muted small text-uppercase"
+          <h2
+            class="h6 fw-bold mb-2 text-muted small text-uppercase"
             style="letter-spacing: 0.05em;"
           >
             Tagar
-          </h6>
+          </h2>
           <div class="d-flex flex-wrap gap-2">
             {#each a.tags as tag}
               <a href="/tag/{tag.slug}" class="hashtag-pill">
@@ -586,7 +588,7 @@
       <!-- Comments -->
       <section class="article-comments mt-5" id="komentar">
         <div class="article-comments__header">
-          <h4 class="article-comments__title">Komentar</h4>
+          <h2 class="article-comments__title">Komentar</h2>
           <span class="article-comments__count">{comments.length} komentar</span
           >
         </div>
@@ -666,7 +668,7 @@
     </div>
 
     <!-- Sidebar -->
-    <div class="col-12 col-lg-4 mt-4 mt-lg-0">
+    <div class="col-12 col-lg-4 mt-4 mt-lg-0 article-aside">
       <div class="sticky-top" style="top: 80px;">
         <AdBanner ad={data.adSidebar} adSlot="article_ad_2" size="sidebar" />
         <SocialFollowCard socials={data.socials} {siteName} />

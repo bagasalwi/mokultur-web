@@ -79,7 +79,7 @@
 
 <svelte:window on:keydown={onKeydown} />
 
-<button type="button" class={triggerClass} on:click={show}>
+<button type="button" class={triggerClass} on:click={show} aria-label={triggerLabel || "Bagikan artikel"} aria-haspopup="dialog">
   <i class="bi bi-share-fill"></i> <span>{triggerLabel}</span>
 </button>
 

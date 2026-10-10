@@ -53,7 +53,7 @@
         <span class="event-promo__pulse" aria-hidden="true"></span>
       </div>
 
-      <h6 class="event-promo__title">Event yang akan datang</h6>
+      <h2 class="event-promo__title">Event yang akan datang</h2>
       <p class="event-promo__desc">Jangan sampai kelewatan acaranya.</p>
 
       <div class="event-promo__deck">
