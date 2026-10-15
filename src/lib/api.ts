@@ -515,6 +515,42 @@ export function listPages(): Promise<{ data: Pick<PageItem, 'id' | 'name' | 'slu
   return apiFetch<{ data: Pick<PageItem, 'id' | 'name' | 'slug'>[] }>('/api/pages');
 }
 
+// ── Ratecard ──────────────────────────────────────────────────────────────────
+
+export interface RatecardPackage {
+  name: string;
+  priceIdr: number;
+  priceUsd: number | null;
+  unit: string | null;
+  features: string[];
+}
+
+export interface RatecardSection {
+  id: string;
+  title: string;
+  meta: string | null;
+  featured: boolean;
+  packages: RatecardPackage[];
+  note: string | null;
+  examples: { url: string; label: string | null }[];
+}
+
+export interface Ratecard {
+  title: string;
+  intro: string | null;
+  contact: { whatsapp: string | null; email: string | null };
+  mediaProfile: { label: string | null; url: string } | null;
+  insight: { caption: string | null; stats: { label: string; value: string; hint: string | null }[] };
+  sections: RatecardSection[];
+  closing: string | null;
+  updatedAt: string;
+}
+
+/** Managed from dashboard.mokultur.com/ratecard; 404 while unpublished. */
+export function getRatecard(): Promise<{ data: Ratecard }> {
+  return apiFetch<{ data: Ratecard }>('/api/ratecard');
+}
+
 // ── Instagram Reels ───────────────────────────────────────────────────────────
 
 export interface Reel {
