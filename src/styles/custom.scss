@@ -2361,7 +2361,11 @@ a {
 .media-partner-hero {
     position: relative;
     overflow: hidden;
-    margin-bottom: 1.5rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: clamp(1.25rem, 4vw, 3rem);
+    align-items: center;
+    margin-bottom: 2rem;
     border-radius: 30px;
     padding: clamp(1.5rem, 4vw, 2.4rem);
     color: #fff;
@@ -2385,14 +2389,26 @@ a {
         mask-image: linear-gradient(135deg, #000, transparent 76%);
     }
 
+    > * {
+        // Above the ::after grid texture.
+        position: relative;
+        z-index: 1;
+    }
+
     h1 {
-        max-width: 11ch;
-        margin: 0 0 1rem;
+        // Two lines on desktop ("Bergabung Bersama / Media Partner Kami");
+        // narrower measures crushed it into four tight lines.
+        max-width: 18ch;
+        margin: 0 0 0.85rem;
         color: #fff;
-        font-size: clamp(2.6rem, 7vw, 6rem);
-        font-weight: 950;
-        letter-spacing: -0.08em;
-        line-height: 0.92;
+        font-size: clamp(2rem, 4.4vw, 3.4rem);
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        line-height: 1.02;
+    }
+
+    @media (max-width: 991.98px) {
+        grid-template-columns: minmax(0, 1fr);
     }
 
     p {
@@ -2424,6 +2440,12 @@ a {
     flex-wrap: wrap;
     gap: 0.75rem;
     margin-top: 1.35rem;
+
+    @media (max-width: 575.98px) {
+        .media-partner-button {
+            flex: 1 1 auto;
+        }
+    }
 }
 
 .media-partner-button {
@@ -2464,41 +2486,50 @@ a {
     }
 }
 
-.media-partner-hero__panel {
+.media-partner-hero__stats {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.85rem;
-    padding: 1rem;
+    gap: 0.65rem;
+    margin: 0;
+    padding: 0.65rem;
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 24px;
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(10px);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.06);
 }
 
 .media-partner-stat {
-    min-height: 132px;
-    padding: 1rem;
-    border-radius: 18px;
-    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 0.3rem;
+    padding: 1rem 1.1rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.08);
 
-    strong,
-    span {
-        display: block;
-    }
-
-    strong {
-        margin-bottom: 0.25rem;
+    dd {
+        margin: 0;
         color: #fff;
-        font-size: clamp(2rem, 4vw, 3.2rem);
-        font-weight: 950;
-        letter-spacing: -0.06em;
-        line-height: 0.95;
+        font-size: clamp(1.9rem, 3.6vw, 2.75rem);
+        font-weight: 900;
+        letter-spacing: -0.05em;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
     }
 
-    span {
-        color: rgba(255, 255, 255, 0.72);
-        font-size: 0.82rem;
-        line-height: 1.45;
+    dt {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.8rem;
+        font-weight: 600;
+        line-height: 1.35;
+    }
+
+    // The total reads as the headline figure.
+    &:first-child dd {
+        color: var(--media-partner-primary);
+    }
+
+    @media (max-width: 575.98px) {
+        padding: 0.8rem 0.9rem;
     }
 }
 
@@ -2581,7 +2612,10 @@ a {
     }
 
     @media (max-width: 479px) {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        // Three small tiles rather than two tall ones: the directory was over
+        // 4,000px long on a phone.
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.5rem;
     }
 }
 
@@ -2593,7 +2627,8 @@ a {
     color: var(--media-partner-dark);
     transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms ease, border-color 180ms ease;
 
-    &:hover {
+    // Only tiles that link somewhere lift; a plain tile is not a button.
+    &:is(a):hover {
         transform: translateY(-3px);
         border-color: color-mix(in srgb, var(--media-partner-glow) 42%, transparent);
         box-shadow: 0 18px 42px rgba(15, 23, 42, 0.1);
@@ -2626,8 +2661,15 @@ a {
     align-items: center;
     text-align: center;
     min-height: 100%;
-    padding: 1rem 0.75rem;
+    padding: 1rem 0.75rem 0.9rem;
     border-radius: 16px;
+    background: #fff;
+    text-decoration: none;
+
+    @media (max-width: 479px) {
+        padding: 0.7rem 0.4rem 0.65rem;
+        border-radius: 14px;
+    }
 }
 
 .media-partner-card__top {
@@ -2639,19 +2681,25 @@ a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 84px;
-    height: 84px;
+    // Wide rather than square: most partner logos are wordmarks, which a
+    // square box shrank to a sliver.
+    width: min(100%, 132px);
+    height: 72px;
     flex: 0 0 auto;
     overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--media-partner-dark) 8%, transparent);
-    border-radius: 20px;
+    // The tile is already the frame; a second bordered box inside it was noise.
+    border-radius: 14px;
     background: #fff;
 
     img {
         width: 100%;
         height: 100%;
         object-fit: contain;
-        padding: 0.65rem;
+        padding: 0.35rem;
+    }
+
+    @media (max-width: 479px) {
+        height: 52px;
     }
 
     span {
@@ -2677,8 +2725,9 @@ a {
     font-weight: 850;
 }
 
-.media-partner-card__industry {
-    margin: 0;
+.media-partner-card__body .media-partner-card__industry {
+    // Scoped under the body so its generic `p` rule (0.9rem, 0.8rem margin) does not win.
+    margin: 0.1rem 0 0;
     color: #64748b;
     font-size: 0.75rem;
     line-height: 1.3;
@@ -2692,7 +2741,8 @@ a {
     h3 {
         margin: 0 0 0.15rem;
         color: var(--media-partner-dark);
-        font-size: 0.875rem;
+        font-size: clamp(0.78rem, 2.4vw, 0.875rem);
+        overflow-wrap: anywhere;
         font-weight: 800;
         letter-spacing: -0.02em;
         line-height: 1.25;
@@ -2728,6 +2778,11 @@ a {
     &:hover {
         color: var(--media-partner-dark);
     }
+}
+
+.media-partner-directory:last-child {
+    // The page already ends with section padding; mb-5 on the last group doubled it.
+    margin-bottom: 0 !important;
 }
 
 .media-partner-empty {

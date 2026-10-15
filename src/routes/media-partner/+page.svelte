@@ -8,6 +8,12 @@
   $: siteName = data.settings?.site_name ?? 'Mokultur';
   $: email = data.settings?.contact_email ?? null;
   $: mailUrl = email ? `mailto:${email}` : null;
+  $: stats = [
+    { label: 'Total Partner', value: data.stats.total },
+    { label: 'Media Partnership', value: data.stats.media },
+    { label: 'Paid Partnership', value: data.stats.paid },
+    { label: 'Invitational', value: data.stats.invitational },
+  ];
 
 </script>
 
@@ -33,57 +39,31 @@
 <div class="media-partner-page section-md container-xl">
 
   <!-- Hero -->
-  <div class="media-partner-hero mb-4">
-    <div class="row g-4 align-items-center">
-      <div class="col-12 col-lg-7">
-        <span class="media-partner-eyebrow d-block mb-2">Media Partner Network</span>
-        <h1 class="fw-boldest mb-2" style="font-size:clamp(1.8rem,4vw,3rem);letter-spacing:-0.03em;color:#fff;">
-          Bergabung Bersama<br />Media Partner Kami
-        </h1>
-        <p class="mb-4" style="color:rgba(255,255,255,0.78);max-width:60ch;line-height:1.75;">
-          Kami terbuka untuk kolaborasi dengan berbagai media, brand, dan komunitas yang memiliki visi serupa.
-        </p>
-        <div class="media-partner-actions d-flex flex-wrap gap-2">
-          {#if mailUrl}
-            <a href={mailUrl} class="media-partner-button media-partner-button--primary">
-              <i class="bi bi-envelope me-2"></i>Hubungi Kami
-            </a>
-          {/if}
-          <a href="#partner-directory" class="media-partner-button media-partner-button--ghost">
-            <i class="bi bi-grid me-2"></i>Lihat Direktori
+  <header class="media-partner-hero">
+    <div class="media-partner-hero__copy">
+      <span class="media-partner-eyebrow">Media Partner Network</span>
+      <h1>Bergabung Bersama Media Partner Kami</h1>
+      <p>Kami terbuka untuk kolaborasi dengan berbagai media, brand, dan komunitas yang memiliki visi serupa.</p>
+      <div class="media-partner-actions">
+        {#if mailUrl}
+          <a href={mailUrl} class="media-partner-button media-partner-button--primary">
+            <i class="bi bi-envelope" aria-hidden="true"></i>Hubungi Kami
           </a>
-        </div>
-      </div>
-      <div class="col-12 col-lg-5">
-        <div class="row g-3">
-          <div class="col-6">
-            <div class="media-partner-stat">
-              <strong class="d-block fs-4 fw-boldest">{data.stats.total}</strong>
-              <small style="color:rgba(255,255,255,0.55);">Total Partner</small>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="media-partner-stat">
-              <strong class="d-block fs-4 fw-boldest">{data.stats.media}</strong>
-              <small style="color:rgba(255,255,255,0.55);">Media Partnership</small>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="media-partner-stat">
-              <strong class="d-block fs-4 fw-boldest">{data.stats.paid}</strong>
-              <small style="color:rgba(255,255,255,0.55);">Paid Partnership</small>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="media-partner-stat">
-              <strong class="d-block fs-4 fw-boldest">{data.stats.invitational}</strong>
-              <small style="color:rgba(255,255,255,0.55);">Invitational</small>
-            </div>
-          </div>
-        </div>
+        {/if}
+        <a href="#partner-directory" class="media-partner-button media-partner-button--ghost">
+          <i class="bi bi-grid" aria-hidden="true"></i>Lihat Direktori
+        </a>
       </div>
     </div>
-  </div>
+    <dl class="media-partner-hero__stats">
+      {#each stats as stat}
+        <div class="media-partner-stat">
+          <dt>{stat.label}</dt>
+          <dd>{stat.value}</dd>
+        </div>
+      {/each}
+    </dl>
+  </header>
 
   <!-- Featured Partners -->
   {#if data.featured.length > 0}
