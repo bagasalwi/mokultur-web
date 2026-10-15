@@ -66,7 +66,8 @@
 <svelte:head>
   <title>{pageTitle}</title>
   <meta name="description" content={description} />
-  <meta name="robots" content="index, follow" />
+  <!-- Shared by link with brands; deliberately kept out of search results. -->
+  <meta name="robots" content="noindex, nofollow" />
   <link rel="canonical" href={absoluteUrl('/ratecard')} />
   <meta property="og:type" content="website" />
   <meta property="og:title" content={pageTitle} />

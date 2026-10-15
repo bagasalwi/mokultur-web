@@ -11,6 +11,10 @@ export const load: PageServerLoad = async ({ setHeaders }) => {
     throw error(503, 'Ratecard sedang tidak dapat dimuat');
   }
   // Short: edits from the dashboard should reach readers within minutes.
-  setHeaders({ 'cache-control': 'public, max-age=300, stale-while-revalidate=3600' });
+  setHeaders({
+    'cache-control': 'public, max-age=300, stale-while-revalidate=3600',
+    // Kept out of search results; the header also covers crawlers that ignore the meta tag.
+    'x-robots-tag': 'noindex, nofollow',
+  });
   return { ratecard };
 };
