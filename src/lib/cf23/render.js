@@ -459,11 +459,12 @@ const CF23Render = (function () {
     var leftMax = 610;
     var name = field(data.name, '[NAMA KAMU]', hints);
     if (name) outlined(ctx, name.text, P, 1206, { size: 58, fill: c.cream, strokeWidth: 8, shadow: 5, maxWidth: leftMax, minSize: 30, alpha: name.alpha });
-    var handle = cleanHandle(data.username);
-    var user = field(handle ? '@' + handle : '', '@[username]', hints);
+    // username: null means the page has no separate handle field (mokultur.com/comifuro23
+    // takes one "Nama/Instagram" value as the name), so the line and its hint are left out.
+    var user = data.username == null ? null : field(cleanHandle(data.username) ? '@' + cleanHandle(data.username) : '', '@[username]', hints);
     if (user) plain(ctx, user.text, P, 1248, { size: 32, weight: '800', fill: c.peach, maxWidth: leftMax, alpha: user.alpha });
     var parts = characterParts(dd, hints, '[KARAKTER]', '[JUDUL SERIES]');
-    if (parts) richLine(ctx, parts, P, 1284, { size: 26, fill: c.cream, maxWidth: leftMax });
+    if (parts) richLine(ctx, parts, P, data.username == null ? 1256 : 1284, { size: 26, fill: c.cream, maxWidth: leftMax });
 
     pill(ctx, {
       x: 1024, y: 1148, anchor: 'right', height: 50, padL: 12, padR: 18, text: EVENT.venue,
@@ -547,9 +548,8 @@ const CF23Render = (function () {
     });
 
     var name = field(data.name, '[NAMA KAMU]', hints);
-    if (name) outlined(ctx, name.text, 540, 1624, { size: 72, fill: c.cream, strokeWidth: 10, shadow: 6, align: 'center', maxWidth: 940, minSize: 36, alpha: name.alpha });
-    var handle = cleanHandle(data.username);
-    var user = field(handle ? '@' + handle : '', '@[username]', hints);
+    if (name) outlined(ctx, name.text, 540, data.username == null ? 1644 : 1624, { size: 72, fill: c.cream, strokeWidth: 10, shadow: 6, align: 'center', maxWidth: 940, minSize: 36, alpha: name.alpha });
+    var user = data.username == null ? null : field(cleanHandle(data.username) ? '@' + cleanHandle(data.username) : '', '@[username]', hints);
     if (user) plain(ctx, user.text, 540, 1668, { size: 36, weight: '800', fill: c.peach, align: 'center', maxWidth: 940, alpha: user.alpha });
     plain(ctx, EVENT.hashtags, 540, 1704, { size: 24, weight: '800', fill: c.cream, align: 'center', letterSpacing: 1 });
     brandMark(ctx, 540, 1760, { size: 26, logoHeight: 56, gap: 8, fill: c.peach, align: 'center' });
@@ -562,6 +562,7 @@ const CF23Render = (function () {
    * @param {CanvasRenderingContext2D} ctx  canvas berukuran template.width x template.height
    * @param {'day1'|'day2'|'story'} templateId
    * @param {object} data { name, username, days: { 1: {character, series, accent, photo}, 2: {...} } }
+   *   username: null drops the @handle line entirely (no field for it on the page)
    *   photo = { image: HTMLImageElement|ImageBitmap, zoom: 1..4, panX: -1..1, panY: -1..1 } atau null
    * @param {object} [options] { hints: true } menampilkan placeholder [TEKS] untuk field kosong (untuk preview)
    * @returns {{slots: Array<{day,x,y,w,h,maxX,maxY}>}} area foto untuk drag/zoom di UI

@@ -38,7 +38,6 @@
 
   let template = $state<TemplateId>('day1');
   let name = $state('');
-  let username = $state('');
   let days = $state<Record<Day, DayState>>({
     1: { character: '', series: '', accent: R.DEFAULT_ACCENT[1], image: null, preview: null, url: null, fileName: '' },
     2: { character: '', series: '', accent: R.DEFAULT_ACCENT[2], image: null, preview: null, url: null, fileName: '' },
@@ -120,7 +119,7 @@
         photo: state.image ? { image: final ? state.image : state.preview ?? state.image, zoom: c.zoom, panX: c.panX, panY: c.panY } : null,
       };
     }
-    return { name, username, days: out };
+    return { name, username: null, days: out };
   }
 
   function draw() {
@@ -143,12 +142,12 @@
 
   // Redraw whenever anything the card shows changes.
   $effect(() => {
-    void [template, name, username, days[1].character, days[1].series, days[1].accent, days[1].image, days[2].character, days[2].series, days[2].accent, days[2].image, fontsReady];
+    void [template, name, days[1].character, days[1].series, days[1].accent, days[1].image, days[2].character, days[2].series, days[2].accent, days[2].image, fontsReady];
     schedule();
   });
 
   $effect(() => {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify({ name, username })); } catch { /* private mode */ }
+    try { localStorage.setItem(STORE_KEY, JSON.stringify({ name })); } catch { /* private mode */ }
   });
 
   function setStatus(message: string, isError = false) {
@@ -296,7 +295,7 @@
   // ---- Output --------------------------------------------------------------
 
   function fileName(id: TemplateId): string {
-    const slug = (username || name).toLowerCase().replace(/^@+/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const slug = name.toLowerCase().replace(/^@+/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     return `cf23-cosplay-card-${id}${slug ? `-${slug}` : ''}.png`;
   }
 
@@ -404,7 +403,6 @@
     try {
       const saved = JSON.parse(localStorage.getItem(STORE_KEY) ?? 'null');
       if (saved?.name) name = String(saved.name).slice(0, 40);
-      if (saved?.username) username = String(saved.username).slice(0, 32);
     } catch { /* ignore */ }
     // The homepage card passes the name it was typed with.
     const fromLink = $page.url.searchParams.get('nama');
@@ -442,13 +440,13 @@
   <meta property="og:title" content={TITLE} />
   <meta property="og:description" content={DESCRIPTION} />
   <meta property="og:url" content={absoluteUrl('/comifuro23')} />
-  <meta property="og:image" content={absoluteUrl('/assets/og/comifuro23.jpg?v=2')} />
+  <meta property="og:image" content={absoluteUrl('/assets/og/comifuro23.jpg?v=3')} />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={TITLE} />
   <meta name="twitter:description" content={DESCRIPTION} />
-  <meta name="twitter:image" content={absoluteUrl('/assets/og/comifuro23.jpg?v=2')} />
+  <meta name="twitter:image" content={absoluteUrl('/assets/og/comifuro23.jpg?v=3')} />
   <meta name="theme-color" content="#3E0F3D" />
   {@html `<script type="application/ld+json">${JSON.stringify(buildBreadcrumb([{ name: 'Cosplay Card CF23', path: '/comifuro23' }]))}<\/script>`}
 </svelte:head>
@@ -501,14 +499,10 @@
     </section>
 
     <form class="cf23-panel" onsubmit={(event) => event.preventDefault()} novalidate>
-      <fieldset class="cf23-group cf23-group--you" aria-label="Nama dan username">
+      <fieldset class="cf23-group cf23-group--you" aria-label="Nama atau Instagram">
         <label class="cf23-field">
-          <span>Nama kamu</span>
-          <input type="text" bind:value={name} maxlength="40" autocomplete="nickname" enterkeyhint="next" />
-        </label>
-        <label class="cf23-field">
-          <span>Username Instagram / X</span>
-          <input type="text" bind:value={username} maxlength="32" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="@username" enterkeyhint="done" />
+          <span>Nama/Instagram kamu</span>
+          <input type="text" bind:value={name} maxlength="40" autocomplete="nickname" autocapitalize="off" spellcheck="false" placeholder="Rina atau @rinacos" enterkeyhint="done" />
         </label>
       </fieldset>
 
