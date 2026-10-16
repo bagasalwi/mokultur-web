@@ -16,6 +16,7 @@
   import GoogleNewsFollow from '$components/sidebar/GoogleNewsFollow.svelte';
   import NewsletterSignup from '$components/sidebar/NewsletterSignup.svelte';
   import PopularArticlesCard, { RANGE_LABELS } from '$components/common/PopularArticlesCard.svelte';
+  import Cf23PromoCard from '$components/home/Cf23PromoCard.svelte';
   import WritersCard from '$components/home/WritersCard.svelte';
   import TechSection from '$components/home/TechSection.svelte';
   import AdBanner from '$components/common/AdBanner.svelte';
@@ -166,6 +167,7 @@
         <!-- Sidebar -->
         <div class="col-lg-4">
           <div class="sticky-top home-latest__aside">
+            <Cf23PromoCard />
             <PopularArticlesCard
               headingId="home-popular"
               ranges={(['today', 'week', 'month'] as const).map((key) => ({ key, label: RANGE_LABELS[key], articles: data.popular[key] }))}
