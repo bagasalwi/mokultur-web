@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy, onMount, tick } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import { page } from '$app/stores';
   import { absoluteUrl, buildBreadcrumb } from '$lib/seo';
   import CF23Render from '$lib/cf23/render.js';
@@ -16,7 +16,8 @@
    * download/share bar stays on screen.
    */
   type Day = 1 | 2;
-  type DayState = { character: string; series: string; accent: string; image: HTMLImageElement | null; url: string | null; fileName: string };
+  /** `image` is the original, used for the PNG; `preview` is a smaller copy redrawn on every drag frame. */
+  type DayState = { character: string; series: string; accent: string; image: HTMLImageElement | null; preview: HTMLImageElement | null; url: string | null; fileName: string };
   type Crop = { zoom: number; panX: number; panY: number };
 
   let { data } = $props();
@@ -38,8 +39,8 @@
   let name = $state('');
   let username = $state('');
   let days = $state<Record<Day, DayState>>({
-    1: { character: '', series: '', accent: R.DEFAULT_ACCENT[1], image: null, url: null, fileName: '' },
-    2: { character: '', series: '', accent: R.DEFAULT_ACCENT[2], image: null, url: null, fileName: '' },
+    1: { character: '', series: '', accent: R.DEFAULT_ACCENT[1], image: null, preview: null, url: null, fileName: '' },
+    2: { character: '', series: '', accent: R.DEFAULT_ACCENT[2], image: null, preview: null, url: null, fileName: '' },
   });
   // Position and zoom per format per day: the Feed and Story frames are different shapes.
   let crops = $state<Record<string, Crop>>({});
@@ -96,7 +97,8 @@
     schedule();
   }
 
-  function buildData(id: TemplateId): CardData {
+  /** `final` draws the original photos (the PNG); otherwise the light preview copies. */
+  function buildData(id: TemplateId, final = false): CardData {
     const out = {} as CardData['days'];
     for (const day of [1, 2] as Day[]) {
       const state = days[day];
@@ -105,7 +107,7 @@
         character: state.character,
         series: state.series,
         accent: state.accent,
-        photo: state.image ? { image: state.image, zoom: c.zoom, panX: c.panX, panY: c.panY } : null,
+        photo: state.image ? { image: final ? state.image : state.preview ?? state.image, zoom: c.zoom, panX: c.panX, panY: c.panY } : null,
       };
     }
     return { name, username, days: out };
@@ -113,7 +115,9 @@
 
   function draw() {
     frame = 0;
-    if (!canvas) return;
+    // One first render, once the fonts are in: drawing before them meant three
+    // full renders during page load, the bulk of its main-thread time on phones.
+    if (!canvas || !fontsReady) return;
     const t = R.TEMPLATES[template];
     if (canvas.width !== t.width || canvas.height !== t.height) {
       canvas.width = t.width;
@@ -144,16 +148,50 @@
 
   // ---- Photos --------------------------------------------------------------
 
+  /**
+   * Phone photos are often 12 MP or more (about 48 MB each once decoded). The
+   * preview works from a copy at most PREVIEW_EDGE on its long side, so the
+   * original is only decoded when the PNG is made — that keeps memory down on
+   * phones (iOS Safari is strict). The copy is an <img>, not an ImageBitmap or
+   * canvas: Chrome caches the high-quality downscale of an <img>, while a bitmap
+   * drawn with imageSmoothingQuality 'high' was measured 4x slower per frame.
+   */
+  const PREVIEW_EDGE = 2048;
+  async function previewCopy(img: HTMLImageElement): Promise<HTMLImageElement> {
+    const long = Math.max(img.naturalWidth, img.naturalHeight);
+    if (long <= PREVIEW_EDGE) return img;
+    const k = PREVIEW_EDGE / long;
+    const copy = document.createElement('canvas');
+    copy.width = Math.round(img.naturalWidth * k);
+    copy.height = Math.round(img.naturalHeight * k);
+    const ctx = copy.getContext('2d');
+    if (!ctx) return img;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, 0, 0, copy.width, copy.height);
+    const blob = await new Promise<Blob | null>((resolve) => copy.toBlob(resolve, 'image/jpeg', 0.92));
+    if (!blob) return img;
+    const small = new Image();
+    small.src = URL.createObjectURL(blob);
+    try { await small.decode(); } catch { URL.revokeObjectURL(small.src); return img; }
+    return small;
+  }
+
+  function releasePreview(state: DayState) {
+    if (state.preview instanceof HTMLImageElement && state.preview !== state.image && state.preview.src.startsWith('blob:')) URL.revokeObjectURL(state.preview.src);
+  }
+
   function pickPhoto(day: Day, event: Event) {
     const input = event.currentTarget as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
     const url = URL.createObjectURL(file);
     const img = new Image();
-    img.onload = () => {
+    img.onload = async () => {
+      const preview = await previewCopy(img);
       const state = days[day];
       if (state.url) URL.revokeObjectURL(state.url);
-      days[day] = { ...state, image: img, url, fileName: file.name };
+      releasePreview(state);
+      days[day] = { ...state, image: img, preview, url, fileName: file.name };
       for (const key of Object.keys(crops)) if (key.endsWith(`:${day}`)) delete crops[key];
       setStatus('');
       schedule();
@@ -252,7 +290,7 @@
   }
 
   async function makeFile(id: TemplateId = template): Promise<File> {
-    const blob = await R.toBlob(id, buildData(id));
+    const blob = await R.toBlob(id, buildData(id, true));
     return new File([blob], fileName(id), { type: 'image/png' });
   }
 
@@ -360,13 +398,18 @@
       canShare = typeof navigator.share === 'function' && typeof navigator.canShare === 'function' && navigator.canShare({ files: [probe] });
     } catch { canShare = false; }
 
-    draw();
-    void loadCf23Assets().then(async () => { fontsReady = true; await tick(); draw(); });
+    // loadCf23Assets never rejects; the timer only covers a font request that hangs.
+    const fallback = setTimeout(() => (fontsReady = true), 3000);
+    void loadCf23Assets().then(() => { clearTimeout(fallback); fontsReady = true; });
   });
 
   onDestroy(() => {
-    if (typeof URL === 'undefined') return;
-    for (const day of [1, 2] as Day[]) if (days[day].url) URL.revokeObjectURL(days[day].url!);
+    // onDestroy also runs after server rendering, where there are no DOM classes or object URLs.
+    if (typeof window === 'undefined') return;
+    for (const day of [1, 2] as Day[]) {
+      if (days[day].url) URL.revokeObjectURL(days[day].url!);
+      releasePreview(days[day]);
+    }
   });
 </script>
 
@@ -687,6 +730,7 @@
       max-width: 100%;
       max-height: min(64svh, 720px);
       border-radius: 0.75rem;
+      background: var(--plum);
       box-shadow: 6px 6px 0 var(--brown);
       touch-action: none;
       cursor: grab;
