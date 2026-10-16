@@ -426,8 +426,7 @@
     </section>
 
     <form class="cf23-panel" onsubmit={(event) => event.preventDefault()} novalidate>
-      <fieldset class="cf23-group">
-        <legend>Kamu</legend>
+      <fieldset class="cf23-group cf23-group--you" aria-label="Nama dan username">
         <label class="cf23-field">
           <span>Nama kamu</span>
           <input type="text" bind:value={name} maxlength="40" autocomplete="nickname" enterkeyhint="next" />
@@ -754,6 +753,11 @@
     }
 
     legend + * { clear: both; }
+  }
+
+  // No heading on the first group: its labels already say "Nama kamu".
+  .cf23-group--you {
+    padding-top: 1.25rem;
   }
 
   .cf23-field {
