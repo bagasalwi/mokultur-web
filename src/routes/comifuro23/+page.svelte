@@ -27,10 +27,11 @@
   const ALL: TemplateId[] = ['day1', 'day2', 'story'];
   const TITLE = 'Cosplay Card Comic Frontier 23 (CF23)';
   const DESCRIPTION = 'Bikin Cosplay Card CF23 untuk feed dan story Instagram: upload foto Day 1 dan Day 2, isi nama dan karakter, lalu download PNG. Gratis, langsung di browser, foto tidak di-upload.';
-  const FORMATS: { id: TemplateId; label: string; size: string }[] = [
-    { id: 'day1', label: 'Feed Day 1', size: '4:5' },
-    { id: 'day2', label: 'Feed Day 2', size: '4:5' },
-    { id: 'story', label: 'Story Day 1 + 2', size: '9:16' },
+  /** `title`/`sub` are the two lines of the format switch; `label` is the full name used in messages. */
+  const FORMATS: { id: TemplateId; label: string; title: string; sub: string }[] = [
+    { id: 'day1', label: 'Feed Day 1', title: 'Day 1', sub: 'Feed · 4:5' },
+    { id: 'day2', label: 'Feed Day 2', title: 'Day 2', sub: 'Feed · 4:5' },
+    { id: 'story', label: 'Story Day 1 + 2', title: 'Story', sub: 'Day 1+2 · 9:16' },
   ];
   const DAY_LABEL: Record<Day, string> = { 1: 'Sabtu, 31 Oktober', 2: 'Minggu, 1 November' };
   const STORE_KEY = 'cf23-card-profile';
@@ -49,6 +50,12 @@
   let busy = $state(false);
   let canShare = $state(false);
   let fontsReady = $state(false);
+  // Touch screens: the preview fills most of a phone screen, so it only takes
+  // over touches (drag, pinch) in "Atur foto" mode; otherwise it scrolls the page.
+  let coarse = $state(false);
+  let adjusting = $state(false);
+  const hasPhoto = $derived(activeDaysHavePhoto());
+  const editable = $derived(!coarse || adjusting);
 
   let canvas = $state<HTMLCanvasElement>();
   let previewBox = $state<HTMLElement>();
@@ -56,6 +63,9 @@
   let frame = 0;
 
   const activeDays = $derived(R.TEMPLATES[template].days as Day[]);
+  function activeDaysHavePhoto(): boolean {
+    return (R.TEMPLATES[template].days as Day[]).some((day) => days[day].image);
+  }
   const missing = $derived(activeDays.filter((day) => !days[day].image));
   const ready = $derived(missing.length === 0);
   const currentLabel = $derived(FORMATS.find((format) => format.id === template)?.label ?? '');
@@ -232,6 +242,7 @@
   }
 
   function onPointerDown(event: PointerEvent) {
+    if (event.pointerType !== 'mouse' && !editable) return;
     const p = toCanvas(event);
     const slot = drag ? slots.find((s) => s.day === drag!.day) ?? null : hit(p);
     if (!slot) return;
@@ -379,6 +390,12 @@
     }
   }
 
+  /** The save bar's first job: while a photo is missing, its main button picks it. */
+  function pickMissing() {
+    const input = document.getElementById(`cf23-photo-${missing[0]}`) as HTMLInputElement | null;
+    input?.click();
+  }
+
   function scrollToPreview() {
     previewBox?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
@@ -399,6 +416,7 @@
     } catch { canShare = false; }
 
     // loadCf23Assets never rejects; the timer only covers a font request that hangs.
+    coarse = window.matchMedia('(pointer: coarse)').matches;
     const fallback = setTimeout(() => (fontsReady = true), 3000);
     void loadCf23Assets().then(() => { clearTimeout(fallback); fontsReady = true; });
   });
@@ -437,24 +455,25 @@
 
 <div class="cf23">
   <header class="cf23-head container-xl">
-    <p class="cf23-event"><i class="bi bi-geo-alt-fill" aria-hidden="true"></i>Comic Frontier 23 · ICE BSD · 31 Okt – 1 Nov 2026</p>
     <h1>Cosplay Card CF23</h1>
-    <p class="cf23-lead">Upload foto cosplay-mu, isi nama dan karakter, lalu simpan untuk feed atau story. Semua diproses di HP-mu, fotonya tidak dikirim ke mana pun.</p>
+    <p class="cf23-meta"><i class="bi bi-geo-alt-fill" aria-hidden="true"></i>Comic Frontier 23 · ICE BSD · 31 Okt – 1 Nov 2026</p>
+    <p class="cf23-lead">Upload foto cosplay-mu, isi nama dan karakter, lalu simpan untuk feed atau story. Fotonya tetap di HP-mu, tidak dikirim ke mana pun.</p>
   </header>
 
   <div class="cf23-layout container-xl">
     <section class="cf23-stage" aria-label="Preview" bind:this={previewBox}>
       <div class="cf23-formats" role="radiogroup" aria-label="Pilih format">
         {#each FORMATS as format}
-          <button type="button" role="radio" aria-checked={template === format.id} class:is-active={template === format.id} onclick={() => { template = format.id; setStatus(''); }}>
-            {format.label}<small>{format.size}</small>
+          <button type="button" role="radio" aria-checked={template === format.id} class:is-active={template === format.id} onclick={() => { template = format.id; adjusting = false; setStatus(''); }}>
+            <span>{format.title}</span><small>{format.sub}</small>
           </button>
         {/each}
       </div>
 
-      <div class="cf23-canvas" class:is-story={template === 'story'}>
+      <div class="cf23-canvas" class:is-story={template === 'story'} class:is-adjusting={coarse && adjusting}>
         <canvas
           bind:this={canvas}
+          style:touch-action={editable ? 'none' : 'pan-y'}
           width="1080"
           height="1350"
           aria-label={`Preview ${currentLabel}. Geser untuk mengatur posisi foto.`}
@@ -465,7 +484,20 @@
           onwheel={onWheel}
         ></canvas>
       </div>
-      <p class="cf23-hint"><i class="bi bi-arrows-move" aria-hidden="true"></i>Geser foto di preview untuk atur posisi, cubit (pinch) atau pakai slider untuk zoom.</p>
+      {#if hasPhoto}
+        <div class="cf23-tools">
+          {#if coarse}
+            <button type="button" class="cf23-adjust" class:is-on={adjusting} aria-pressed={adjusting} onclick={() => (adjusting = !adjusting)}>
+              <i class="bi {adjusting ? 'bi-check2' : 'bi-arrows-move'}" aria-hidden="true"></i>{adjusting ? 'Selesai' : 'Atur foto'}
+            </button>
+          {/if}
+          <p class="cf23-hint">
+            {#if !coarse}<i class="bi bi-arrows-move" aria-hidden="true"></i>Geser foto untuk atur posisi, scroll atau pakai slider untuk zoom.
+            {:else if adjusting}Geser foto, cubit (pinch) untuk zoom. Ketuk Selesai untuk lanjut scroll.
+            {:else}Ketuk Atur foto untuk menggeser dan zoom foto.{/if}
+          </p>
+        </div>
+      {/if}
     </section>
 
     <form class="cf23-panel" onsubmit={(event) => event.preventDefault()} novalidate>
@@ -487,7 +519,7 @@
           <legend>Day {day} <small>{DAY_LABEL[day]}</small></legend>
 
           <label class="cf23-upload" class:has-photo={state.image}>
-            <input type="file" accept="image/*" onchange={(event) => pickPhoto(day, event)} />
+            <input id={`cf23-photo-${day}`} type="file" accept="image/*" onchange={(event) => pickPhoto(day, event)} />
             <i class="bi {state.image ? 'bi-arrow-repeat' : 'bi-camera-fill'}" aria-hidden="true"></i>
             <span>
               <strong>{state.image ? `Ganti foto Day ${day}` : `Pilih foto Day ${day}`}</strong>
@@ -535,7 +567,7 @@
     </form>
 
     <section class="cf23-post" aria-labelledby="cf23-post-title">
-      <h2 id="cf23-post-title">Posting Cosplay Card-mu!</h2>
+      <h2 id="cf23-post-title">Posting <span class="cf23-nowrap">Cosplay Card-mu!</span></h2>
       <p class="cf23-post__lead">Pamerin cosplay-mu di Instagram dan tag <a href={instagram.url} target="_blank" rel="noopener noreferrer">{instagram.handle}</a> biar kami bisa lihat. Pakai <strong>#CF23 #Comifuro23</strong> ya!</p>
 
       <ol class="cf23-post__steps">
@@ -548,29 +580,29 @@
         <i class="bi {canShare ? 'bi-share-fill' : 'bi-download'}" aria-hidden="true"></i>
         <span>
           <strong>{canShare ? 'Simpan semua (3)' : 'Download semua (3 PNG)'}</strong>
-          <small>{allReady ? 'Feed Day 1, Feed Day 2, dan Story Day 1 + 2' : 'Upload foto Day 1 dan Day 2 dulu'}</small>
+          <small>{allReady ? 'Feed Day 1, Day 2 & Story' : 'Upload foto Day 1 dan Day 2 dulu'}</small>
         </span>
       </button>
 
       <label class="cf23-caption">
         <span>Caption</span>
-        <textarea readonly rows="6" value={caption}></textarea>
+        <textarea readonly rows="7" value={caption}></textarea>
       </label>
       <div class="cf23-post__actions">
         <button type="button" class="cf23-ghost cf23-ghost--cream" onclick={copyCaption}><i class="bi {copied ? 'bi-check2' : 'bi-clipboard'}" aria-hidden="true"></i>{copied ? 'Tersalin!' : 'Salin caption'}</button>
-        <a class="cf23-ghost cf23-ghost--cream" href={instagram.url} target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram" aria-hidden="true"></i>Buka {instagram.handle}</a>
+        <a class="cf23-ghost cf23-ghost--cream" href={instagram.url} target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram" aria-hidden="true"></i>Buka Instagram</a>
       </div>
     </section>
   </div>
 
   <div class="cf23-actions" role="region" aria-label="Simpan Cosplay Card">
     <div class="cf23-actions__inner container-xl">
-      <p class="cf23-status" class:is-error={statusError} role="status" aria-live="polite">
-        {#if status}{status}{:else if !ready}Upload foto Day {missing.join(' dan Day ')} dulu untuk menyimpan {currentLabel}.{:else}{currentLabel} siap disimpan.{/if}
-      </p>
+      <p class="cf23-status" class:is-error={statusError} role="status" aria-live="polite">{status}</p>
       <div class="cf23-actions__buttons">
         <button type="button" class="cf23-ghost cf23-ghost--light cf23-to-preview" onclick={scrollToPreview} aria-label="Lihat preview"><i class="bi bi-eye" aria-hidden="true"></i></button>
-        {#if canShare}
+        {#if !ready}
+          <button type="button" class="cf23-primary" onclick={pickMissing}><i class="bi bi-camera-fill" aria-hidden="true"></i>Upload foto Day {missing[0]}</button>
+        {:else if canShare}
           <button type="button" class="cf23-primary" onclick={share} disabled={!ready || busy}><i class="bi bi-share-fill" aria-hidden="true"></i>Simpan / Bagikan</button>
           <button type="button" class="cf23-ghost cf23-ghost--light" onclick={download} disabled={!ready || busy} aria-label="Download PNG"><i class="bi bi-download" aria-hidden="true"></i></button>
         {:else}
@@ -603,14 +635,14 @@
   }
 
   .cf23-head {
-    padding-top: clamp(1.5rem, 4vw, 3rem);
-    padding-bottom: 0.5rem;
+    padding-top: clamp(1.25rem, 4vw, 3rem);
+    padding-bottom: 0.25rem;
 
     h1 {
-      margin: 0.35rem 0 0.5rem;
+      margin: 0 0 0.45rem;
       font-family: var(--display);
       font-weight: 400;
-      font-size: clamp(2.4rem, 8vw, 4.2rem);
+      font-size: clamp(2.2rem, 9.5vw, 4.2rem);
       line-height: 1;
       letter-spacing: 0.02em;
       color: var(--cream);
@@ -620,17 +652,15 @@
     }
   }
 
-  .cf23-event {
-    display: inline-flex;
-    align-items: center;
+  .cf23-meta {
+    display: flex;
+    align-items: baseline;
     gap: 0.4rem;
-    margin: 0;
-    padding: 0.3rem 0.8rem;
-    border: 2px solid var(--cream);
-    border-radius: 999px;
-    background: var(--brown);
-    font-size: 0.875rem;
+    margin: 0 0 0.5rem;
+    color: var(--cream);
+    font-size: 0.95rem;
     font-weight: 800;
+    line-height: 1.35;
 
     i { color: var(--orange); }
   }
@@ -639,9 +669,12 @@
     max-width: 60ch;
     margin: 0;
     color: var(--peach);
-    font-size: 1.05rem;
+    font-size: 1rem;
     line-height: 1.45;
+    text-wrap: pretty;
   }
+
+  .cf23-nowrap { white-space: nowrap; }
 
   .cf23-layout {
     display: grid;
@@ -669,37 +702,40 @@
     }
   }
 
+  // All three formats in view at once on a phone: an even, three-part switch.
   .cf23-formats {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.5rem;
-    overflow-x: auto;
-    scrollbar-width: none;
-    margin: 0 -0.25rem;
-    padding: 0.25rem;
-
-    &::-webkit-scrollbar { display: none; }
+    max-width: 30rem;
 
     button {
-      flex: 0 0 auto;
-      display: inline-flex;
-      align-items: baseline;
-      gap: 0.35rem;
-      min-height: 44px;
-      padding: 0.45rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.05rem;
+      min-height: 56px;
+      padding: 0.35rem 0.25rem;
       border: 3px solid var(--cream);
-      border-radius: 999px;
+      border-radius: 16px;
       background: transparent;
       color: var(--cream);
-      font-family: var(--display);
-      font-size: 1.05rem;
-      letter-spacing: 0.02em;
       cursor: pointer;
 
+      span {
+        font-family: var(--display);
+        font-size: 1.15rem;
+        line-height: 1.05;
+        letter-spacing: 0.02em;
+      }
+
       small {
-        font-family: var(--body);
         font-size: 0.75rem;
         font-weight: 800;
-        opacity: 0.75;
+        line-height: 1.2;
+        opacity: 0.8;
+        white-space: nowrap;
       }
     }
 
@@ -708,6 +744,8 @@
       background: var(--orange);
       color: var(--brown);
       box-shadow: 3px 3px 0 var(--brown);
+
+      small { opacity: 1; }
     }
 
     button:focus-visible {
@@ -717,10 +755,11 @@
   }
 
   .cf23-canvas {
+    position: relative;
     display: flex;
     justify-content: center;
-    padding: 0.75rem;
-    border-radius: 1.5rem;
+    padding: 0.6rem;
+    border-radius: 1.25rem;
     background: var(--violet);
 
     canvas {
@@ -732,8 +771,12 @@
       border-radius: 0.75rem;
       background: var(--plum);
       box-shadow: 6px 6px 0 var(--brown);
-      touch-action: none;
       cursor: grab;
+    }
+
+    &.is-adjusting {
+      outline: 3px dashed var(--orange);
+      outline-offset: -3px;
     }
 
     &.is-story canvas {
@@ -748,19 +791,47 @@
     }
   }
 
+  .cf23-tools {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .cf23-adjust {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    padding: 0.35rem 0.9rem;
+    border: 3px solid var(--brown);
+    border-radius: 999px;
+    background: var(--cream);
+    color: var(--brown);
+    font: 800 0.95rem var(--body);
+    box-shadow: 3px 3px 0 var(--brown);
+    cursor: pointer;
+
+    &.is-on {
+      background: var(--orange);
+    }
+
+    &:focus-visible { outline: 3px solid var(--pink); outline-offset: 2px; }
+  }
+
   .cf23-hint {
     display: flex;
     gap: 0.45rem;
     margin: 0;
     color: var(--peach);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     line-height: 1.4;
 
     i { flex-shrink: 0; margin-top: 0.1rem; }
   }
 
   .cf23-panel {
-    padding: 0.25rem 1.25rem 1.25rem;
+    padding: 0.25rem clamp(1rem, 4vw, 1.25rem) 1.25rem;
     border: 4px solid var(--brown);
     border-radius: 1.5rem;
     background: var(--cream);
@@ -962,7 +1033,7 @@
   }
 
   .cf23-post {
-    padding: 1.25rem;
+    padding: clamp(1rem, 4vw, 1.25rem);
     border: 3px dashed var(--peach);
     border-radius: 1.5rem;
     color: var(--cream);
@@ -1074,20 +1145,25 @@
       color: var(--brown);
       font: 600 1rem/1.4 var(--body);
       resize: none;
+      // Grows to fit the caption where supported, so nothing hides behind a scrollbar.
+      field-sizing: content;
     }
   }
 
   .cf23-post__actions {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5rem;
     margin-top: 0.75rem;
+
+    > * { min-width: 0; }
   }
 
   .cf23-ghost--cream {
     border-color: var(--cream);
     color: var(--cream);
     text-decoration: none;
+    white-space: nowrap;
 
     &:hover { background: rgb(255 236 232 / 0.1); color: var(--cream); }
   }
@@ -1107,9 +1183,15 @@
 
   .cf23-actions__inner {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
+    flex-direction: column;
+    gap: 0.45rem;
+
+    @media (min-width: 768px) {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
   }
 
   .cf23-status {
@@ -1117,17 +1199,26 @@
     min-width: 0;
     margin: 0;
     color: var(--peach);
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     font-weight: 700;
     line-height: 1.3;
 
+    &:empty { display: none; }
     &.is-error { color: #ffb3c8; }
   }
 
   .cf23-actions__buttons {
     display: flex;
-    flex-shrink: 0;
     gap: 0.5rem;
+
+    .cf23-primary { flex: 1; justify-content: center; }
+
+    @media (min-width: 768px) {
+      flex-shrink: 0;
+      margin-left: auto;
+
+      .cf23-primary { flex: 0 0 auto; }
+    }
   }
 
   .cf23-to-preview {
