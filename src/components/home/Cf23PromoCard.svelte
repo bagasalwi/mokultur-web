@@ -71,8 +71,8 @@
     </div>
 
     <form class="cf23-promo__form" action="/comifuro23" method="get">
-      <label class="visually-hidden" for="cf23-promo-name">Nama cosplayer</label>
-      <input id="cf23-promo-name" name="nama" type="text" bind:value={name} maxlength="40" placeholder="Ketik nama cosplayer-mu" autocomplete="nickname" enterkeyhint="go" />
+      <label class="visually-hidden" for="cf23-promo-name">Nama kamu</label>
+      <input id="cf23-promo-name" name="nama" type="text" bind:value={name} maxlength="40" placeholder="Ketik nama kamu" autocomplete="nickname" enterkeyhint="go" />
       <button type="submit">Buat card <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
     </form>
   </section>

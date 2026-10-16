@@ -429,7 +429,7 @@
       <fieldset class="cf23-group">
         <legend>Kamu</legend>
         <label class="cf23-field">
-          <span>Nama cosplayer</span>
+          <span>Nama kamu</span>
           <input type="text" bind:value={name} maxlength="40" autocomplete="nickname" enterkeyhint="next" />
         </label>
         <label class="cf23-field">
@@ -555,6 +555,9 @@
     background: var(--plum);
     color: var(--cream);
     font-family: var(--body);
+    // The site footer keeps a 4rem top margin (custom.scss) that shows as a white
+    // strip under this full-bleed page; pull the footer up against the plum.
+    margin-bottom: -4rem;
   }
 
   .cf23-head {

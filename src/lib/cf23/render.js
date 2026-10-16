@@ -457,7 +457,7 @@ const CF23Render = (function () {
     slot.day = day;
 
     var leftMax = 610;
-    var name = field(data.name, '[NAMA COSPLAYER]', hints);
+    var name = field(data.name, '[NAMA KAMU]', hints);
     if (name) outlined(ctx, name.text, P, 1206, { size: 58, fill: c.cream, strokeWidth: 8, shadow: 5, maxWidth: leftMax, minSize: 30, alpha: name.alpha });
     var handle = cleanHandle(data.username);
     var user = field(handle ? '@' + handle : '', '@[username]', hints);
@@ -546,7 +546,7 @@ const CF23Render = (function () {
       if (se) plain(ctx, se.text, col.x + 8, 1504, { size: 24, weight: '700', fill: c.peach, maxWidth: 446, minSize: 16, alpha: se.alpha });
     });
 
-    var name = field(data.name, '[NAMA COSPLAYER]', hints);
+    var name = field(data.name, '[NAMA KAMU]', hints);
     if (name) outlined(ctx, name.text, 540, 1624, { size: 72, fill: c.cream, strokeWidth: 10, shadow: 6, align: 'center', maxWidth: 940, minSize: 36, alpha: name.alpha });
     var handle = cleanHandle(data.username);
     var user = field(handle ? '@' + handle : '', '@[username]', hints);
