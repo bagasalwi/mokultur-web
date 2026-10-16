@@ -506,9 +506,11 @@
         </label>
       </fieldset>
 
-      {#each activeDays as day (day)}
+      <!-- Both days always: a visitor fills Day 1 and Day 2 in one go, whatever the preview shows. -->
+      {#each [1, 2] as const as day (day)}
         {@const state = days[day]}
         {@const c = crop(day)}
+        {@const inUse = activeDays.includes(day)}
         <fieldset class="cf23-group">
           <legend>Day {day} <small>{DAY_LABEL[day]}</small></legend>
 
@@ -521,7 +523,11 @@
             </span>
           </label>
 
-          {#if state.image}
+          {#if state.image && !inUse}
+            <button type="button" class="cf23-ghost cf23-show-day" onclick={() => { template = day === 1 ? 'day1' : 'day2'; adjusting = false; }}>
+              <i class="bi bi-eye" aria-hidden="true"></i>Lihat & atur foto Day {day} di preview
+            </button>
+          {:else if state.image}
             <div class="cf23-zoom">
               <label class="cf23-field">
                 <span>Zoom</span>
@@ -948,6 +954,12 @@
       outline: 3px solid var(--pink);
       outline-offset: 2px;
     }
+  }
+
+  // Zoom is per format; for a day the current preview does not show, offer to switch to it.
+  .cf23-show-day {
+    align-self: flex-start;
+    font-size: 0.95rem;
   }
 
   .cf23-zoom {
