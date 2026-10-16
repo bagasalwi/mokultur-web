@@ -119,6 +119,8 @@
   // The assistant answers questions about the public site; it has no business
   // on the dashboard or the auth screens.
   $: isPrivateRoute = $page.url.pathname.startsWith('/dashboard') || $page.url.pathname.startsWith('/auth');
+  // Tool pages whose own bottom bar the floating chat button would sit on.
+  $: hideChat = $page.url.pathname === '/comifuro23';
 
   $: origin = $page.url.origin;
   $: siteName = data.settings?.site_name ?? 'Mokultur';
@@ -205,7 +207,7 @@
 
 <svelte:window on:keydown={searchShortcut} />
 
-{#if ChatWidget && data.settings?.ai_chat_enabled && !isPrivateRoute}
+{#if ChatWidget && data.settings?.ai_chat_enabled && !isPrivateRoute && !hideChat}
   <svelte:component
     this={ChatWidget}
     title={data.settings.ai_chat_title}

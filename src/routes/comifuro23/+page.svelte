@@ -47,7 +47,6 @@
 
   let canvas = $state<HTMLCanvasElement>();
   let previewBox = $state<HTMLElement>();
-  let actionBar = $state<HTMLElement>();
   let slots: Slot[] = [];
   let frame = 0;
 
@@ -286,16 +285,6 @@
 
     draw();
     void loadCf23Assets().then(async () => { fontsReady = true; await tick(); draw(); });
-
-    // The site's floating chat button rises above a bottom bar through this variable.
-    const lift = new ResizeObserver(() => {
-      document.body.style.setProperty('--app-bottom-nav', `${actionBar?.offsetHeight ?? 0}px`);
-    });
-    if (actionBar) lift.observe(actionBar);
-    return () => {
-      lift.disconnect();
-      document.body.style.removeProperty('--app-bottom-nav');
-    };
   });
 
   onDestroy(() => {
@@ -427,7 +416,7 @@
     </form>
   </div>
 
-  <div class="cf23-actions" role="region" aria-label="Simpan kartu" bind:this={actionBar}>
+  <div class="cf23-actions" role="region" aria-label="Simpan kartu">
     <div class="cf23-actions__inner container-xl">
       <p class="cf23-status" class:is-error={statusError} role="status" aria-live="polite">
         {#if status}{status}{:else if !ready}Upload foto Day {missing.join(' dan Day ')} dulu untuk menyimpan {currentLabel}.{:else}{currentLabel} siap disimpan.{/if}
