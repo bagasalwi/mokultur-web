@@ -13,7 +13,7 @@
    *
    * Built for phones first: the preview sits on top and can be dragged and
    * pinched, the form only shows the days the chosen format uses, and the
-   * download/share bar stays on screen.
+   * download bar stays on screen.
    */
   type Day = 1 | 2;
   /** `image` is the original, used for the PNG; `preview` is a smaller copy redrawn on every drag frame. */
@@ -47,7 +47,6 @@
   let status = $state('');
   let statusError = $state(false);
   let busy = $state(false);
-  let canShare = $state(false);
   let fontsReady = $state(false);
   // Touch screens: the preview fills most of a phone screen, so it only takes
   // over touches (drag, pinch) in "Atur foto" mode; otherwise it scrolls the page.
@@ -318,9 +317,9 @@
 
   /**
    * Saves every ready format in one go: Feed Day 1 and Day 2 as soon as their
-   * photo is in, and Story once both are. Phones that can share several files
-   * get one share sheet; elsewhere the PNGs download one after another (a
-   * browser may ask once to allow multiple downloads).
+   * photo is in, and Story once both are. Always a plain download (no share
+   * sheet), one PNG after another; a browser may ask once to allow multiple
+   * downloads.
    */
   async function saveAll() {
     if (busy) return;
@@ -332,15 +331,6 @@
     try {
       const files: File[] = [];
       for (const id of ids) files.push(await makeFile(id));
-      if (canShare && navigator.canShare?.({ files })) {
-        try {
-          await navigator.share({ files, title: 'Cosplay Card CF23', text: caption });
-          setStatus(`Jangan lupa tag ${instagram.handle}!${more}`);
-          return;
-        } catch (reason) {
-          if (reason instanceof DOMException && reason.name === 'AbortError') { setStatus(''); return; }
-        }
-      }
       for (const [index, file] of files.entries()) {
         if (index) await new Promise((resolve) => setTimeout(resolve, 450));
         saveFile(file);
@@ -382,10 +372,6 @@
     const fromLink = $page.url.searchParams.get('nama');
     if (fromLink) name = fromLink.slice(0, 40);
 
-    try {
-      const probe = new File([new Blob()], 'probe.png', { type: 'image/png' });
-      canShare = typeof navigator.share === 'function' && typeof navigator.canShare === 'function' && navigator.canShare({ files: [probe] });
-    } catch { canShare = false; }
 
     // loadCf23Assets never rejects; the timer only covers a font request that hangs.
     coarse = window.matchMedia('(pointer: coarse)').matches;
@@ -551,9 +537,9 @@
       </ol>
 
       <button type="button" class="cf23-all" onclick={saveAll} disabled={!readyFormats.length || busy}>
-        <i class="bi {canShare ? 'bi-share-fill' : 'bi-download'}" aria-hidden="true"></i>
+        <i class="bi bi-download" aria-hidden="true"></i>
         <span>
-          <strong>{canShare ? 'Simpan' : 'Download'} semua ({readyFormats.length || 3} PNG)</strong>
+          <strong>Download semua ({readyFormats.length || 3} PNG)</strong>
           <small>{readyFormats.length ? readyLabel : 'Upload foto Day 1 dan Day 2 dulu'}</small>
         </span>
       </button>
@@ -578,7 +564,7 @@
           <button type="button" class="cf23-primary" onclick={pickMissing}><i class="bi bi-camera-fill" aria-hidden="true"></i>Upload foto Day {nextMissing ?? 1}</button>
         {:else}
           <button type="button" class="cf23-primary" onclick={saveAll} disabled={busy}>
-            <i class="bi {canShare ? 'bi-share-fill' : 'bi-download'}" aria-hidden="true"></i>{canShare ? 'Simpan' : 'Download'} {readyFormats.length > 1 ? `semua (${readyFormats.length})` : 'PNG'}
+            <i class="bi bi-download" aria-hidden="true"></i>Download {readyFormats.length > 1 ? `semua (${readyFormats.length})` : 'PNG'}
           </button>
         {/if}
       </div>
