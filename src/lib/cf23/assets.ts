@@ -1,7 +1,7 @@
 import CF23Render from './render.js';
 
 /**
- * Fonts and the Mokultur logo for the CF23 card, loaded only where the card is
+ * Fonts for the CF23 card, loaded only where the card is
  * used. The faces are self-hosted (static/fonts) and registered through the
  * FontFace API, so no other page pays for them and no request goes to Google.
  */
@@ -16,7 +16,6 @@ export function loadCf23Assets(): Promise<void> {
     ];
     await Promise.all([
       ...faces.map((face) => face.load().then((loaded) => { document.fonts.add(loaded); }).catch(() => undefined)),
-      CF23Render.loadBrand('/assets/mokultur/logo-w320.webp'),
     ]);
     await CF23Render.loadFonts();
   })();

@@ -78,10 +78,11 @@ const CF23Render = (function () {
 
   /** Logo kecil di atas, URL di bawahnya; `align` 'right' atau 'center' terhadap x, mulai dari `top`. */
   function brandMark(ctx, x, top, o) {
-    var logoH = o.logoHeight;
-    var logoW = BRAND.logo ? logoH * (BRAND.logo.naturalWidth || BRAND.logo.width) / (BRAND.logo.naturalHeight || BRAND.logo.height) : 0;
+    var withLogo = Boolean(BRAND.logo && o.logoHeight);
+    var logoH = withLogo ? o.logoHeight : 0;
+    var logoW = withLogo ? logoH * (BRAND.logo.naturalWidth || BRAND.logo.width) / (BRAND.logo.naturalHeight || BRAND.logo.height) : 0;
     ctx.save();
-    if (BRAND.logo) {
+    if (withLogo) {
       ctx.imageSmoothingQuality = 'high';
       var lx = o.align === 'right' ? x - logoW : x - logoW / 2;
       ctx.drawImage(BRAND.logo, lx, top, logoW, logoH);
@@ -92,7 +93,7 @@ const CF23Render = (function () {
     ctx.fillStyle = o.fill;
     ctx.textAlign = o.align === 'right' ? 'right' : 'center';
     ctx.textBaseline = 'alphabetic';
-    var urlBase = top + (BRAND.logo ? logoH + o.gap : 0) + o.size * 0.8;
+    var urlBase = top + (withLogo ? logoH + o.gap : 0) + o.size * 0.8;
     ctx.fillText(BRAND.url, x, urlBase);
     // Credit for the key visual the theme is drawn from, under the URL.
     if (o.creditSize) {
@@ -445,7 +446,6 @@ const CF23Render = (function () {
       x: P, y: P, anchor: 'left', height: 58, padL: 24, padR: 24, text: EVENT.name,
       family: DISPLAY, size: 28, letterSpacing: 2, bg: c.brown, border: c.cream, borderWidth: 4, color: c.cream, nudge: 1
     });
-    plain(ctx, EVENT.venueShort, P + hp.w + 16, P + 30, { size: 24, weight: '800', fill: c.cream, baseline: 'middle', letterSpacing: 1 });
 
     var base = 292;
     var cw = outlined(ctx, 'COSPLAY', P, base, { size: 88, fill: c.cream, strokeWidth: 10, shadow: 7, letterSpacing: 2 });
@@ -467,22 +467,21 @@ const CF23Render = (function () {
 
     var leftMax = 610;
     var name = field(data.name, '[NAMA KAMU]', hints);
-    if (name) outlined(ctx, name.text, P, 1206, { size: 58, fill: c.cream, strokeWidth: 8, shadow: 5, maxWidth: leftMax, minSize: 30, alpha: name.alpha });
+    if (name) outlined(ctx, name.text, P, 1226, { size: 70, fill: c.cream, strokeWidth: 9, shadow: 6, maxWidth: leftMax, minSize: 34, alpha: name.alpha });
     // username: null means the page has no separate handle field (mokultur.com/comifuro23
     // takes one "Nama/Instagram" value as the name), so the line and its hint are left out.
     var user = data.username == null ? null : field(cleanHandle(data.username) ? '@' + cleanHandle(data.username) : '', '@[username]', hints);
     if (user) plain(ctx, user.text, P, 1248, { size: 32, weight: '800', fill: c.peach, maxWidth: leftMax, alpha: user.alpha });
     var parts = characterParts(dd, hints, '[KARAKTER]', '[JUDUL SERIES]');
-    if (parts) richLine(ctx, parts, P, data.username == null ? 1256 : 1284, { size: 26, fill: c.cream, maxWidth: leftMax });
+    if (parts) richLine(ctx, parts, P, data.username == null ? 1280 : 1300, { size: 32, fill: c.cream, maxWidth: leftMax });
 
     pill(ctx, {
-      x: 1024, y: 1136, anchor: 'right', height: 50, padL: 12, padR: 18, text: EVENT.venue,
+      x: 1024, y: 1160, anchor: 'right', height: 50, padL: 12, padR: 18, text: EVENT.venue,
       weight: '800', size: 24, bg: c.plum, border: c.cream, borderWidth: 4, color: c.cream,
       icon: PIN, iconSize: 28, iconColor: c.orange, nudge: 2
     });
-    plain(ctx, EVENT.venueFull, 1024, 1216, { size: 20, weight: '700', fill: c.peach, align: 'right' });
-    plain(ctx, EVENT.hashtags, 1024, 1248, { size: 22, weight: '800', fill: c.cream, align: 'right', letterSpacing: 1 });
-    brandMark(ctx, 1024, 1260, { size: 17, logoHeight: 28, gap: 4, fill: c.peach, align: 'right', creditSize: 13 });
+    plain(ctx, EVENT.hashtags, 1024, 1250, { size: 22, weight: '800', fill: c.cream, align: 'right', letterSpacing: 1 });
+    brandMark(ctx, 1024, 1268, { size: 20, fill: c.peach, align: 'right', creditSize: 14 });
 
     return [slot];
   }
@@ -551,17 +550,17 @@ const CF23Render = (function () {
       slots.push(slot);
 
       var ch = field(dd.character, '[KARAKTER DAY ' + col.day + ']', hints);
-      if (ch) outlined(ctx, ch.text, col.x + 8, 1474, { size: 36, fill: c.cream, strokeWidth: 6, shadow: 4, maxWidth: 446, minSize: 22, alpha: ch.alpha });
+      if (ch) outlined(ctx, ch.text, col.x + 8, 1488, { size: 48, fill: c.cream, strokeWidth: 7, shadow: 5, maxWidth: 446, minSize: 26, alpha: ch.alpha });
       var se = field(dd.series, '[JUDUL SERIES]', hints);
-      if (se) plain(ctx, se.text, col.x + 8, 1504, { size: 24, weight: '700', fill: c.peach, maxWidth: 446, minSize: 16, alpha: se.alpha });
+      if (se) plain(ctx, se.text, col.x + 8, 1528, { size: 30, weight: '700', fill: c.peach, maxWidth: 446, minSize: 18, alpha: se.alpha });
     });
 
     var name = field(data.name, '[NAMA KAMU]', hints);
-    if (name) outlined(ctx, name.text, 540, data.username == null ? 1644 : 1624, { size: 72, fill: c.cream, strokeWidth: 10, shadow: 6, align: 'center', maxWidth: 940, minSize: 36, alpha: name.alpha });
+    if (name) outlined(ctx, name.text, 540, data.username == null ? 1684 : 1636, { size: 84, fill: c.cream, strokeWidth: 11, shadow: 7, align: 'center', maxWidth: 940, minSize: 40, alpha: name.alpha });
     var user = data.username == null ? null : field(cleanHandle(data.username) ? '@' + cleanHandle(data.username) : '', '@[username]', hints);
     if (user) plain(ctx, user.text, 540, 1668, { size: 36, weight: '800', fill: c.peach, align: 'center', maxWidth: 940, alpha: user.alpha });
-    plain(ctx, EVENT.hashtags, 540, 1704, { size: 24, weight: '800', fill: c.cream, align: 'center', letterSpacing: 1 });
-    brandMark(ctx, 540, 1744, { size: 26, logoHeight: 56, gap: 8, fill: c.peach, align: 'center', creditSize: 19 });
+    plain(ctx, EVENT.hashtags, 540, 1746, { size: 26, weight: '800', fill: c.cream, align: 'center', letterSpacing: 1 });
+    brandMark(ctx, 540, 1786, { size: 26, fill: c.peach, align: 'center', creditSize: 19 });
 
     return slots;
   }

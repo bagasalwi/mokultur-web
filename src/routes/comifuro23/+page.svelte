@@ -400,13 +400,13 @@
   <meta property="og:title" content={TITLE} />
   <meta property="og:description" content={DESCRIPTION} />
   <meta property="og:url" content={absoluteUrl('/comifuro23')} />
-  <meta property="og:image" content={absoluteUrl('/assets/og/comifuro23.jpg?v=4')} />
+  <meta property="og:image" content={absoluteUrl('/assets/og/comifuro23.jpg?v=5')} />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={TITLE} />
   <meta name="twitter:description" content={DESCRIPTION} />
-  <meta name="twitter:image" content={absoluteUrl('/assets/og/comifuro23.jpg?v=4')} />
+  <meta name="twitter:image" content={absoluteUrl('/assets/og/comifuro23.jpg?v=5')} />
   <meta name="theme-color" content="#3E0F3D" />
   {@html `<script type="application/ld+json">${JSON.stringify(buildBreadcrumb([{ name: 'Cosplay Card CF23', path: '/comifuro23' }]))}<\/script>`}
 </svelte:head>
