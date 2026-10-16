@@ -19,9 +19,13 @@
   type DayState = { character: string; series: string; accent: string; image: HTMLImageElement | null; url: string | null; fileName: string };
   type Crop = { zoom: number; panX: number; panY: number };
 
+  let { data } = $props();
+
   const R = CF23Render;
-  const TITLE = 'Kartu Cosplay Comic Frontier 23 (CF23)';
-  const DESCRIPTION = 'Bikin kartu cosplay CF23 untuk feed dan story Instagram: upload foto Day 1 dan Day 2, isi nama dan karakter, lalu download PNG. Gratis, langsung di browser, foto tidak di-upload.';
+  const HASHTAGS = '#CF23 #Comifuro23 #Mokultur';
+  const ALL: TemplateId[] = ['day1', 'day2', 'story'];
+  const TITLE = 'Cosplay Card Comic Frontier 23 (CF23)';
+  const DESCRIPTION = 'Bikin Cosplay Card CF23 untuk feed dan story Instagram: upload foto Day 1 dan Day 2, isi nama dan karakter, lalu download PNG. Gratis, langsung di browser, foto tidak di-upload.';
   const FORMATS: { id: TemplateId; label: string; size: string }[] = [
     { id: 'day1', label: 'Feed Day 1', size: '4:5' },
     { id: 'day2', label: 'Feed Day 2', size: '4:5' },
@@ -54,6 +58,32 @@
   const missing = $derived(activeDays.filter((day) => !days[day].image));
   const ready = $derived(missing.length === 0);
   const currentLabel = $derived(FORMATS.find((format) => format.id === template)?.label ?? '');
+  const allReady = $derived(Boolean(days[1].image && days[2].image));
+
+  // Mokultur's Instagram, from the site's social links, for the posting call to action.
+  const instagram = $derived.by(() => {
+    const link = (data?.socials ?? []).find((social: { platform: string; username: string }) => /instagram/i.test(social.platform) && social.username?.startsWith('@'));
+    return { handle: link?.username ?? '@mokultur', url: link?.url ?? 'https://www.instagram.com/mokultur/' };
+  });
+
+  /** A ready-to-paste caption from what the visitor typed. */
+  const caption = $derived.by(() => {
+    const who = (day: Day) => {
+      const { character, series } = days[day];
+      const c = character.trim();
+      const t = series.trim();
+      return c && t ? `${c} (${t})` : c || t;
+    };
+    const looks = [who(1), who(2)].filter(Boolean);
+    const unique = [...new Set(looks)];
+    const opener = unique.length === 2
+      ? `Day 1 jadi ${unique[0]}, Day 2 jadi ${unique[1]} di Comic Frontier 23! ✨`
+      : unique.length === 1
+        ? `Cosplay ${unique[0]} di Comic Frontier 23! ✨`
+        : 'Cosplay di Comic Frontier 23! ✨';
+    return [opener, '', `📍 ICE BSD · 31 Okt – 1 Nov 2026`, `Bikin Cosplay Card-mu di mokultur.com/comifuro23`, '', `${instagram.handle} ${HASHTAGS}`].join('\n');
+  });
+  let copied = $state(false);
 
   function crop(day: Day, id: TemplateId = template): Crop {
     const key = `${id}:${day}`;
@@ -218,12 +248,65 @@
 
   function fileName(id: TemplateId): string {
     const slug = (username || name).toLowerCase().replace(/^@+/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    return `cf23-${id}${slug ? `-${slug}` : ''}.png`;
+    return `cf23-cosplay-card-${id}${slug ? `-${slug}` : ''}.png`;
   }
 
-  async function makeFile(): Promise<File> {
-    const blob = await R.toBlob(template, buildData(template));
-    return new File([blob], fileName(template), { type: 'image/png' });
+  async function makeFile(id: TemplateId = template): Promise<File> {
+    const blob = await R.toBlob(id, buildData(id));
+    return new File([blob], fileName(id), { type: 'image/png' });
+  }
+
+  function saveFile(file: File) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(file);
+    a.download = file.name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+
+  /**
+   * All three formats at once. Phones that can share several files get one share
+   * sheet; elsewhere the PNGs download one after another (a browser may ask once
+   * to allow multiple downloads).
+   */
+  async function downloadAll() {
+    if (!allReady || busy) return;
+    busy = true;
+    setStatus('Menyiapkan 3 gambar…');
+    try {
+      const files: File[] = [];
+      for (const id of ALL) files.push(await makeFile(id));
+      if (canShare && navigator.canShare?.({ files })) {
+        try {
+          await navigator.share({ files, title: 'Cosplay Card CF23', text: caption });
+          setStatus(`3 Cosplay Card siap diposting. Jangan lupa tag ${instagram.handle}!`);
+          return;
+        } catch (reason) {
+          if (reason instanceof DOMException && reason.name === 'AbortError') { setStatus(''); return; }
+        }
+      }
+      for (const [index, file] of files.entries()) {
+        if (index) await new Promise((resolve) => setTimeout(resolve, 450));
+        saveFile(file);
+      }
+      setStatus(`3 PNG tersimpan. Posting dan tag ${instagram.handle}!`);
+    } catch {
+      setStatus('Gambar gagal dibuat. Coba lagi, atau pakai foto dengan ukuran lebih kecil.', true);
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function copyCaption() {
+    try {
+      await navigator.clipboard.writeText(caption);
+      copied = true;
+      setTimeout(() => (copied = false), 2200);
+    } catch {
+      setStatus('Caption tidak bisa disalin otomatis. Tahan teksnya lalu pilih Salin.', true);
+    }
   }
 
   async function download() {
@@ -232,14 +315,8 @@
     setStatus('Menyiapkan gambar…');
     try {
       const file = await makeFile();
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(file);
-      a.download = file.name;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-      setStatus(`Tersimpan: ${file.name}`);
+      saveFile(file);
+      setStatus(`Tersimpan. Posting dan tag ${instagram.handle}!`);
     } catch {
       setStatus('Gambar gagal dibuat. Coba lagi, atau pakai foto dengan ukuran lebih kecil.', true);
     } finally {
@@ -254,8 +331,8 @@
     setStatus('Menyiapkan gambar…');
     try {
       const file = await makeFile();
-      await navigator.share({ files: [file], title: 'Kartu Cosplay CF23', text: '#CF23 #Comifuro23 · mokultur.com/comifuro23' });
-      setStatus('');
+      await navigator.share({ files: [file], title: 'Cosplay Card CF23', text: caption });
+      setStatus(`Jangan lupa tag ${instagram.handle} dan ${HASHTAGS.split(' ').slice(0, 2).join(' ')}!`);
     } catch (reason) {
       if (reason instanceof DOMException && reason.name === 'AbortError') setStatus('');
       else setStatus('Tidak bisa membuka menu bagikan. Pakai tombol Download.', true);
@@ -304,21 +381,21 @@
   <meta property="og:title" content={TITLE} />
   <meta property="og:description" content={DESCRIPTION} />
   <meta property="og:url" content={absoluteUrl('/comifuro23')} />
-  <meta property="og:image" content={absoluteUrl('/assets/og/comifuro23.jpg')} />
+  <meta property="og:image" content={absoluteUrl('/assets/og/comifuro23.jpg?v=2')} />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={TITLE} />
   <meta name="twitter:description" content={DESCRIPTION} />
-  <meta name="twitter:image" content={absoluteUrl('/assets/og/comifuro23.jpg')} />
+  <meta name="twitter:image" content={absoluteUrl('/assets/og/comifuro23.jpg?v=2')} />
   <meta name="theme-color" content="#3E0F3D" />
-  {@html `<script type="application/ld+json">${JSON.stringify(buildBreadcrumb([{ name: 'Kartu Cosplay CF23', path: '/comifuro23' }]))}<\/script>`}
+  {@html `<script type="application/ld+json">${JSON.stringify(buildBreadcrumb([{ name: 'Cosplay Card CF23', path: '/comifuro23' }]))}<\/script>`}
 </svelte:head>
 
 <div class="cf23">
   <header class="cf23-head container-xl">
     <p class="cf23-event"><i class="bi bi-geo-alt-fill" aria-hidden="true"></i>Comic Frontier 23 · ICE BSD · 31 Okt – 1 Nov 2026</p>
-    <h1>Kartu cosplay CF23</h1>
+    <h1>Cosplay Card CF23</h1>
     <p class="cf23-lead">Upload foto cosplay-mu, isi nama dan karakter, lalu simpan untuk feed atau story. Semua diproses di HP-mu, fotonya tidak dikirim ke mana pun.</p>
   </header>
 
@@ -414,9 +491,37 @@
 
       <p class="cf23-privacy"><i class="bi bi-shield-lock-fill" aria-hidden="true"></i>Foto hanya diproses di perangkatmu dan tidak disimpan oleh Mokultur.</p>
     </form>
+
+    <section class="cf23-post" aria-labelledby="cf23-post-title">
+      <h2 id="cf23-post-title">Posting Cosplay Card-mu!</h2>
+      <p class="cf23-post__lead">Pamerin cosplay-mu di Instagram dan tag <a href={instagram.url} target="_blank" rel="noopener noreferrer">{instagram.handle}</a> biar kami bisa lihat. Pakai <strong>#CF23 #Comifuro23</strong> ya!</p>
+
+      <ol class="cf23-post__steps">
+        <li><span>1</span>Simpan Cosplay Card: satu format, atau semuanya sekaligus.</li>
+        <li><span>2</span>Posting Feed Day 1 / Day 2, dan Story Day 1 + 2 di Instagram.</li>
+        <li><span>3</span>Tempel caption di bawah, lalu tag {instagram.handle}.</li>
+      </ol>
+
+      <button type="button" class="cf23-all" onclick={downloadAll} disabled={!allReady || busy}>
+        <i class="bi {canShare ? 'bi-share-fill' : 'bi-download'}" aria-hidden="true"></i>
+        <span>
+          <strong>{canShare ? 'Simpan semua (3)' : 'Download semua (3 PNG)'}</strong>
+          <small>{allReady ? 'Feed Day 1, Feed Day 2, dan Story Day 1 + 2' : 'Upload foto Day 1 dan Day 2 dulu'}</small>
+        </span>
+      </button>
+
+      <label class="cf23-caption">
+        <span>Caption</span>
+        <textarea readonly rows="6" value={caption}></textarea>
+      </label>
+      <div class="cf23-post__actions">
+        <button type="button" class="cf23-ghost cf23-ghost--cream" onclick={copyCaption}><i class="bi {copied ? 'bi-check2' : 'bi-clipboard'}" aria-hidden="true"></i>{copied ? 'Tersalin!' : 'Salin caption'}</button>
+        <a class="cf23-ghost cf23-ghost--cream" href={instagram.url} target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram" aria-hidden="true"></i>Buka {instagram.handle}</a>
+      </div>
+    </section>
   </div>
 
-  <div class="cf23-actions" role="region" aria-label="Simpan kartu">
+  <div class="cf23-actions" role="region" aria-label="Simpan Cosplay Card">
     <div class="cf23-actions__inner container-xl">
       <p class="cf23-status" class:is-error={statusError} role="status" aria-live="polite">
         {#if status}{status}{:else if !ready}Upload foto Day {missing.join(' dan Day ')} dulu untuk menyimpan {currentLabel}.{:else}{currentLabel} siap disimpan.{/if}
@@ -803,6 +908,137 @@
     line-height: 1.4;
 
     i { color: var(--lilac); margin-top: 0.1rem; }
+  }
+
+  .cf23-post {
+    padding: 1.25rem;
+    border: 3px dashed var(--peach);
+    border-radius: 1.5rem;
+    color: var(--cream);
+
+    @media (min-width: 992px) {
+      grid-column: 2;
+    }
+
+    h2 {
+      margin: 0 0 0.4rem;
+      color: var(--cream);
+      font-family: var(--display);
+      font-size: 1.75rem;
+      font-weight: 400;
+      line-height: 1.1;
+      -webkit-text-stroke: 5px var(--brown);
+      paint-order: stroke fill;
+      text-shadow: 0 3px 0 var(--brown);
+    }
+
+    a { color: var(--orange); font-weight: 800; }
+  }
+
+  .cf23-post__lead {
+    margin: 0;
+    color: var(--peach);
+    line-height: 1.45;
+
+    strong { color: var(--cream); }
+  }
+
+  .cf23-post__steps {
+    display: grid;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    padding: 0;
+    list-style: none;
+    font-weight: 600;
+    line-height: 1.35;
+
+    li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+    }
+
+    span {
+      display: inline-grid;
+      flex-shrink: 0;
+      place-items: center;
+      width: 1.6rem;
+      height: 1.6rem;
+      border: 2px solid var(--brown);
+      border-radius: 50%;
+      background: var(--orange);
+      color: var(--brown);
+      font-family: var(--display);
+      font-size: 0.95rem;
+    }
+  }
+
+  .cf23-all {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    width: 100%;
+    min-height: 64px;
+    padding: 0.6rem 1rem;
+    border: 3px solid var(--brown);
+    border-radius: 16px;
+    background: var(--orange);
+    color: var(--brown);
+    text-align: left;
+    box-shadow: 4px 4px 0 var(--brown);
+    cursor: pointer;
+
+    i { font-size: 1.5rem; }
+
+    span { display: flex; flex-direction: column; }
+
+    strong {
+      font-family: var(--display);
+      font-size: 1.25rem;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+    }
+
+    small { font-size: 0.85rem; font-weight: 700; }
+
+    &:disabled { opacity: 0.55; cursor: not-allowed; }
+    &:not(:disabled):active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--brown); }
+    &:focus-visible { outline: 3px solid var(--cream); outline-offset: 3px; }
+  }
+
+  .cf23-caption {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-top: 1rem;
+
+    > span { font-weight: 800; }
+
+    textarea {
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      border: 3px solid var(--brown);
+      border-radius: 14px;
+      background: var(--paper);
+      color: var(--brown);
+      font: 600 1rem/1.4 var(--body);
+      resize: none;
+    }
+  }
+
+  .cf23-post__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .cf23-ghost--cream {
+    border-color: var(--cream);
+    color: var(--cream);
+    text-decoration: none;
+
+    &:hover { background: rgb(255 236 232 / 0.1); color: var(--cream); }
   }
 
   // Always within thumb reach: the save bar sticks to the bottom of the screen

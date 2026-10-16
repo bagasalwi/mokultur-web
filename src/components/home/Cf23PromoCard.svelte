@@ -62,8 +62,8 @@
   <section class="cf23-promo" aria-labelledby="cf23-promo-title" bind:this={host} onpointermove={onTilt} onpointerleave={() => { tiltX = 0; tiltY = 0; }}>
     <div class="cf23-promo__copy">
       <span class="cf23-promo__event">CF23 · 31 Okt – 1 Nov</span>
-      <h2 id="cf23-promo-title">Bikin kartu cosplay CF23</h2>
-      <p>Foto Day 1 &amp; Day 2 jadi kartu siap posting untuk feed dan story.</p>
+      <h2 id="cf23-promo-title">Bikin Cosplay Card CF23</h2>
+      <p>Foto Day 1 &amp; Day 2 jadi Cosplay Card siap posting untuk feed dan story. Tag @mokultur!</p>
     </div>
 
     <div class="cf23-promo__preview" style:transform={`perspective(600px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) rotate(3deg)`}>
@@ -73,7 +73,7 @@
     <form class="cf23-promo__form" action="/comifuro23" method="get">
       <label class="visually-hidden" for="cf23-promo-name">Nama cosplayer</label>
       <input id="cf23-promo-name" name="nama" type="text" bind:value={name} maxlength="40" placeholder="Ketik nama cosplayer-mu" autocomplete="nickname" enterkeyhint="go" />
-      <button type="submit">Buat kartu <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+      <button type="submit">Buat card <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
     </form>
   </section>
 {/if}
