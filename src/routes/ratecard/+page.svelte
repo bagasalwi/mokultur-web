@@ -556,8 +556,8 @@
   .rc-note {
     margin-top: 1rem;
     padding: 1rem 1.2rem;
-    border-left: 4px solid var(--rc-primary);
-    border-radius: 4px 14px 14px 4px;
+    border: 1px solid color-mix(in srgb, var(--rc-primary) 32%, transparent);
+    border-radius: 14px;
     background: color-mix(in srgb, var(--rc-primary) 9%, #fff);
     color: #333;
     font-size: 0.93rem;
