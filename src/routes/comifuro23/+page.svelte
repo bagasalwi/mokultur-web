@@ -65,10 +65,12 @@
   function activeDaysHavePhoto(): boolean {
     return (R.TEMPLATES[template].days as Day[]).some((day) => days[day].image);
   }
-  const missing = $derived(activeDays.filter((day) => !days[day].image));
-  const ready = $derived(missing.length === 0);
   const currentLabel = $derived(FORMATS.find((format) => format.id === template)?.label ?? '');
-  const allReady = $derived(Boolean(days[1].image && days[2].image));
+  // Every format whose photos are in: saving always takes all of them at once.
+  const readyFormats = $derived(ALL.filter((id) => (R.TEMPLATES[id].days as Day[]).every((day) => days[day].image)));
+  const readyLabel = $derived(readyFormats.map((id) => FORMATS.find((format) => format.id === id)?.label ?? id).join(', '));
+  /** The first day still without a photo, Day 1 before Day 2. */
+  const nextMissing = $derived(([1, 2] as Day[]).find((day) => !days[day].image) ?? null);
 
   // Mokultur's Instagram, from the site's social links, for the posting call to action.
   const instagram = $derived.by(() => {
@@ -315,21 +317,25 @@
   }
 
   /**
-   * All three formats at once. Phones that can share several files get one share
-   * sheet; elsewhere the PNGs download one after another (a browser may ask once
-   * to allow multiple downloads).
+   * Saves every ready format in one go: Feed Day 1 and Day 2 as soon as their
+   * photo is in, and Story once both are. Phones that can share several files
+   * get one share sheet; elsewhere the PNGs download one after another (a
+   * browser may ask once to allow multiple downloads).
    */
-  async function downloadAll() {
-    if (!allReady || busy) return;
+  async function saveAll() {
+    if (busy) return;
+    if (!readyFormats.length) { pickMissing(); return; }
+    const ids = [...readyFormats];
     busy = true;
-    setStatus('Menyiapkan 3 gambar…');
+    setStatus(ids.length > 1 ? `Menyiapkan ${ids.length} gambar…` : 'Menyiapkan gambar…');
+    const more = nextMissing ? ` Tambah foto Day ${nextMissing} untuk format lainnya.` : '';
     try {
       const files: File[] = [];
-      for (const id of ALL) files.push(await makeFile(id));
+      for (const id of ids) files.push(await makeFile(id));
       if (canShare && navigator.canShare?.({ files })) {
         try {
           await navigator.share({ files, title: 'Cosplay Card CF23', text: caption });
-          setStatus(`3 Cosplay Card siap diposting. Jangan lupa tag ${instagram.handle}!`);
+          setStatus(`Jangan lupa tag ${instagram.handle}!${more}`);
           return;
         } catch (reason) {
           if (reason instanceof DOMException && reason.name === 'AbortError') { setStatus(''); return; }
@@ -339,7 +345,7 @@
         if (index) await new Promise((resolve) => setTimeout(resolve, 450));
         saveFile(file);
       }
-      setStatus(`3 PNG tersimpan. Posting dan tag ${instagram.handle}!`);
+      setStatus(`${files.length} PNG tersimpan. Posting dan tag ${instagram.handle}!${more}`);
     } catch {
       setStatus('Gambar gagal dibuat. Coba lagi, atau pakai foto dengan ukuran lebih kecil.', true);
     } finally {
@@ -357,41 +363,9 @@
     }
   }
 
-  async function download() {
-    if (!ready || busy) return;
-    busy = true;
-    setStatus('Menyiapkan gambar…');
-    try {
-      const file = await makeFile();
-      saveFile(file);
-      setStatus(`Tersimpan. Posting dan tag ${instagram.handle}!`);
-    } catch {
-      setStatus('Gambar gagal dibuat. Coba lagi, atau pakai foto dengan ukuran lebih kecil.', true);
-    } finally {
-      busy = false;
-    }
-  }
-
-  /** Phones: hand the PNG to the share sheet, so it can go straight to Photos or Instagram. */
-  async function share() {
-    if (!ready || busy) return;
-    busy = true;
-    setStatus('Menyiapkan gambar…');
-    try {
-      const file = await makeFile();
-      await navigator.share({ files: [file], title: 'Cosplay Card CF23', text: caption });
-      setStatus(`Jangan lupa tag ${instagram.handle} dan ${HASHTAGS.split(' ').slice(0, 2).join(' ')}!`);
-    } catch (reason) {
-      if (reason instanceof DOMException && reason.name === 'AbortError') setStatus('');
-      else setStatus('Tidak bisa membuka menu bagikan. Pakai tombol Download.', true);
-    } finally {
-      busy = false;
-    }
-  }
-
-  /** The save bar's first job: while a photo is missing, its main button picks it. */
+  /** The save bar's first job: while no format is ready, its main button picks the next photo. */
   function pickMissing() {
-    const input = document.getElementById(`cf23-photo-${missing[0]}`) as HTMLInputElement | null;
+    const input = document.getElementById(`cf23-photo-${nextMissing ?? 1}`) as HTMLInputElement | null;
     input?.click();
   }
 
@@ -440,13 +414,13 @@
   <meta property="og:title" content={TITLE} />
   <meta property="og:description" content={DESCRIPTION} />
   <meta property="og:url" content={absoluteUrl('/comifuro23')} />
-  <meta property="og:image" content={absoluteUrl('/assets/og/comifuro23.jpg?v=3')} />
+  <meta property="og:image" content={absoluteUrl('/assets/og/comifuro23.jpg?v=4')} />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={TITLE} />
   <meta name="twitter:description" content={DESCRIPTION} />
-  <meta name="twitter:image" content={absoluteUrl('/assets/og/comifuro23.jpg?v=3')} />
+  <meta name="twitter:image" content={absoluteUrl('/assets/og/comifuro23.jpg?v=4')} />
   <meta name="theme-color" content="#3E0F3D" />
   {@html `<script type="application/ld+json">${JSON.stringify(buildBreadcrumb([{ name: 'Cosplay Card CF23', path: '/comifuro23' }]))}<\/script>`}
 </svelte:head>
@@ -571,16 +545,16 @@
       <p class="cf23-post__lead">Pamerin cosplay-mu di Instagram dan tag <a href={instagram.url} target="_blank" rel="noopener noreferrer">{instagram.handle}</a> biar kami bisa lihat. Pakai <strong>#CF23 #Comifuro23</strong> ya!</p>
 
       <ol class="cf23-post__steps">
-        <li><span>1</span>Simpan Cosplay Card: satu format, atau semuanya sekaligus.</li>
+        <li><span>1</span>Simpan Cosplay Card: semua format yang siap tersimpan sekaligus.</li>
         <li><span>2</span>Posting Feed Day 1 / Day 2, dan Story Day 1 + 2 di Instagram.</li>
         <li><span>3</span>Tempel caption di bawah, lalu tag {instagram.handle}.</li>
       </ol>
 
-      <button type="button" class="cf23-all" onclick={downloadAll} disabled={!allReady || busy}>
+      <button type="button" class="cf23-all" onclick={saveAll} disabled={!readyFormats.length || busy}>
         <i class="bi {canShare ? 'bi-share-fill' : 'bi-download'}" aria-hidden="true"></i>
         <span>
-          <strong>{canShare ? 'Simpan semua (3)' : 'Download semua (3 PNG)'}</strong>
-          <small>{allReady ? 'Feed Day 1, Day 2 & Story' : 'Upload foto Day 1 dan Day 2 dulu'}</small>
+          <strong>{canShare ? 'Simpan' : 'Download'} semua ({readyFormats.length || 3} PNG)</strong>
+          <small>{readyFormats.length ? readyLabel : 'Upload foto Day 1 dan Day 2 dulu'}</small>
         </span>
       </button>
 
@@ -600,13 +574,12 @@
       <p class="cf23-status" class:is-error={statusError} role="status" aria-live="polite">{status}</p>
       <div class="cf23-actions__buttons">
         <button type="button" class="cf23-ghost cf23-ghost--light cf23-to-preview" onclick={scrollToPreview} aria-label="Lihat preview"><i class="bi bi-eye" aria-hidden="true"></i></button>
-        {#if !ready}
-          <button type="button" class="cf23-primary" onclick={pickMissing}><i class="bi bi-camera-fill" aria-hidden="true"></i>Upload foto Day {missing[0]}</button>
-        {:else if canShare}
-          <button type="button" class="cf23-primary" onclick={share} disabled={!ready || busy}><i class="bi bi-share-fill" aria-hidden="true"></i>Simpan / Bagikan</button>
-          <button type="button" class="cf23-ghost cf23-ghost--light" onclick={download} disabled={!ready || busy} aria-label="Download PNG"><i class="bi bi-download" aria-hidden="true"></i></button>
+        {#if !readyFormats.length}
+          <button type="button" class="cf23-primary" onclick={pickMissing}><i class="bi bi-camera-fill" aria-hidden="true"></i>Upload foto Day {nextMissing ?? 1}</button>
         {:else}
-          <button type="button" class="cf23-primary" onclick={download} disabled={!ready || busy}><i class="bi bi-download" aria-hidden="true"></i>Download PNG</button>
+          <button type="button" class="cf23-primary" onclick={saveAll} disabled={busy}>
+            <i class="bi {canShare ? 'bi-share-fill' : 'bi-download'}" aria-hidden="true"></i>{canShare ? 'Simpan' : 'Download'} {readyFormats.length > 1 ? `semua (${readyFormats.length})` : 'PNG'}
+          </button>
         {/if}
       </div>
     </div>

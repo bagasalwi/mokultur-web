@@ -63,7 +63,7 @@ const CF23Render = (function () {
   var DEG = Math.PI / 180;
 
   // ---------- Kredit Mokultur (logo kecil + URL halaman) ----------
-  var BRAND = { logo: null, url: 'mokultur.com/comifuro23' };
+  var BRAND = { logo: null, url: 'mokultur.com/comifuro23', credit: 'Theme inspired by Comifuro 23 KV by THEALAGATOR' };
 
   /** Muat logo dari domain yang sama, supaya canvas tidak "tainted" dan download tetap jalan. */
   function loadBrand(src) {
@@ -92,7 +92,16 @@ const CF23Render = (function () {
     ctx.fillStyle = o.fill;
     ctx.textAlign = o.align === 'right' ? 'right' : 'center';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillText(BRAND.url, x, top + (BRAND.logo ? logoH + o.gap : 0) + o.size * 0.8);
+    var urlBase = top + (BRAND.logo ? logoH + o.gap : 0) + o.size * 0.8;
+    ctx.fillText(BRAND.url, x, urlBase);
+    // Credit for the key visual the theme is drawn from, under the URL.
+    if (o.creditSize) {
+      setFont(ctx, '600', o.creditSize, BODY);
+      setSpacing(ctx, 0.2);
+      ctx.globalAlpha = 0.72;
+      ctx.fillStyle = COLORS.cream;
+      ctx.fillText(BRAND.credit, x, urlBase + o.creditSize * 1.35);
+    }
     ctx.restore();
   }
 
@@ -467,13 +476,13 @@ const CF23Render = (function () {
     if (parts) richLine(ctx, parts, P, data.username == null ? 1256 : 1284, { size: 26, fill: c.cream, maxWidth: leftMax });
 
     pill(ctx, {
-      x: 1024, y: 1148, anchor: 'right', height: 50, padL: 12, padR: 18, text: EVENT.venue,
+      x: 1024, y: 1136, anchor: 'right', height: 50, padL: 12, padR: 18, text: EVENT.venue,
       weight: '800', size: 24, bg: c.plum, border: c.cream, borderWidth: 4, color: c.cream,
       icon: PIN, iconSize: 28, iconColor: c.orange, nudge: 2
     });
-    plain(ctx, EVENT.venueFull, 1024, 1232, { size: 20, weight: '700', fill: c.peach, align: 'right' });
-    plain(ctx, EVENT.hashtags, 1024, 1266, { size: 22, weight: '800', fill: c.cream, align: 'right', letterSpacing: 1 });
-    brandMark(ctx, 1024, 1280, { size: 18, logoHeight: 30, gap: 4, fill: c.peach, align: 'right' });
+    plain(ctx, EVENT.venueFull, 1024, 1216, { size: 20, weight: '700', fill: c.peach, align: 'right' });
+    plain(ctx, EVENT.hashtags, 1024, 1248, { size: 22, weight: '800', fill: c.cream, align: 'right', letterSpacing: 1 });
+    brandMark(ctx, 1024, 1260, { size: 17, logoHeight: 28, gap: 4, fill: c.peach, align: 'right', creditSize: 13 });
 
     return [slot];
   }
@@ -552,7 +561,7 @@ const CF23Render = (function () {
     var user = data.username == null ? null : field(cleanHandle(data.username) ? '@' + cleanHandle(data.username) : '', '@[username]', hints);
     if (user) plain(ctx, user.text, 540, 1668, { size: 36, weight: '800', fill: c.peach, align: 'center', maxWidth: 940, alpha: user.alpha });
     plain(ctx, EVENT.hashtags, 540, 1704, { size: 24, weight: '800', fill: c.cream, align: 'center', letterSpacing: 1 });
-    brandMark(ctx, 540, 1760, { size: 26, logoHeight: 56, gap: 8, fill: c.peach, align: 'center' });
+    brandMark(ctx, 540, 1744, { size: 26, logoHeight: 56, gap: 8, fill: c.peach, align: 'center', creditSize: 19 });
 
     return slots;
   }
