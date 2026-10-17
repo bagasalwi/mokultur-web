@@ -13,9 +13,10 @@ declare const CF23Render: {
   ACCENTS: { name: string; value: string }[];
   DEFAULT_ACCENT: Record<1 | 2, string>;
   BRAND: { logo: HTMLImageElement | null; url: string };
-  render(ctx: CanvasRenderingContext2D, templateId: TemplateId, data: CardData, options?: { hints?: boolean }): { slots: Slot[] };
+  /** `blank`: no name, character or series, and transparent photo windows. */
+  render(ctx: CanvasRenderingContext2D, templateId: TemplateId, data: CardData, options?: { hints?: boolean; blank?: boolean }): { slots: Slot[] };
   loadFonts(): Promise<void>;
   loadBrand(src: string): Promise<void>;
-  toBlob(templateId: TemplateId, data: CardData, type?: string): Promise<Blob>;
+  toBlob(templateId: TemplateId, data: CardData, type?: string, options?: { blank?: boolean }): Promise<Blob>;
 };
 export default CF23Render;

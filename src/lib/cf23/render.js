@@ -62,6 +62,9 @@ const CF23Render = (function () {
 
   var DEG = Math.PI / 180;
 
+  /** Set for one render() call: a blank template whose photo windows are cut out to transparency. */
+  var BLANK = false;
+
   // ---------- Kredit Mokultur (logo kecil + URL halaman) ----------
   var BRAND = { logo: null, url: 'mokultur.com/comifuro23', credit: 'Theme inspired by Comifuro 23 KV by THEALAGATOR' };
 
@@ -393,11 +396,12 @@ const CF23Render = (function () {
     ctx.save();
     rr(ctx, ix, iy, iw, ih, f.innerRadius);
     ctx.clip();
-    if (photo && photo.image) range = drawCover(ctx, photo, ix, iy, iw, ih);
+    if (BLANK) ctx.clearRect(ix - 1, iy - 1, iw + 2, ih + 2);
+    else if (photo && photo.image) range = drawCover(ctx, photo, ix, iy, iw, ih);
     else drawPlaceholder(ctx, ix, iy, iw, ih, placeholder);
     ctx.restore();
 
-    if (!(photo && photo.image)) {
+    if (!BLANK && !(photo && photo.image)) {
       ctx.save();
       rr(ctx, ix + 2, iy + 2, iw - 4, ih - 4, f.innerRadius - 2);
       ctx.setLineDash([16, 12]);
@@ -579,12 +583,26 @@ const CF23Render = (function () {
     var hints = !!(options && options.hints);
     data = data || {};
     data.days = data.days || {};
+    // blank: no name, character or series, and the photo windows left transparent,
+    // so the card can be laid over a photo in another editor.
+    BLANK = !!(options && options.blank);
+    if (BLANK) {
+      hints = false;
+      data = { name: '', username: null, days: {
+        1: { character: '', series: '', accent: (data.days[1] || {}).accent, photo: null },
+        2: { character: '', series: '', accent: (data.days[2] || {}).accent, photo: null }
+      } };
+    }
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     var slots;
-    if (templateId === 'story') slots = renderStory(ctx, data, hints);
-    else slots = renderFeed(ctx, templateId === 'day2' ? 2 : 1, data, hints);
-    ctx.restore();
+    try {
+      if (templateId === 'story') slots = renderStory(ctx, data, hints);
+      else slots = renderFeed(ctx, templateId === 'day2' ? 2 : 1, data, hints);
+    } finally {
+      BLANK = false;
+      ctx.restore();
+    }
     return { slots: slots };
   }
 
@@ -598,12 +616,12 @@ const CF23Render = (function () {
     ]).then(function () {}, function () {});
   }
 
-  function toBlob(templateId, data, type) {
+  function toBlob(templateId, data, type, options) {
     var t = TEMPLATES[templateId];
     var canvas = document.createElement('canvas');
     canvas.width = t.width;
     canvas.height = t.height;
-    render(canvas.getContext('2d'), templateId, data, { hints: false });
+    render(canvas.getContext('2d'), templateId, data, { hints: false, blank: !!(options && options.blank) });
     return new Promise(function (resolve, reject) {
       canvas.toBlob(function (b) { b ? resolve(b) : reject(new Error('Gagal membuat gambar')); }, type || 'image/png');
     });

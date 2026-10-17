@@ -343,6 +343,35 @@
     }
   }
 
+  /**
+   * The three templates without name, character, series or photo, with the
+   * photo windows transparent, for people who lay the card over a photo in
+   * their own editor. Needs no photo; uses the colours picked for each day.
+   */
+  let busyBlank = $state(false);
+  async function downloadBlank() {
+    if (busyBlank) return;
+    busyBlank = true;
+    setStatus('Menyiapkan template polosan…');
+    try {
+      const data = buildData('day1');
+      const files: File[] = [];
+      for (const id of ALL) {
+        const blob = await R.toBlob(id, data, 'image/png', { blank: true });
+        files.push(new File([blob], `cf23-cosplay-card-template-${id}.png`, { type: 'image/png' }));
+      }
+      for (const [index, file] of files.entries()) {
+        if (index) await new Promise((resolve) => setTimeout(resolve, 450));
+        saveFile(file);
+      }
+      setStatus('3 template polosan tersimpan. Area fotonya transparan.');
+    } catch {
+      setStatus('Template gagal dibuat. Coba lagi.', true);
+    } finally {
+      busyBlank = false;
+    }
+  }
+
   async function copyCaption() {
     try {
       await navigator.clipboard.writeText(caption);
@@ -552,6 +581,14 @@
         <button type="button" class="cf23-ghost cf23-ghost--cream" onclick={copyCaption}><i class="bi {copied ? 'bi-check2' : 'bi-clipboard'}" aria-hidden="true"></i>{copied ? 'Tersalin!' : 'Salin caption'}</button>
         <a class="cf23-ghost cf23-ghost--cream" href={instagram.url} target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram" aria-hidden="true"></i>Buka Instagram</a>
       </div>
+
+      <button type="button" class="cf23-blank" onclick={downloadBlank} disabled={busyBlank}>
+        <i class="bi bi-download" aria-hidden="true"></i>
+        <span>
+          <strong>Download template polosan (3 PNG)</strong>
+          <small>Tanpa nama, karakter, series & foto. Area foto transparan, tinggal taruh fotomu di bawahnya.</small>
+        </span>
+      </button>
     </section>
   </div>
 
@@ -1113,6 +1150,34 @@
       // Grows to fit the caption where supported, so nothing hides behind a scrollbar.
       field-sizing: content;
     }
+  }
+
+  .cf23-blank {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 60px;
+    margin-top: 1rem;
+    padding: 0.6rem 0.9rem;
+    border: 3px solid var(--cream);
+    border-radius: 16px;
+    background: transparent;
+    color: var(--cream);
+    text-align: left;
+    cursor: pointer;
+
+    i { font-size: 1.35rem; color: var(--orange); }
+
+    span { display: flex; flex-direction: column; min-width: 0; }
+
+    strong { font-size: 1rem; font-weight: 800; line-height: 1.25; }
+
+    small { color: var(--peach); font-size: 0.85rem; font-weight: 600; line-height: 1.35; }
+
+    &:hover { background: rgb(255 236 232 / 0.08); }
+    &:disabled { opacity: 0.55; cursor: progress; }
+    &:focus-visible { outline: 3px solid var(--pink); outline-offset: 2px; }
   }
 
   .cf23-post__actions {
