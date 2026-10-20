@@ -32,6 +32,9 @@
   $: seo = data.seo;
   $: siteName = data.settings?.site_name ?? "Mokultur";
   $: detailStyle = data.settings?.article_detail_style ?? "classic";
+  // A poster or book cover as the cover image: shown whole inside a landscape
+  // frame over a blurred copy of itself, instead of a card taller than the hero.
+  $: heroPortrait = Boolean(a?.imageWidth && a?.imageHeight && a.imageHeight > a.imageWidth * 1.05);
   $: readerState = data.readerState;
 
   // Like state
@@ -359,7 +362,11 @@
           {#if a.photoStory && a.photoStory.photos.length >= 2}
             <PhotoStoryHeader story={a.photoStory} onopen={(index) => storyViewer?.open(index)} />
           {:else}
-          <figure class="article-hero-figure mb-0">
+          <figure
+            class="article-hero-figure mb-0"
+            class:article-hero-figure--portrait={heroPortrait}
+            style={heroPortrait ? `--hero-backdrop: url("${imgUrl(a.image, 540) ?? a.image}")` : undefined}
+          >
             <img
               src={imgUrl(a.image, 1080) ?? a.image}
               srcset={imgSrcset(a.image, 540)}

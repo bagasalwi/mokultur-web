@@ -1209,6 +1209,56 @@ a {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
+/*
+ * A portrait cover (poster, book cover) shown at the column's full width ran
+ * taller than the whole hero. It now sits whole inside a landscape frame, over
+ * a blurred, darkened copy of itself, so the hero keeps its height and the
+ * poster is never cropped. Every detail style uses it; the frame takes the
+ * style's own radius and shadow.
+ */
+.article-hero-figure--portrait {
+    position: relative;
+    display: grid;
+    place-items: center;
+    --hero-pad: clamp(0.75rem, 2vw, 1.25rem);
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 16px;
+    background: #0d0d0d;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    isolation: isolate;
+
+    &::before {
+        content: "";
+        position: absolute;
+        inset: -12%;
+        z-index: -1;
+        background: var(--hero-backdrop) center / cover no-repeat;
+        filter: blur(28px) saturate(1.2) brightness(0.55);
+    }
+
+    // Absolutely placed against the frame's padding with auto margins: an image
+    // keeps its own proportions there and shrinks to fit, so the poster is
+    // always whole and centred. (height: 100% in the grid resolved against an
+    // indefinite height and let the poster overflow, cropped.)
+    .article-hero-img.w-100 {
+        position: absolute;
+        inset: var(--hero-pad);
+        width: auto !important;
+        height: auto;
+        max-width: calc(100% - 2 * var(--hero-pad));
+        max-height: calc(100% - 2 * var(--hero-pad));
+        margin: auto;
+        border-radius: 10px;
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+        transform: none;
+    }
+
+    @media (max-width: 575.98px) {
+        aspect-ratio: 1 / 1;
+    }
+}
+
 /* Size unknown to the gallery: reserve the usual 16:9 so the text does not jump. */
 .article-hero-img--unsized {
     aspect-ratio: 16 / 9;
@@ -4251,6 +4301,11 @@ input[readonly="readonly"] {
 .b-gambar {
     width: 100%;
     margin-top: 0.5em !important;
+    // A portrait image (poster, book cover) at full column width ran taller
+    // than the screen. The box keeps the column width and the image is fitted
+    // inside it, centred, so landscape images look exactly as before.
+    max-height: min(80vh, 44rem);
+    object-fit: contain;
 }
 
 .b-caption {
@@ -7605,8 +7660,24 @@ button.emoji-picker {
         transform: rotate(1.5deg);
     }
 
+    // The frame gets the tilt and the big radius; the poster inside stays straight.
+    .article-hero-figure--portrait {
+        border-radius: 36px;
+        box-shadow: 0 28px 90px rgba(0, 0, 0, 0.46);
+        transform: rotate(1.5deg);
+
+        .article-hero-img.w-100 {
+            border-radius: 14px;
+            transform: none;
+        }
+    }
+
     @media (max-width: 991px) {
         padding-top: 1.5rem;
+
+        .article-hero-figure--portrait {
+            transform: none;
+        }
 
         .article-detail__hero-row {
             min-height: auto;
@@ -7651,6 +7722,17 @@ button.emoji-picker {
         border-radius: 0;
         border: 10px solid rgba(255, 255, 255, 0.1);
         box-shadow: none;
+    }
+
+    .article-hero-figure--portrait {
+        border-radius: 0;
+        border: 10px solid rgba(255, 255, 255, 0.1);
+        box-shadow: none;
+
+        .article-hero-img.w-100 {
+            border: 0;
+            border-radius: 0;
+        }
     }
 
     + .container-xl + .article-detail__content-shell .article-detail__reader,
