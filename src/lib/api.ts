@@ -73,7 +73,11 @@ export interface ArticleSeo {
   description: string;
   canonical: string;
   robots: string;
-  og: { title: string; description: string; image: string | null; type: string; url: string };
+  og: {
+    title: string; description: string; image: string | null; type: string; url: string;
+    /** Set when the image is the API's share card, whose size is fixed. */
+    imageWidth?: number | null; imageHeight?: number | null; imageAlt?: string | null;
+  };
   twitter: { card: string; title: string; description: string; image: string | null };
 }
 

@@ -251,6 +251,11 @@
   <meta property="og:type" content={seo.og.type} />
   <meta property="og:url" content={seo.og.url} />
   {#if seo.og.image}<meta property="og:image" content={seo.og.image} />{/if}
+  {#if seo.og.image && seo.og.imageWidth && seo.og.imageHeight}
+    <meta property="og:image:width" content={String(seo.og.imageWidth)} />
+    <meta property="og:image:height" content={String(seo.og.imageHeight)} />
+  {/if}
+  {#if seo.og.image && seo.og.imageAlt}<meta property="og:image:alt" content={seo.og.imageAlt} />{/if}
   <meta name="twitter:card" content={seo.twitter.card} />
   <meta name="twitter:title" content={seo.twitter.title} />
   <meta name="twitter:description" content={seo.twitter.description} />
