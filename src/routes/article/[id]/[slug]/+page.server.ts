@@ -8,6 +8,16 @@ import type { ReaderArticleState } from '$lib/reader';
 
 const COOKIE = 'mokultur_token';
 
+/*
+ * /api/articles/:id/:slug shares its path with the API's other article routes,
+ * so a slug of "comments" (an old Laravel URL Google still crawls by the
+ * hundred) came back as a comment list, the page rendered an article with no
+ * title, and answered 500. These slugs are looked up under "-", which no route
+ * uses: the API 301s it to the article, and the slug check sends the reader to
+ * the real URL.
+ */
+const API_SUBROUTES = new Set(['comments', 'related', 'view', 'story.png', 'like', 'interactions']);
+
 export const load: PageServerLoad = async ({ params, request, setHeaders, url, locals, cookies, fetch }) => {
   const id = Number(params.id);
   if (!Number.isFinite(id) || id <= 0) throw error(404, 'Not found');
@@ -32,7 +42,7 @@ export const load: PageServerLoad = async ({ params, request, setHeaders, url, l
   let res;
   try {
     const [articleRes, tagsRes, articleAd1Res, articleAd2Res, articleAd3Res, curhatanRes, eventsRes] = await Promise.allSettled([
-      getArticle(id, params.slug, ifNoneMatch, previewToken),
+      getArticle(id, API_SUBROUTES.has(params.slug) ? '-' : params.slug, ifNoneMatch, previewToken),
       getPopularTags(15),
       getAd('article_ad_1', preview),
       getAd('article_ad_2', preview),
@@ -48,6 +58,11 @@ export const load: PageServerLoad = async ({ params, request, setHeaders, url, l
     }
 
     res = articleRes.value;
+
+    // A route added to the API later would collide the same way; same answer.
+    if (typeof (res.data as { id?: unknown } | undefined)?.id !== 'number') {
+      res = await getArticle(id, '-', ifNoneMatch, previewToken);
+    }
 
     // fetch() follows the API's own 301, so a stale slug shows up as a slug mismatch, not as `redirect`.
     if ((res as any).redirect || (res.data?.slug && res.data.slug !== params.slug)) {
