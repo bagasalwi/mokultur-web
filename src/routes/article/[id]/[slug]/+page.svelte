@@ -239,6 +239,11 @@
     a.updatedAt && a.publishDate && new Date(a.updatedAt).getTime() - new Date(a.publishDate).getTime() > 3_600_000
       ? formatDate(a.updatedAt)
       : "";
+  // A scheduled article is often last saved before it goes out; the modified
+  // time must not precede the published one (same rule as the API's JSON-LD).
+  $: modifiedIso = a.updatedAt
+    ? new Date(Math.max(new Date(a.updatedAt).getTime(), a.publishDate ? new Date(a.publishDate).getTime() : 0)).toISOString()
+    : null;
 </script>
 
 <svelte:head>
@@ -267,9 +272,9 @@
       property="article:published_time"
       content={new Date(a.publishDate).toISOString()}
     />{/if}
-  {#if a.updatedAt}<meta
+  {#if modifiedIso}<meta
       property="article:modified_time"
-      content={new Date(a.updatedAt).toISOString()}
+      content={modifiedIso}
     />{/if}
   {#if a.category}<meta
       property="article:section"
