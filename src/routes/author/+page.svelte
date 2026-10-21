@@ -3,6 +3,7 @@
   import type { Writer } from '$lib/api';
   import Pagination from '$components/common/Pagination.svelte';
   import { absoluteUrl, buildBreadcrumb } from '$lib/seo';
+  import { paginationPath } from '$lib/pagination';
   import { compactNumber, imgFallback, timeAgo } from '$lib/format';
   import { imgSrcset, imgUrl } from '$lib/img';
   import { initials } from '$lib/user';
@@ -36,7 +37,7 @@
   <title>Penulis - {siteName}</title>
   <meta name="description" content={description} />
   <meta name="robots" content={data.sort === 'views' ? 'noindex, follow' : 'index, follow'} />
-  <link rel="canonical" href={absoluteUrl('/author')} />
+  <link rel="canonical" href={absoluteUrl(paginationPath('/author', data.sort === 'views' ? 1 : data.page))} />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Orang-orang di balik {siteName}" />
   <meta property="og:description" content={description} />

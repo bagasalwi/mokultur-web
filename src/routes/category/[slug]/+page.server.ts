@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { getCategoryArticles, getPopularArticles, type ArticleListItem, type ArticleSort, type PopularRange } from '$lib/api';
 import { error, isHttpError } from '@sveltejs/kit';
-import { pageNumber, paginationTotal } from '$lib/pagination';
+import { listingPage, paginationTotal } from '$lib/pagination';
 import { COOKIE_NAME } from '$lib/auth';
 import { loadReader } from '$lib/server/reader';
 import { interestForCategory, type ReaderInterest } from '$lib/reader';
@@ -22,8 +22,7 @@ async function popularIn(slug: string): Promise<{ ranges: Record<PopularRange, A
 }
 
 export const load: PageServerLoad = async ({ params, url, setHeaders, locals, cookies, fetch }) => {
-  const page = pageNumber(url.searchParams.get('page'));
-  if (page === null) error(404, 'Halaman tidak ditemukan');
+  const page = listingPage(url);
   const search = url.searchParams.get('search')?.trim() || undefined;
   const sort: ArticleSort = url.searchParams.get('sort') === 'popular' ? 'popular' : 'latest';
   if (!search) {

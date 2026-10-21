@@ -1,13 +1,14 @@
 import type { PageServerLoad } from './$types';
 import { listWriters, type Writer } from '$lib/api';
-import { pageNumber } from '$lib/pagination';
+import { error } from '@sveltejs/kit';
+import { listingPage } from '$lib/pagination';
 
 type WriterSort = 'active' | 'views';
 
 const time = (d: string | null) => (d ? Date.parse(d.includes('T') ? d : `${d.replace(' ', 'T')}Z`) || 0 : 0);
 
 export const load: PageServerLoad = async ({ url, setHeaders }) => {
-  const page = pageNumber(url.searchParams.get('page')) ?? 1;
+  const page = listingPage(url);
   const sort: WriterSort = url.searchParams.get('sort') === 'views' ? 'views' : 'active';
   setHeaders({ 'cache-control': 'public, max-age=300, stale-while-revalidate=900' });
   // The whole roster fits on one page; paging only kicks in past 50 writers.
@@ -15,5 +16,6 @@ export const load: PageServerLoad = async ({ url, setHeaders }) => {
   const writers = [...res.data].sort((a, b) =>
     sort === 'views' ? b.totalViews - a.totalViews : time(b.latestPublishDate) - time(a.latestPublishDate),
   );
+  if (page > 1 && page > res.meta.totalPages) error(404, 'Halaman tidak ditemukan');
   return { writers, meta: res.meta, page, sort };
 };

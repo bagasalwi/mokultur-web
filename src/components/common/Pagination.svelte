@@ -19,10 +19,16 @@
 {#if totalPages > 1}
   <nav aria-label="Navigasi halaman" class="my-4">
     <ul class="pagination pagination-dark justify-content-center">
+      <!-- An arrow with nowhere to go is not a link: crawlers followed the
+           disabled ones to ?page=0 and to the page after the last. -->
       <li class="page-item {currentPage <= 1 ? 'disabled' : ''}">
-        <a class="page-link" href={buildUrl(currentPage - 1)} aria-label="Sebelumnya">
-          <i class="bi bi-chevron-left"></i>
-        </a>
+        {#if currentPage > 1}
+          <a class="page-link" href={buildUrl(currentPage - 1)} rel="prev" aria-label="Sebelumnya">
+            <i class="bi bi-chevron-left"></i>
+          </a>
+        {:else}
+          <span class="page-link" aria-hidden="true"><i class="bi bi-chevron-left"></i></span>
+        {/if}
       </li>
 
       {#each pages as p}
@@ -30,15 +36,19 @@
           <li class="page-item disabled"><span class="page-link">…</span></li>
         {:else}
           <li class="page-item {p === currentPage ? 'active' : ''}">
-            <a class="page-link" href={buildUrl(p)}>{p}</a>
+            <a class="page-link" href={buildUrl(p)} aria-current={p === currentPage ? 'page' : undefined}>{p}</a>
           </li>
         {/if}
       {/each}
 
       <li class="page-item {currentPage >= totalPages ? 'disabled' : ''}">
-        <a class="page-link" href={buildUrl(currentPage + 1)} aria-label="Berikutnya">
-          <i class="bi bi-chevron-right"></i>
-        </a>
+        {#if currentPage < totalPages}
+          <a class="page-link" href={buildUrl(currentPage + 1)} rel="next" aria-label="Berikutnya">
+            <i class="bi bi-chevron-right"></i>
+          </a>
+        {:else}
+          <span class="page-link" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
+        {/if}
       </li>
     </ul>
   </nav>

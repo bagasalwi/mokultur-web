@@ -1,11 +1,10 @@
 import type { PageServerLoad } from './$types';
 import { getTagArticles, getPopularArticles } from '$lib/api';
 import { error, isHttpError, redirect } from '@sveltejs/kit';
-import { pageNumber, paginationTotal } from '$lib/pagination';
+import { listingPage, paginationTotal } from '$lib/pagination';
 
 export const load: PageServerLoad = async ({ params, url, setHeaders }) => {
-  const page = pageNumber(url.searchParams.get('page'));
-  if (page === null) error(404, 'Halaman tidak ditemukan');
+  const page = listingPage(url);
   setHeaders({ 'cache-control': 'public, max-age=60, stale-while-revalidate=300' });
 
   let tagRes: Awaited<ReturnType<typeof getTagArticles>>;

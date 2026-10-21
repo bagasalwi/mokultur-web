@@ -1,7 +1,7 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { getAd, getMediaPartners, listArticles } from '$lib/api';
-import { pageNumber } from '$lib/pagination';
+import { listingPage } from '$lib/pagination';
 
 const PER_PAGE = 20;
 
@@ -14,8 +14,8 @@ export const load: PageServerLoad = async ({ url, setHeaders }) => {
     if (category) target.set('category', category);
     redirect(301, `/search?${target}`);
   }
-  const page = pageNumber(url.searchParams.get('page'));
-  if (page === null || page > 1000) error(404, 'Halaman tidak ditemukan');
+  const page = listingPage(url);
+  if (page > 1000) error(404, 'Halaman tidak ditemukan');
   const reviewOnly = url.searchParams.get('reviewOnly') === 'true';
   const preview = url.searchParams.get('preview_ads') === 'true';
 
