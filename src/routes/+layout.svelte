@@ -142,11 +142,8 @@
     // Helps Google settle on a single site name in search results.
     alternateName: 'Mokultur ID',
     url: origin,
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: `${origin}/search?q={search_term_string}`,
-      'query-input': 'required name=search_term_string',
-    },
+    // No SearchAction: Google retired the sitelinks search box in 2024, and the
+    // old index-article?search= target was the last thing still feeding it.
   });
 </script>
 
