@@ -20,6 +20,8 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
     };
   } catch (e: any) {
     if (isRedirect(e) || isHttpError(e)) throw e;
+    // Deleted or hidden by moderation: gone for good, so Google drops it sooner.
+    if (e?.status === 410) throw error(410, 'Curhatan ini sudah dihapus');
     if (e?.status === 404) throw error(404, 'Curhatan tidak ditemukan');
     throw error(500, 'Server error');
   }
