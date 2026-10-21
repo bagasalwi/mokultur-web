@@ -2,14 +2,39 @@
   import type { PageData } from './$types';
   import { PUBLIC_API_URL } from '$env/static/public';
   import CurhatCard from '$components/curhatan/CurhatCard.svelte';
+  import { absoluteUrl, buildBreadcrumb } from '$lib/seo';
+  import { curhatExcerpt, curhatPath } from '$lib/curhat';
 
   export let data: PageData;
 
   $: c = data.curhatan;
   $: siteName = data.settings?.site_name ?? 'Mokultur';
-  $: slug = c.curhatan.substring(0, 60).toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+$/, '');
-  $: canonicalUrl = `${PUBLIC_API_URL}/curhat-${c.id}/${slug}`;
-  $: metaDesc = c.curhatan.substring(0, 157) + (c.curhatan.length > 157 ? '…' : '');
+  // The site's own host: PUBLIC_API_URL here sent Google to api.mokultur.com,
+  // which is disallowed in its robots.txt and redirects back.
+  $: canonicalUrl = absoluteUrl(curhatPath(c));
+  $: metaDesc = curhatExcerpt(c.curhatan, 158);
+  // Every post used to share "Curhatan <name>"; the text itself is what tells them apart.
+  $: pageTitle = `"${curhatExcerpt(c.curhatan, 60)}" — Curhatan ${c.curhatanDari}`;
+  $: jsonLd = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'SocialMediaPosting',
+      '@id': canonicalUrl,
+      url: canonicalUrl,
+      mainEntityOfPage: canonicalUrl,
+      headline: curhatExcerpt(c.curhatan, 110),
+      text: c.curhatan,
+      ...(c.createdAt ? { datePublished: c.createdAt } : {}),
+      ...(c.gambar ? { image: c.gambar } : {}),
+      author: { '@type': 'Person', name: c.curhatanDari },
+      isPartOf: { '@type': 'WebPage', '@id': absoluteUrl('/curhatan'), name: 'Curhatan' },
+      interactionStatistic: [
+        { '@type': 'InteractionCounter', interactionType: 'https://schema.org/LikeAction', userInteractionCount: c.like ?? 0 },
+        { '@type': 'InteractionCounter', interactionType: 'https://schema.org/ViewAction', userInteractionCount: c.view ?? 0 },
+      ],
+    },
+    buildBreadcrumb([{ name: 'Curhatan', path: '/curhatan' }, { name: curhatExcerpt(c.curhatan, 60), path: curhatPath(c) }]),
+  ];
 
   // — Upvote —
   let likes = data.curhatan.like ?? 0;
@@ -274,12 +299,12 @@
 </script>
 
 <svelte:head>
-  <title>Curhatan {c.curhatanDari} — {siteName}</title>
+  <title>{pageTitle} - {siteName}</title>
   <meta name="description" content={metaDesc} />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href={canonicalUrl} />
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="Curhatan {c.curhatanDari} — {siteName}" />
+  <meta property="og:title" content={pageTitle} />
   <meta property="og:description" content={metaDesc} />
   <meta property="og:url" content={canonicalUrl} />
   {#if c.gambar}
@@ -287,8 +312,9 @@
     <meta name="twitter:image" content={c.gambar} />
   {/if}
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Curhatan {c.curhatanDari} — {siteName}" />
+  <meta name="twitter:title" content={pageTitle} />
   <meta name="twitter:description" content={metaDesc} />
+  {@html `<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}<\/script>`}
 </svelte:head>
 
 <section class="section-md container-xl">
@@ -309,7 +335,7 @@
         {/if}
 
         <span class="curhat-detail-hero__quote" aria-hidden="true">&ldquo;</span>
-        <p class="curhat-detail-hero__text">{c.curhatan}</p>
+        <h1 class="curhat-detail-hero__text">{c.curhatan}</h1>
 
         <div class="home-collab-card__chips mt-3">
           {#if c.userId}

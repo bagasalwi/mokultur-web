@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { CurhatanItem } from '$lib/api';
   import { upvoteCurhatan } from '$lib/api';
+  import { curhatPath } from '$lib/curhat';
 
   export let item: CurhatanItem;
   export let excerptLimit = 240;
@@ -9,7 +10,6 @@
   let likes = item.like;
   let voted = false;
 
-  $: slug = item.curhatan.substring(0, 60).toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+$/, '');
   $: excerpt = item.curhatan.length > excerptLimit ? item.curhatan.substring(0, excerptLimit) + '…' : item.curhatan;
   $: firstChar = item.curhatanDari ? item.curhatanDari[0].toUpperCase() : '?';
 
@@ -28,7 +28,7 @@
   }
 </script>
 
-<a href="/curhat-{item.id}/{slug}" class="curhat-card-link d-block text-decoration-none">
+<a href={curhatPath(item)} class="curhat-card-link d-block text-decoration-none">
   <article class="curhat-card" style="--curhat-card-bg: {item.cardColor};">
     {#if item.gambar}
       <div class="curhat-card__media">
