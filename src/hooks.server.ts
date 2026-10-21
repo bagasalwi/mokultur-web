@@ -10,8 +10,11 @@ const SECRET_BYTES = new TextEncoder().encode(env.JWT_SECRET ?? '');
 export const handle: Handle = async ({ event, resolve }) => {
   if (!LOUNGE_ENABLED) {
     const path = event.url.pathname;
+    // Permanent: the Lounge is switched off, and a 302 kept /lounge in Search
+    // Console's "Page with redirect" (and once as a 5xx) instead of letting
+    // Google drop it. Flip LOUNGE_ENABLED and these URLs are live again.
     if (path === '/lounge' || path.startsWith('/lounge/') || path === '/forum' || path.startsWith('/forum/')) {
-      throw redirect(302, '/');
+      throw redirect(301, '/');
     }
   }
 
