@@ -14,6 +14,21 @@ export function safeNext(value: string | null | undefined, fallback = '/dashboar
   return value;
 }
 
+/**
+ * The page a visitor came from, when it is on this site. Sign-in links no
+ * longer carry ?redirect= (see AuthModal), so without JS this is how the
+ * login page knows where to send the reader back to.
+ */
+export function refererPath(request: Request, origin: string): string | null {
+  try {
+    const from = new URL(request.headers.get('referer') ?? '');
+    if (from.origin !== origin || from.pathname.startsWith('/auth/')) return null;
+    return `${from.pathname}${from.search}`;
+  } catch {
+    return null;
+  }
+}
+
 /** Pages a signed-out visitor cannot see, so the modal opens over the homepage instead. */
 const PRIVATE = /^\/(dashboard|artikel-tersimpan|untuk-kamu)(?:[/?#]|$)/;
 

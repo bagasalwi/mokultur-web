@@ -648,7 +648,7 @@
         {:else}
           <div class="article-comments__login">
             <span class="article-comments__empty">Masuk untuk menulis komentar.</span>
-            <a href="/auth/login?redirect=/article/{a.id}/{a.slug}#komentar" class="theme-btn theme-btn--dark theme-btn--sm">
+            <a href="/auth/login" rel="nofollow" data-auth-redirect="/article/{a.id}/{a.slug}#komentar" class="theme-btn theme-btn--dark theme-btn--sm">
               Masuk
             </a>
           </div>

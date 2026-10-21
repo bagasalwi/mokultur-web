@@ -445,7 +445,7 @@
         {/if}
       </div>
     {:else}
-      <a class="navbar-login-btn {authClass}" href="/auth/login" aria-label="Masuk">
+      <a class="navbar-login-btn {authClass}" href="/auth/login" rel="nofollow" aria-label="Masuk">
         <i class="bi bi-box-arrow-in-right"></i>
         <span>Masuk</span>
       </a>
@@ -633,8 +633,8 @@
         {:else}
           <p>{LOUNGE_ENABLED ? 'Masuk untuk ikut Culture Lounge, menyimpan artikel, dan dapat rekomendasi.' : 'Masuk untuk menyimpan artikel dan dapat rekomendasi Untuk Kamu.'}</p>
           <div class="sheet__cta">
-            <a href={LOUNGE_ENABLED ? '/auth/login?redirect=/lounge' : '/auth/login'} class="sheet__btn sheet__btn--primary" on:click={closeMenu}><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> Masuk</a>
-            <a href="/auth/register" class="sheet__btn sheet__btn--ghost" on:click={closeMenu}>Daftar</a>
+            <a href="/auth/login" rel="nofollow" data-auth-redirect={LOUNGE_ENABLED ? '/lounge' : undefined} class="sheet__btn sheet__btn--primary" on:click={closeMenu}><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> Masuk</a>
+            <a href="/auth/register" rel="nofollow" class="sheet__btn sheet__btn--ghost" on:click={closeMenu}>Daftar</a>
           </div>
         {/if}
       </div>

@@ -191,7 +191,7 @@
       {:else}
         <div class="mt-mobile-profile mt-mobile-profile--guest">
           <span>Masuk untuk ikut ngobrol di Culture Lounge.</span>
-          <a href="/auth/login?redirect=/lounge" class="mt-btn mt-btn--primary">Masuk</a>
+          <a href="/auth/login" rel="nofollow" data-auth-redirect="/lounge" class="mt-btn mt-btn--primary">Masuk</a>
         </div>
       {/if}
 
@@ -292,7 +292,7 @@
         <div class="mt-empty">
           <i class="bi bi-chat-square-dots"></i>
           <p>Belum ada thread.</p>
-          {#if !me}<a class="mt-btn mt-btn--primary" href="/auth/login?redirect=/lounge">Masuk untuk posting</a>{/if}
+          {#if !me}<a class="mt-btn mt-btn--primary" href="/auth/login" rel="nofollow" data-auth-redirect="/lounge">Masuk untuk posting</a>{/if}
         </div>
       {:else}
         <ul class="mt-feed">
@@ -354,7 +354,7 @@
                     </button>
                   </form>
                 {:else}
-                  <a class="mt-act" href="/auth/login?redirect=/lounge" aria-label="Suka"><i class="bi bi-heart"></i> {likeOf(t).count}</a>
+                  <a class="mt-act" href="/auth/login" rel="nofollow" data-auth-redirect="/lounge" aria-label="Suka"><i class="bi bi-heart"></i> {likeOf(t).count}</a>
                 {/if}
                 <ShareMenu url={`${origin}${threadUrl(t)}`} title={`Culture Lounge · ${siteName}`} compact />
                 <span class="mt-act mt-act--view"><i class="bi bi-eye"></i> {t.viewCount}</span>
@@ -391,8 +391,8 @@
           <h3 class="mt-side-card__title">Gabung diskusi</h3>
           <p class="mt-side-card__hint">Masuk untuk posting, balas thread & share post.</p>
           <div class="mt-side-card__cta">
-            <a href="/auth/login?redirect=/lounge" class="mt-btn mt-btn--primary mt-btn--block">Masuk</a>
-            <a href="/auth/register" class="mt-btn mt-btn--ghost mt-btn--block">Daftar</a>
+            <a href="/auth/login" rel="nofollow" data-auth-redirect="/lounge" class="mt-btn mt-btn--primary mt-btn--block">Masuk</a>
+            <a href="/auth/register" rel="nofollow" class="mt-btn mt-btn--ghost mt-btn--block">Daftar</a>
           </div>
         {/if}
       </div>
@@ -427,8 +427,8 @@
     <p class="mt-join-popup__title"><i class="bi bi-stars"></i> Culture Lounge</p>
     <p class="mt-join-popup__body">Masuk untuk ikut ngobrol, post, dan balas thread.</p>
     <div class="mt-join-popup__cta">
-      <a href="/auth/login?redirect=/lounge" class="mt-btn mt-btn--primary">Masuk</a>
-      <a href="/auth/register" class="mt-btn mt-btn--ghost">Daftar</a>
+      <a href="/auth/login" rel="nofollow" data-auth-redirect="/lounge" class="mt-btn mt-btn--primary">Masuk</a>
+      <a href="/auth/register" rel="nofollow" class="mt-btn mt-btn--ghost">Daftar</a>
     </div>
   </div>
 {/if}

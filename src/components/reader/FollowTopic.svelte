@@ -47,7 +47,7 @@
       {busy ? 'Menyimpan…' : followed ? 'Diikuti' : 'Ikuti topik'}
     </button>
   {:else}
-    <a class="theme-btn theme-btn--primary theme-btn--sm" href="/auth/login?redirect={encodeURIComponent(returnTo)}">
+    <a class="theme-btn theme-btn--primary theme-btn--sm" href="/auth/login" rel="nofollow" data-auth-redirect={returnTo}>
       <i class="bi bi-plus-lg" aria-hidden="true"></i> Ikuti topik
     </a>
   {/if}

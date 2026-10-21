@@ -131,7 +131,7 @@
               </button>
             </form>
           {:else}
-            <a class="mt-stat mt-stat--btn" href="/auth/login?redirect=/lounge/@{handle}/{thread.id}" aria-label="Suka">
+            <a class="mt-stat mt-stat--btn" href="/auth/login" rel="nofollow" data-auth-redirect="/lounge/@{handle}/{thread.id}" aria-label="Suka">
               <i class="bi bi-heart"></i> {likeCount}
             </a>
           {/if}
@@ -278,7 +278,7 @@
       </form>
     {:else}
       <div class="mt-reply-cta">
-        <p>Mau ikut diskusi? <a href="/auth/login?redirect=/lounge/@{handle}/{thread.id}">Masuk dulu</a> ya.</p>
+        <p>Mau ikut diskusi? <a href="/auth/login" rel="nofollow" data-auth-redirect="/lounge/@{handle}/{thread.id}">Masuk dulu</a> ya.</p>
       </div>
     {/if}
   </div>

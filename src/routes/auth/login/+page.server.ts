@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import { PUBLIC_API_URL } from '$env/static/public';
 import { setSessionCookie } from '$lib/auth';
-import { authFail, modalUrl, safeNext } from '$lib/server/auth-flow';
+import { authFail, modalUrl, refererPath, safeNext } from '$lib/server/auth-flow';
 import type { Actions, PageServerLoad } from './$types';
 
 /**
@@ -9,8 +9,8 @@ import type { Actions, PageServerLoad } from './$types';
  * A visit here (old links, server redirects from private pages) is forwarded
  * to the page the reader wanted, with the modal open over it.
  */
-export const load: PageServerLoad = ({ locals, url }) => {
-  const next = safeNext(url.searchParams.get('redirect'));
+export const load: PageServerLoad = ({ locals, url, request }) => {
+  const next = safeNext(url.searchParams.get('redirect') ?? refererPath(request, url.origin));
   if (locals.user) throw redirect(303, next);
   throw redirect(303, modalUrl(url.origin, 'login', next));
 };

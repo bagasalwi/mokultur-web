@@ -27,7 +27,7 @@
             <h2 id="home-pick-heading" class="home-pick__title">{siteName}'s <mark>Pick</mark></h2>
             <p class="home-pick__sub">{sub}</p>
           </div>
-          <a href={loggedIn ? '/dashboard' : '/auth/login?redirect=/dashboard'} class="home-pick__cta theme-btn theme-btn--primary theme-btn--sm">
+          <a href={loggedIn ? '/dashboard' : '/auth/login'} rel={loggedIn ? undefined : 'nofollow'} data-auth-redirect={loggedIn ? undefined : '/dashboard'} class="home-pick__cta theme-btn theme-btn--primary theme-btn--sm">
             {loggedIn && interests.length ? 'Lihat semua pilihan' : 'Pilih minat'}
             <i class="bi bi-arrow-right" aria-hidden="true"></i>
           </a>

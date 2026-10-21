@@ -68,6 +68,11 @@
    * Every "Masuk"/"Daftar" link on the site still points at /auth/login or
    * /auth/register (and still works without JS). With JS we open the modal in
    * place instead of navigating away.
+   *
+   * The page to return to rides in data-auth-redirect, not in the href: as
+   * ?redirect=/article/… every article minted its own login URL, and Search
+   * Console listed 161 of them. The href stays one static, nofollow URL; the
+   * login page falls back to the Referer for visitors without JS.
    */
   function intercept(event: MouseEvent) {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -78,7 +83,7 @@
     const target = url.pathname.replace(/\/$/, '');
     if (target !== '/auth/login' && target !== '/auth/register') return;
     event.preventDefault();
-    openAuth(target === '/auth/register' ? 'register' : 'login', url.searchParams.get('redirect'));
+    openAuth(target === '/auth/register' ? 'register' : 'login', link.dataset.authRedirect ?? url.searchParams.get('redirect'));
   }
 
   /** `?auth=login|register` (from a server redirect or a shared link) opens the modal, then leaves the URL. */

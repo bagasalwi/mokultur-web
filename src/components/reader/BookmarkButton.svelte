@@ -40,11 +40,11 @@
       {#if label}<span class="reader-save__label">{busy ? 'Menyimpan…' : saved ? 'Tersimpan' : 'Simpan'}</span>{/if}
     </button>
   {:else}
-    <a class="{baseClass} {className}" href="/auth/login?redirect={encodeURIComponent(returnTo)}" aria-label="Masuk untuk menyimpan artikel">
+    <a class="{baseClass} {className}" href="/auth/login" rel="nofollow" data-auth-redirect={returnTo} aria-label="Masuk untuk menyimpan artikel">
       <i class="bi bi-bookmark" aria-hidden="true"></i>{#if label}<span class="reader-save__label">Simpan</span>{/if}
     </a>
   {/if}
-  {#if error}<span class="reader-error" role="alert">{error} {#if error.includes('Sesi')}<a href="/auth/login?redirect={encodeURIComponent(returnTo)}">Masuk</a>{/if}</span>{/if}
+  {#if error}<span class="reader-error" role="alert">{error} {#if error.includes('Sesi')}<a href="/auth/login" rel="nofollow" data-auth-redirect={returnTo}>Masuk</a>{/if}</span>{/if}
 </span>
 
 <style>
