@@ -3,7 +3,7 @@
   import { CF23_PROMO_UNTIL } from '$lib/cf23/assets';
 
   /**
-   * Homepage card for the CF23 cosplay card generator. Typing a name redraws a
+   * Homepage card for the CF23 Cosplan Card generator. Typing a name redraws a
    * live miniature of the card (the real render engine, loaded only once the
    * card is near the screen); the form is a plain GET to /comifuro23, so it
    * works before any script has run. It retires itself a week after the event.
@@ -62,8 +62,8 @@
   <section class="cf23-promo" aria-labelledby="cf23-promo-title" bind:this={host} onpointermove={onTilt} onpointerleave={() => { tiltX = 0; tiltY = 0; }}>
     <div class="cf23-promo__copy">
       <span class="cf23-promo__event">CF23 · 31 Okt – 1 Nov</span>
-      <h2 id="cf23-promo-title">Bikin Cosplay Card CF23</h2>
-      <p>Foto Day 1 &amp; Day 2 jadi Cosplay Card siap posting untuk feed dan story. Tag @mokultur!</p>
+      <h2 id="cf23-promo-title">Bikin Cosplan Card CF23</h2>
+      <p>Umumkan cosplan Day 1 &amp; 2 kamu, siap posting di feed dan story. Tag @mokultur!</p>
     </div>
 
     <div class="cf23-promo__preview" style:transform={`perspective(600px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) rotate(3deg)`}>

@@ -7,7 +7,8 @@
   import { loadCf23Assets } from '$lib/cf23/assets';
 
   /**
-   * mokultur.com/comifuro23 — the CF23 cosplay card generator, ported from the
+   * mokultur.com/comifuro23 — the CF23 Cosplan Card generator (a cosplan is
+   * who you will cosplay on each day of the event), ported from the
    * supplied vanilla app.js. Everything happens in the browser: photos are read
    * with object URLs and drawn to a canvas, never uploaded.
    *
@@ -23,10 +24,10 @@
   let { data } = $props();
 
   const R = CF23Render;
-  const HASHTAGS = '#CF23 #Comifuro23 #Mokultur';
+  const HASHTAGS = '#CF23 #Comifuro23 #Cosplan #Mokultur';
   const ALL: TemplateId[] = ['day1', 'day2', 'story'];
-  const TITLE = 'Cosplay Card Comic Frontier 23 (CF23)';
-  const DESCRIPTION = 'Bikin Cosplay Card CF23 untuk feed dan story Instagram: upload foto Day 1 dan Day 2, isi nama dan karakter, lalu download PNG. Gratis, langsung di browser, foto tidak di-upload.';
+  const TITLE = 'Cosplan Card Comic Frontier 23 (CF23)';
+  const DESCRIPTION = 'Bikin Cosplan Card CF23: umumkan rencana cosplay Day 1 dan Day 2 di feed dan story Instagram. Upload foto, isi nama dan karakter, lalu download PNG. Gratis, langsung di browser, foto tidak di-upload.';
   /** `title`/`sub` are the two lines of the format switch; `label` is the full name used in messages. */
   const FORMATS: { id: TemplateId; label: string; title: string; sub: string }[] = [
     { id: 'day1', label: 'Feed Day 1', title: 'Day 1', sub: 'Feed · 4:5' },
@@ -77,7 +78,7 @@
     return { handle: link?.username ?? '@mokultur', url: link?.url ?? 'https://www.instagram.com/mokultur/' };
   });
 
-  /** A ready-to-paste caption from what the visitor typed. */
+  /** A ready-to-paste caption from what the visitor typed: the cosplan, one line per day. */
   const caption = $derived.by(() => {
     const who = (day: Day) => {
       const { character, series } = days[day];
@@ -85,14 +86,15 @@
       const t = series.trim();
       return c && t ? `${c} (${t})` : c || t;
     };
-    const looks = [who(1), who(2)].filter(Boolean);
-    const unique = [...new Set(looks)];
-    const opener = unique.length === 2
-      ? `Day 1 jadi ${unique[0]}, Day 2 jadi ${unique[1]} di Comic Frontier 23! ✨`
-      : unique.length === 1
-        ? `Cosplay ${unique[0]} di Comic Frontier 23! ✨`
-        : 'Cosplay di Comic Frontier 23! ✨';
-    return [opener, '', `📍 ICE BSD · 31 Okt – 1 Nov 2026`, `Bikin Cosplay Card-mu di mokultur.com/comifuro23`, '', `${instagram.handle} ${HASHTAGS}`].join('\n');
+    const [one, two] = [who(1), who(2)];
+    const plan = one && two && one === two
+      ? [`Day 1 & 2: ${one}`]
+      : [one && `Day 1: ${one}`, two && `Day 2: ${two}`].filter(Boolean);
+    return [
+      'Cosplan Comic Frontier 23 ✨', ...plan, '',
+      '📍 ICE BSD · 31 Okt – 1 Nov 2026', 'Sampai ketemu di CF23! Bikin Cosplan Card-mu di mokultur.com/comifuro23', '',
+      `${instagram.handle} ${HASHTAGS}`,
+    ].join('\n');
   });
   let copied = $state(false);
 
@@ -297,7 +299,7 @@
 
   function fileName(id: TemplateId): string {
     const slug = name.toLowerCase().replace(/^@+/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    return `cf23-cosplay-card-${id}${slug ? `-${slug}` : ''}.png`;
+    return `cf23-cosplan-card-${id}${slug ? `-${slug}` : ''}.png`;
   }
 
   async function makeFile(id: TemplateId = template): Promise<File> {
@@ -358,7 +360,7 @@
       const files: File[] = [];
       for (const id of ALL) {
         const blob = await R.toBlob(id, data, 'image/png', { blank: true });
-        files.push(new File([blob], `cf23-cosplay-card-template-${id}.png`, { type: 'image/png' }));
+        files.push(new File([blob], `cf23-cosplan-card-template-${id}.png`, { type: 'image/png' }));
       }
       for (const [index, file] of files.entries()) {
         if (index) await new Promise((resolve) => setTimeout(resolve, 450));
@@ -429,22 +431,22 @@
   <meta property="og:title" content={TITLE} />
   <meta property="og:description" content={DESCRIPTION} />
   <meta property="og:url" content={absoluteUrl('/comifuro23')} />
-  <meta property="og:image" content={absoluteUrl('/assets/og/comifuro23.jpg?v=5')} />
+  <meta property="og:image" content={absoluteUrl('/assets/og/comifuro23.jpg?v=6')} />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={TITLE} />
   <meta name="twitter:description" content={DESCRIPTION} />
-  <meta name="twitter:image" content={absoluteUrl('/assets/og/comifuro23.jpg?v=5')} />
+  <meta name="twitter:image" content={absoluteUrl('/assets/og/comifuro23.jpg?v=6')} />
   <meta name="theme-color" content="#3E0F3D" />
-  {@html `<script type="application/ld+json">${JSON.stringify(buildBreadcrumb([{ name: 'Cosplay Card CF23', path: '/comifuro23' }]))}<\/script>`}
+  {@html `<script type="application/ld+json">${JSON.stringify(buildBreadcrumb([{ name: 'Cosplan Card CF23', path: '/comifuro23' }]))}<\/script>`}
 </svelte:head>
 
 <div class="cf23">
   <header class="cf23-head container-xl">
-    <h1>Cosplay Card CF23</h1>
+    <h1>Cosplan Card CF23</h1>
     <p class="cf23-meta"><i class="bi bi-geo-alt-fill" aria-hidden="true"></i>Comic Frontier 23 · ICE BSD · 31 Okt – 1 Nov 2026</p>
-    <p class="cf23-lead">Upload foto cosplay-mu, isi nama dan karakter, lalu simpan untuk feed atau story. Fotonya tetap di HP-mu, tidak dikirim ke mana pun.</p>
+    <p class="cf23-lead">Umumkan cosplan-mu: mau jadi siapa di Day 1 dan Day 2. Upload foto cosplay atau costest-mu, isi nama dan karakter, lalu simpan untuk feed atau story. Fotonya tetap di HP-mu, tidak dikirim ke mana pun.</p>
   </header>
 
   <div class="cf23-layout container-xl">
@@ -556,11 +558,11 @@
     </form>
 
     <section class="cf23-post" aria-labelledby="cf23-post-title">
-      <h2 id="cf23-post-title">Posting <span class="cf23-nowrap">Cosplay Card-mu!</span></h2>
-      <p class="cf23-post__lead">Pamerin cosplay-mu di Instagram dan tag <a href={instagram.url} target="_blank" rel="noopener noreferrer">{instagram.handle}</a> biar kami bisa lihat. Pakai <strong>#CF23 #Comifuro23</strong> ya!</p>
+      <h2 id="cf23-post-title">Posting <span class="cf23-nowrap">Cosplan Card-mu!</span></h2>
+      <p class="cf23-post__lead">Umumkan cosplan-mu di Instagram sebelum hari-H dan tag <a href={instagram.url} target="_blank" rel="noopener noreferrer">{instagram.handle}</a> biar kami bisa lihat. Pakai <strong>#CF23 #Comifuro23</strong> ya!</p>
 
       <ol class="cf23-post__steps">
-        <li><span>1</span>Simpan Cosplay Card: semua format yang siap tersimpan sekaligus.</li>
+        <li><span>1</span>Simpan Cosplan Card: semua format yang siap tersimpan sekaligus.</li>
         <li><span>2</span>Posting Feed Day 1 / Day 2, dan Story Day 1 + 2 di Instagram.</li>
         <li><span>3</span>Tempel caption di bawah, lalu tag {instagram.handle}.</li>
       </ol>
@@ -592,7 +594,7 @@
     </section>
   </div>
 
-  <div class="cf23-actions" role="region" aria-label="Simpan Cosplay Card">
+  <div class="cf23-actions" role="region" aria-label="Simpan Cosplan Card">
     <div class="cf23-actions__inner container-xl">
       <p class="cf23-status" class:is-error={statusError} role="status" aria-live="polite">{status}</p>
       <div class="cf23-actions__buttons">

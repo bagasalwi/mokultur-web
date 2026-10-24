@@ -1,6 +1,6 @@
 // @ts-nocheck -- vendored render engine, typed by render.d.ts
 /*!
- * CF23 Cosplay Card — render engine
+ * CF23 Cosplan Card — render engine
  * Menggambar template Feed Day 1, Feed Day 2, dan Story Day 1 + 2 ke <canvas>.
  *
  * Ported from the supplied cf23-generator (UMD) to an ES module for
@@ -452,7 +452,7 @@ const CF23Render = (function () {
     });
 
     var base = 292;
-    var cw = outlined(ctx, 'COSPLAY', P, base, { size: 88, fill: c.cream, strokeWidth: 10, shadow: 7, letterSpacing: 2 });
+    var cw = outlined(ctx, 'COSPLAN', P, base, { size: 88, fill: c.cream, strokeWidth: 10, shadow: 7, letterSpacing: 2 });
     ctx.save();
     ctx.translate(P + cw + 28, base);
     ctx.rotate(-4 * DEG);
@@ -522,7 +522,7 @@ const CF23Render = (function () {
       x: 540, y: 190, anchor: 'center', height: 60, padL: 26, padR: 26, text: EVENT.name,
       family: DISPLAY, size: 30, letterSpacing: 2, bg: c.brown, border: c.cream, borderWidth: 4, color: c.cream, nudge: 1
     });
-    outlined(ctx, 'COSPLAY', 540, 382, { size: 136, fill: c.cream, strokeWidth: 14, shadow: 10, letterSpacing: 3, align: 'center' });
+    outlined(ctx, 'COSPLAN', 540, 382, { size: 136, fill: c.cream, strokeWidth: 14, shadow: 10, letterSpacing: 3, align: 'center' });
     pill(ctx, {
       x: 540, y: 410, anchor: 'center', height: 52, padL: 14, padR: 22, text: EVENT.dateRange,
       weight: '800', size: 28, bg: c.plum, border: c.cream, borderWidth: 4, color: c.cream,
@@ -609,7 +609,7 @@ const CF23Render = (function () {
   function loadFonts() {
     if (typeof document === 'undefined' || !document.fonts || !document.fonts.load) return Promise.resolve();
     return Promise.all([
-      document.fonts.load('400 100px "Lilita One"', 'COSPLAY'),
+      document.fonts.load('400 100px "Lilita One"', 'COSPLAN'),
       document.fonts.load('500 30px "Baloo 2"', 'Aa'),
       document.fonts.load('700 30px "Baloo 2"', 'Aa'),
       document.fonts.load('800 30px "Baloo 2"', 'Aa')
