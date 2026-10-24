@@ -5,6 +5,9 @@
   import CF23Render from '$lib/cf23/render.js';
   import type { CardData, Slot, TemplateId } from '$lib/cf23/render.js';
   import { loadCf23Assets } from '$lib/cf23/assets';
+  import { get } from 'svelte/store';
+  import { PUBLIC_API_URL } from '$env/static/public';
+  import { consent } from '$lib/consent';
 
   /**
    * mokultur.com/comifuro23 — the CF23 Cosplan Card generator (a cosplan is
@@ -338,6 +341,7 @@
         saveFile(file);
       }
       setStatus(`${files.length} PNG tersimpan. Posting dan tag ${instagram.handle}!${more}`);
+      countDownload(['save', ...ids]);
     } catch {
       setStatus('Gambar gagal dibuat. Coba lagi, atau pakai foto dengan ukuran lebih kecil.', true);
     } finally {
@@ -367,11 +371,30 @@
         saveFile(file);
       }
       setStatus('3 template polosan tersimpan. Area fotonya transparan.');
+      countDownload(['blank']);
     } catch {
       setStatus('Template gagal dibuat. Coba lagi.', true);
     } finally {
       busyBlank = false;
     }
+  }
+
+  /**
+   * Anonymous download count, sent only when the visitor allowed analytics
+   * cookies (undecided counts as no). The request carries what was saved and
+   * nothing else: no cookie, id or name. It never holds up or breaks a save.
+   */
+  function countDownload(items: string[]) {
+    if (get(consent)?.analytics !== true) return;
+    try {
+      void fetch(`${PUBLIC_API_URL.replace(/\/$/, '')}/api/tools/cf23/downloads`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ items }),
+        credentials: 'omit',
+        keepalive: true,
+      }).catch(() => undefined);
+    } catch { /* counting is best effort */ }
   }
 
   async function copyCaption() {
@@ -554,7 +577,7 @@
         </fieldset>
       {/each}
 
-      <p class="cf23-privacy"><i class="bi bi-shield-lock-fill" aria-hidden="true"></i>Foto hanya diproses di perangkatmu dan tidak disimpan oleh Mokultur.</p>
+      <p class="cf23-privacy"><i class="bi bi-shield-lock-fill" aria-hidden="true"></i>Foto hanya diproses di perangkatmu dan tidak disimpan oleh Mokultur. Kalau kamu mengizinkan cookie analytics, kami hanya menghitung jumlah download, tanpa data pribadi.</p>
     </form>
 
     <section class="cf23-post" aria-labelledby="cf23-post-title">
