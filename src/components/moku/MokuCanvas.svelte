@@ -1,32 +1,36 @@
 <script lang="ts">
-  import { onDestroy, onMount } from 'svelte';
+  import { createEventDispatcher, onDestroy, onMount } from 'svelte';
   import type { MokuExpression } from '$lib/chat/expressions';
   import type { Moku, MokuClip, MokuFrame, loadMoku } from '$lib/moku/renderer';
   import { MOKU_3D_URL } from '$lib/generated/moku-3d';
 
   /**
-   * Moku's head and shoulders in the chat panel header, drawn live from the
-   * 2.5D model. The renderer and three.js come from static/moku/moku-3d.js
-   * (scripts/build-moku.mjs), fetched only once the panel opens. It blinks, looks
-   * toward the pointer, and takes the face of each reply. Until the model is
-   * in, and for good where WebGL is unavailable or the visitor saves data, a
-   * still of the same framing stands in.
+   * Moku-san drawn live from the 2.5D model, filling its container: the chat
+   * panel's avatar and the /moku stage. The renderer and three.js come from
+   * static/moku/moku-3d.js (scripts/build-moku.mjs), fetched on mount. Until
+   * the model is in, and for good where WebGL is unavailable or the visitor
+   * saves data, `poster` (a still of the same framing) stands in.
    */
 
-  /** Draws only while true: the chat panel is open and on screen. */
+  /** The part of the 1800×1338 illustration to show; a wider or taller box shows more around it. */
+  export let frame: MokuFrame;
+  export let poster: string;
+  /** Draws only while true, e.g. while the chat panel is open. */
   export let active = true;
+  export let fps = 30;
+  /** When Moku-san waves on arrival: once per visit, every time, or never. */
+  export let greet: 'session' | 'always' | 'never' = 'session';
 
   const MODEL_URL = '/moku/moku.glb?v=1';
-  const POSTER_URL = '/moku/moku-avatar.png?v=1';
-  // Head and shoulders of the model's 1800×1338 illustration, in a square.
-  const FRAME: MokuFrame = [540, 200, 1310, 970];
-  // The motion is slow (breathing, drift, blinks); 30 fps is plenty and halves the work on phones.
-  const FRAME_MS = 1000 / 30;
   const GREETED_KEY = 'mokultur_moku_greeted';
+  // The face's centre in the illustration, for telling a tap on the head from one on the body.
+  const FACE: [number, number] = [925, 640];
+
+  const dispatch = createEventDispatcher<{ ready: void }>();
 
   let canvas: HTMLCanvasElement;
   let moku: Moku | null = null;
-  let ready = false;
+  export let ready = false;
   let raf = 0;
   let last = 0;
   let holdTimer: ReturnType<typeof setTimeout> | undefined;
@@ -57,9 +61,35 @@
     if (!reduceMotion) moku?.play(name);
   }
 
-  function frame(now: number) {
-    raf = requestAnimationFrame(frame);
-    if (now - last < FRAME_MS) return;
+  /**
+   * Which part of Moku-san a point on screen falls on. Mirrors the renderer's
+   * framing: a box wider than `frame` widens it about its centre, a taller one
+   * adds room above.
+   */
+  export function partAt(clientX: number, clientY: number): 'head' | 'body' | null {
+    const r = canvas.getBoundingClientRect();
+    if (!r.width || !r.height) return null;
+    const [x0, y0, x1, y1] = frame;
+    const fw = x1 - x0;
+    const fh = y1 - y0;
+    let [left, right, top] = [x0, x1, y0];
+    if (r.width / r.height > fw / fh) {
+      const w = fh * (r.width / r.height);
+      left = (x0 + x1) / 2 - w / 2;
+      right = left + w;
+    } else {
+      top = y1 - fw / (r.width / r.height);
+    }
+    const x = left + ((clientX - r.left) / r.width) * (right - left);
+    const y = top + ((clientY - r.top) / r.height) * (y1 - top);
+    if (Math.hypot(x - FACE[0], y - FACE[1]) < 330) return 'head';
+    if (y > 930 && x > 420 && x < 1560) return 'body';
+    return null;
+  }
+
+  function frameLoop(now: number) {
+    raf = requestAnimationFrame(frameLoop);
+    if (now - last < 1000 / fps - 1) return;
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     moku?.update(dt);
@@ -68,7 +98,7 @@
   function start() {
     if (raf || !moku) return;
     last = performance.now();
-    raf = requestAnimationFrame(frame);
+    raf = requestAnimationFrame(frameLoop);
   }
 
   function stop() {
@@ -102,6 +132,19 @@
     moku.target.set(clamp((event.clientX - (r.left + r.width / 2)) / s), clamp(-(event.clientY - (r.top + r.height * 0.4)) / s));
   }
 
+  function shouldGreet(): boolean {
+    if (greet === 'never') return false;
+    if (greet === 'always') return true;
+    let greeted = false;
+    try {
+      greeted = sessionStorage.getItem(GREETED_KEY) === '1';
+      sessionStorage.setItem(GREETED_KEY, '1');
+    } catch {
+      /* storage blocked */
+    }
+    return !greeted;
+  }
+
   onMount(async () => {
     document.addEventListener('visibilitychange', sync);
     window.addEventListener('pointermove', follow, { passive: true });
@@ -109,20 +152,21 @@
     try {
       // A static file, not a Vite import, so the service worker does not precache three.js for everyone.
       const renderer: { loadMoku: typeof loadMoku } = await import(/* @vite-ignore */ MOKU_3D_URL);
-      const loaded = await renderer.loadMoku(canvas, MODEL_URL, FRAME);
-      if (destroyed) { loaded.dispose(); return; }
+      const loaded = await renderer.loadMoku(canvas, MODEL_URL, frame);
+      if (destroyed) {
+        loaded.dispose();
+        return;
+      }
       moku = loaded;
       resizer = new ResizeObserver(() => moku?.resize());
       resizer.observe(canvas);
       if (pendingExpression) moku.setExpression(pendingExpression);
       ready = true;
-      // A wave the first time Moku shows up in a visit.
-      let greeted = false;
-      try { greeted = sessionStorage.getItem(GREETED_KEY) === '1'; sessionStorage.setItem(GREETED_KEY, '1'); } catch { /* storage blocked */ }
-      if (!greeted) play('Wave');
+      dispatch('ready');
+      if (shouldGreet()) play('Wave');
     } catch (e) {
       // No WebGL, or the model did not load: the still stays.
-      console.warn('[moku] avatar unavailable:', e);
+      console.warn('[moku] unavailable:', e);
     }
   });
 
@@ -139,25 +183,21 @@
   });
 </script>
 
-<span class="moku" class:is-ready={ready} aria-hidden="true">
-  <img src={POSTER_URL} alt="" width="48" height="48" decoding="async" />
+<span class="moku-canvas" class:is-ready={ready} aria-hidden="true">
+  <img src={poster} alt="" decoding="async" />
   <canvas bind:this={canvas}></canvas>
 </span>
 
 <style>
-  .moku {
+  .moku-canvas {
     position: relative;
-    flex-shrink: 0;
-    width: 48px;
-    height: 48px;
-    overflow: hidden;
-    border: 2px solid var(--site-primary, #f1ff32);
-    border-radius: 12px;
-    background: var(--site-primary, #f1ff32);
+    display: block;
+    width: 100%;
+    height: 100%;
   }
 
-  .moku img,
-  .moku canvas {
+  .moku-canvas img,
+  .moku-canvas canvas {
     position: absolute;
     inset: 0;
     display: block;
@@ -165,21 +205,28 @@
     height: 100%;
   }
 
-  .moku canvas {
+  /* The still is rendered at the frame's shape and placed as the renderer frames it:
+     the whole frame in view, centred across and resting on the bottom edge. */
+  .moku-canvas img {
+    object-fit: contain;
+    object-position: 50% 100%;
+  }
+
+  .moku-canvas canvas {
     opacity: 0;
   }
 
-  .moku.is-ready canvas {
+  .moku-canvas.is-ready canvas {
     opacity: 1;
   }
 
-  .moku.is-ready img {
+  .moku-canvas.is-ready img {
     visibility: hidden;
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .moku canvas {
-      transition: opacity 200ms ease-out;
+    .moku-canvas canvas {
+      transition: opacity 240ms ease-out;
     }
   }
 </style>

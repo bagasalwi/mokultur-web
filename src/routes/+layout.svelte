@@ -120,7 +120,8 @@
   // on the dashboard or the auth screens.
   $: isPrivateRoute = $page.url.pathname.startsWith('/dashboard') || $page.url.pathname.startsWith('/auth');
   // Tool pages whose own bottom bar the floating chat button would sit on.
-  $: hideChat = $page.url.pathname === '/comifuro23';
+  // /moku is the chat itself, full page.
+  $: hideChat = $page.url.pathname === '/comifuro23' || $page.url.pathname === '/moku';
 
   $: origin = $page.url.origin;
   $: siteName = data.settings?.site_name ?? 'Mokultur';

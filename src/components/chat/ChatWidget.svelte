@@ -1,15 +1,10 @@
 <script lang="ts">
-  import { onMount, tick } from 'svelte';
+  import { onDestroy, onMount, tick } from 'svelte';
   import { renderMarkdown } from '$lib/chat/markdown';
-  import { isMokuExpression, stripExpressionTags, type MokuExpression } from '$lib/chat/expressions';
-  import MokuAvatar from './MokuAvatar.svelte';
-
-  interface Msg {
-    role: 'user' | 'assistant';
-    content: string;
-  }
-
-  const STORAGE_KEY = 'mokultur_chat';
+  import { stripExpressionTags } from '$lib/chat/expressions';
+  import { busy, chatError, messages, resetChat, restoreChat, sendChat } from '$lib/chat/session';
+  import { AVATAR_FRAME, AVATAR_POSTER } from '$lib/moku/frames';
+  import MokuCanvas from '$components/moku/MokuCanvas.svelte';
 
   /**
    * Copy comes from the AI settings tab. The literals below are the values that
@@ -32,32 +27,38 @@
     .filter(Boolean);
 
   let open = false;
-  // The panel stays in the page once opened, hidden while closed, so Moku is not loaded again on every open.
+  // The panel stays in the page once opened, hidden while closed, so Moku-san is not loaded again on every open.
   let opened = false;
-  let moku: MokuAvatar | undefined;
-  let messages: Msg[] = [];
+  let moku: MokuCanvas | undefined;
   let input = '';
-  let busy = false;
-  let errorText = '';
   let listEl: HTMLDivElement;
   let inputEl: HTMLInputElement;
 
+  // A word from Moku-san beside the button, once per visit, a few seconds in.
+  const NUDGE_KEY = 'mokultur_moku_nudged';
+  let nudge = false;
+  let nudgeTimers: ReturnType<typeof setTimeout>[] = [];
+
   onMount(() => {
+    restoreChat();
+    let nudged = true;
     try {
-      const raw = sessionStorage.getItem(STORAGE_KEY);
-      if (raw) messages = JSON.parse(raw);
+      nudged = sessionStorage.getItem(NUDGE_KEY) === '1';
     } catch {
-      messages = [];
+      /* storage blocked: stay quiet */
     }
+    if (nudged || $messages.length) return;
+    nudgeTimers = [
+      setTimeout(() => {
+        if (open) return;
+        nudge = true;
+        try { sessionStorage.setItem(NUDGE_KEY, '1'); } catch { /* storage blocked */ }
+      }, 4000),
+      setTimeout(() => (nudge = false), 13000),
+    ];
   });
 
-  function persist() {
-    try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-20)));
-    } catch {
-      // storage penuh atau diblokir — abaikan, chat tetap jalan
-    }
-  }
+  onDestroy(() => nudgeTimers.forEach(clearTimeout));
 
   async function scrollToBottom() {
     await tick();
@@ -66,6 +67,7 @@
 
   async function toggle() {
     open = !open;
+    nudge = false;
     if (open) {
       opened = true;
       await scrollToBottom();
@@ -74,102 +76,26 @@
   }
 
   function reset() {
-    messages = [];
-    errorText = '';
-    persist();
+    resetChat();
     moku?.express('netral');
   }
 
-  async function send(text: string) {
-    const content = text.trim();
-    if (!content || busy) return;
-
-    errorText = '';
+  function send(text: string) {
+    if (!text.trim() || $busy) return;
     input = '';
-    messages = [...messages, { role: 'user', content }, { role: 'assistant', content: '' }];
-    busy = true;
-    persist();
     scrollToBottom();
-    moku?.hold('berpikir', 30);
-    let expression: MokuExpression = 'netral';
-    let first = true;
-
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: messages.slice(0, -1) }),
-      });
-
-      if (res.status === 429) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error ?? 'Kebanyakan pesan, coba lagi nanti ya.');
-      }
-      if (!res.ok || !res.body) {
-        throw new Error('Lagi ada gangguan. Coba lagi sebentar lagi ya.');
-      }
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() ?? '';
-
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed.startsWith('data:')) continue;
-
-          const payload = trimmed.slice(5).trim();
-          if (payload === '[DONE]') continue;
-
-          try {
-            const parsed = JSON.parse(payload);
-            if (parsed.error) throw new Error(parsed.error);
-            if (isMokuExpression(parsed.expr)) {
-              expression = parsed.expr;
-              moku?.express(expression);
-            }
-            if (parsed.delta) {
-              if (first) {
-                first = false;
-                moku?.play('Nod');
-              }
-              moku?.talk(0.5);
-              const last = messages[messages.length - 1];
-              last.content += parsed.delta;
-              messages = messages;
-              scrollToBottom();
-            }
-          } catch (e) {
-            if (e instanceof Error && e.message && !e.message.startsWith('Unexpected')) throw e;
-          }
-        }
-      }
-
-      const reply = messages[messages.length - 1];
-      reply.content = stripExpressionTags(reply.content).trim();
-      if (!reply.content) {
-        reply.content = 'Maaf, aku belum bisa menjawab yang itu. Coba tanya lagi dengan kalimat lain ya.';
-        expression = 'berpikir';
-      }
-      messages = messages;
-      // The reply's face stays a while, longer for a longer answer, then Moku relaxes.
-      moku?.hold(expression, Math.min(8, 2 + reply.content.length * 0.04));
-    } catch (e) {
-      messages = messages.slice(0, -1);
-      errorText = e instanceof Error ? e.message : 'Ada yang salah. Coba lagi ya.';
-      moku?.hold('sedih', 3);
-    } finally {
-      busy = false;
-      persist();
-      scrollToBottom();
-    }
+    void sendChat(text, {
+      onWaiting: () => moku?.hold('berpikir', 30),
+      onExpression: (name) => moku?.express(name),
+      onText: (_, first) => {
+        if (first) moku?.play('Nod');
+        moku?.talk(0.5);
+        scrollToBottom();
+      },
+      // The reply's face stays a while, longer for a longer answer, then Moku-san relaxes.
+      onDone: (expression, reply) => moku?.hold(expression, Math.min(8, 2 + reply.length * 0.04)),
+      onError: () => moku?.hold('sedih', 3),
+    }).then(scrollToBottom);
   }
 
   function onSubmit(e: SubmitEvent) {
@@ -188,21 +114,26 @@
 
 <div class="mchat">
   {#if opened}
-    <div class="mchat__panel" role="dialog" aria-label="Chat Mokultur" hidden={!open}>
+    <div class="mchat__panel" role="dialog" aria-label="Chat dengan Moku-san" hidden={!open}>
       <header class="mchat__head">
         <div class="mchat__head-title">
-          <MokuAvatar bind:this={moku} active={open} />
+          <span class="mchat__avatar">
+            <MokuCanvas bind:this={moku} frame={AVATAR_FRAME} poster={AVATAR_POSTER} active={open} />
+          </span>
           <div class="mchat__head-text">
             <strong>{panelTitle}</strong>
-            <small><span class="mchat__dot" aria-hidden="true"></span>Moku · asisten AI, bisa keliru</small>
+            <small><span class="mchat__dot" aria-hidden="true"></span>Moku-san · asisten AI, bisa keliru</small>
           </div>
         </div>
         <div class="mchat__head-actions">
-          {#if messages.length > 0}
+          {#if $messages.length > 0}
             <button type="button" class="mchat__icon-btn" on:click={reset} title="Mulai obrolan baru" aria-label="Mulai obrolan baru">
               <i class="bi bi-arrow-clockwise"></i>
             </button>
           {/if}
+          <a href="/moku" class="mchat__icon-btn" on:click={() => (open = false)} title="Buka halaman Moku-san" aria-label="Buka halaman Moku-san">
+            <i class="bi bi-arrows-angle-expand"></i>
+          </a>
           <button type="button" class="mchat__icon-btn" on:click={toggle} title="Tutup" aria-label="Tutup chat">
             <i class="bi bi-x-lg"></i>
           </button>
@@ -210,7 +141,7 @@
       </header>
 
       <div class="mchat__body" bind:this={listEl}>
-        {#if messages.length === 0}
+        {#if $messages.length === 0}
           <div class="mchat__welcome">
             <p class="mchat__welcome-text">{welcomeText}</p>
             {#if SUGGESTIONS.length > 0}
@@ -223,12 +154,12 @@
           </div>
         {/if}
 
-        {#each messages as m, i}
+        {#each $messages as m, i}
           <div class="mchat__msg mchat__msg--{m.role}">
             {#if m.role === 'assistant'}
               {#if m.content}
                 <div class="mchat__bubble mchat__bubble--bot">{@html renderMarkdown(stripExpressionTags(m.content))}</div>
-              {:else if busy && i === messages.length - 1}
+              {:else if $busy && i === $messages.length - 1}
                 <div class="mchat__bubble mchat__bubble--bot mchat__typing" aria-label="Sedang mengetik">
                   <span></span><span></span><span></span>
                 </div>
@@ -239,8 +170,8 @@
           </div>
         {/each}
 
-        {#if errorText}
-          <div class="mchat__error">{errorText}</div>
+        {#if $chatError}
+          <div class="mchat__error">{$chatError}</div>
         {/if}
       </div>
 
@@ -253,12 +184,19 @@
           placeholder={inputPlaceholder}
           maxlength="1000"
           autocomplete="off"
-          disabled={busy}
+          disabled={$busy}
         />
-        <button type="submit" class="mchat__send" disabled={busy || !input.trim()} aria-label="Kirim">
+        <button type="submit" class="mchat__send" disabled={$busy || !input.trim()} aria-label="Kirim">
           <i class="bi bi-send-fill"></i>
         </button>
       </form>
+    </div>
+  {/if}
+
+  {#if nudge && !open}
+    <div class="mchat__nudge" role="status">
+      <button type="button" class="mchat__nudge-text" on:click={toggle}>Butuh bantuan? Tanya aja. B-bukan karena aku nungguin, ya!</button>
+      <button type="button" class="mchat__nudge-close" on:click={() => (nudge = false)} aria-label="Tutup sapaan"><i class="bi bi-x-lg"></i></button>
     </div>
   {/if}
 
@@ -267,10 +205,18 @@
     class="mchat__fab"
     class:mchat__fab--open={open}
     on:click={toggle}
-    aria-label={open ? 'Tutup chat' : 'Buka chat Mokultur'}
+    aria-label={open ? 'Tutup chat' : 'Buka chat dengan Moku-san'}
     aria-expanded={open}
   >
-    <i class="bi {open ? 'bi-x-lg' : 'bi-chat-dots-fill'}"></i>
+    {#if open}
+      <i class="bi bi-x-lg"></i>
+    {:else}
+      <!-- Moku-san's head over the rim of the button; the blink frame flashes in now and then. -->
+      <span class="mchat__fab-moku" aria-hidden="true">
+        <img src="/moku/moku-fab.png?v=1" alt="" width="60" height="80" />
+        <img class="mchat__fab-blink" src="/moku/moku-fab-blink.png?v=1" alt="" width="60" height="80" />
+      </span>
+    {/if}
   </button>
 </div>
 
@@ -289,12 +235,16 @@
     gap: 0.75rem;
   }
 
-  /* ---- Floating button ---- */
+  /* ---- Floating button: Moku-san over the rim ---- */
   .mchat__fab {
-    width: 56px;
-    height: 56px;
+    position: relative;
+    width: 60px;
+    height: 60px;
+    /* The head rises above the circle; this keeps it inside the click target. */
+    margin-top: 20px;
     border-radius: 50%;
     border: none;
+    padding: 0;
     background: var(--site-primary, #f1ff32);
     color: var(--site-primary-contrast, #0d0d0d);
     font-size: 1.4rem;
@@ -308,14 +258,126 @@
     flex-shrink: 0;
   }
 
+  .mchat__fab::before {
+    content: '';
+    position: absolute;
+    inset: -20px 0 0;
+  }
+
   .mchat__fab:hover {
-    transform: scale(1.06);
-    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.32);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.3);
+  }
+
+  .mchat__fab:focus-visible {
+    outline: 3px solid var(--site-dark, #0d0d0d);
+    outline-offset: 3px;
   }
 
   .mchat__fab--open {
+    margin-top: 20px;
     background: #0d0d0d;
     color: #fff;
+  }
+
+  /*
+   * The head is a still cut to the button's width, 20px taller than it. The
+   * mask shows everything above the circle's centre line plus the circle
+   * itself, so the hair and face rise over the rim while the shoulders stay
+   * inside the button.
+   */
+  .mchat__fab-moku {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 60px;
+    height: 80px;
+    -webkit-mask:
+      radial-gradient(circle 30px at 50% calc(100% - 30px), #000 99%, transparent 100%),
+      linear-gradient(#000, #000) top / 100% calc(100% - 30px) no-repeat;
+    mask:
+      radial-gradient(circle 30px at 50% calc(100% - 30px), #000 99%, transparent 100%),
+      linear-gradient(#000, #000) top / 100% calc(100% - 30px) no-repeat;
+    transition: transform 180ms ease;
+    pointer-events: none;
+  }
+
+  .mchat__fab-moku img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .mchat__fab:hover .mchat__fab-moku {
+    transform: translateY(-2px) rotate(-3deg);
+  }
+
+  .mchat__fab-blink {
+    opacity: 0;
+    animation: mchat-blink 5.2s steps(1, end) infinite;
+  }
+
+  @keyframes mchat-blink {
+    0%, 95% { opacity: 0; }
+    96%, 98% { opacity: 1; }
+    99%, 100% { opacity: 0; }
+  }
+
+  /* ---- Moku-san's hello beside the button ---- */
+  .mchat__nudge {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    max-width: 236px;
+    margin-right: 0.25rem;
+    border: 1px solid #e5e5e5;
+    border-radius: 14px 14px 4px 14px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+    animation: mchat-in 240ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .mchat__nudge-text {
+    padding: 0.6rem 0.25rem 0.6rem 0.8rem;
+    border: 0;
+    background: none;
+    color: #1a1a1a;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .mchat__nudge-close {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    margin: 0.2rem 0.2rem 0 0;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: #6b7280;
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+
+  .mchat__nudge-close:hover {
+    background: #f3f4f6;
+    color: #1a1a1a;
+  }
+
+  /* ---- Header avatar ---- */
+  .mchat__avatar {
+    display: block;
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    overflow: hidden;
+    border: 2px solid var(--site-primary, #f1ff32);
+    border-radius: 12px;
+    background: var(--site-primary, #f1ff32);
   }
 
   /* ---- Panel ---- */
@@ -408,6 +470,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  a.mchat__icon-btn {
+    text-decoration: none;
   }
 
   .mchat__icon-btn:hover {
@@ -621,8 +687,14 @@
       transition: none;
     }
 
-    .mchat__fab:hover {
+    .mchat__fab:hover,
+    .mchat__fab:hover .mchat__fab-moku {
       transform: none;
+    }
+
+    .mchat__fab-blink,
+    .mchat__nudge {
+      animation: none;
     }
 
     .mchat__typing span {
