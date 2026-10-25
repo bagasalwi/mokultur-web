@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte';
   import { renderMarkdown } from '$lib/chat/markdown';
+  import { isMokuExpression, stripExpressionTags, type MokuExpression } from '$lib/chat/expressions';
+  import MokuAvatar from './MokuAvatar.svelte';
 
   interface Msg {
     role: 'user' | 'assistant';
@@ -30,6 +32,9 @@
     .filter(Boolean);
 
   let open = false;
+  // The panel stays in the page once opened, hidden while closed, so Moku is not loaded again on every open.
+  let opened = false;
+  let moku: MokuAvatar | undefined;
   let messages: Msg[] = [];
   let input = '';
   let busy = false;
@@ -62,6 +67,7 @@
   async function toggle() {
     open = !open;
     if (open) {
+      opened = true;
       await scrollToBottom();
       inputEl?.focus();
     }
@@ -71,6 +77,7 @@
     messages = [];
     errorText = '';
     persist();
+    moku?.express('netral');
   }
 
   async function send(text: string) {
@@ -83,6 +90,9 @@
     busy = true;
     persist();
     scrollToBottom();
+    moku?.hold('berpikir', 30);
+    let expression: MokuExpression = 'netral';
+    let first = true;
 
     try {
       const res = await fetch('/api/chat', {
@@ -121,7 +131,16 @@
           try {
             const parsed = JSON.parse(payload);
             if (parsed.error) throw new Error(parsed.error);
+            if (isMokuExpression(parsed.expr)) {
+              expression = parsed.expr;
+              moku?.express(expression);
+            }
             if (parsed.delta) {
+              if (first) {
+                first = false;
+                moku?.play('Nod');
+              }
+              moku?.talk(0.5);
               const last = messages[messages.length - 1];
               last.content += parsed.delta;
               messages = messages;
@@ -133,13 +152,19 @@
         }
       }
 
-      if (!messages[messages.length - 1].content.trim()) {
-        messages[messages.length - 1].content = 'Maaf, aku belum bisa menjawab yang itu. Coba tanya lagi dengan kalimat lain ya.';
-        messages = messages;
+      const reply = messages[messages.length - 1];
+      reply.content = stripExpressionTags(reply.content).trim();
+      if (!reply.content) {
+        reply.content = 'Maaf, aku belum bisa menjawab yang itu. Coba tanya lagi dengan kalimat lain ya.';
+        expression = 'berpikir';
       }
+      messages = messages;
+      // The reply's face stays a while, longer for a longer answer, then Moku relaxes.
+      moku?.hold(expression, Math.min(8, 2 + reply.content.length * 0.04));
     } catch (e) {
       messages = messages.slice(0, -1);
       errorText = e instanceof Error ? e.message : 'Ada yang salah. Coba lagi ya.';
+      moku?.hold('sedih', 3);
     } finally {
       busy = false;
       persist();
@@ -162,12 +187,15 @@
 <svelte:window on:keydown={onKeydown} />
 
 <div class="mchat">
-  {#if open}
-    <div class="mchat__panel" role="dialog" aria-label="Chat Mokultur">
+  {#if opened}
+    <div class="mchat__panel" role="dialog" aria-label="Chat Mokultur" hidden={!open}>
       <header class="mchat__head">
         <div class="mchat__head-title">
-          <span class="mchat__dot" aria-hidden="true"></span>
-          <strong>{panelTitle}</strong>
+          <MokuAvatar bind:this={moku} active={open} />
+          <div class="mchat__head-text">
+            <strong>{panelTitle}</strong>
+            <small><span class="mchat__dot" aria-hidden="true"></span>Moku · asisten AI, bisa keliru</small>
+          </div>
         </div>
         <div class="mchat__head-actions">
           {#if messages.length > 0}
@@ -199,7 +227,7 @@
           <div class="mchat__msg mchat__msg--{m.role}">
             {#if m.role === 'assistant'}
               {#if m.content}
-                <div class="mchat__bubble mchat__bubble--bot">{@html renderMarkdown(m.content)}</div>
+                <div class="mchat__bubble mchat__bubble--bot">{@html renderMarkdown(stripExpressionTags(m.content))}</div>
               {:else if busy && i === messages.length - 1}
                 <div class="mchat__bubble mchat__bubble--bot mchat__typing" aria-label="Sedang mengetik">
                   <span></span><span></span><span></span>
@@ -316,11 +344,15 @@
     }
   }
 
+  .mchat__panel[hidden] {
+    display: none;
+  }
+
   .mchat__head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.75rem 0.9rem;
+    padding: 0.6rem 0.75rem 0.6rem 0.6rem;
     background: #0d0d0d;
     color: #fff;
     flex-shrink: 0;
@@ -329,13 +361,31 @@
   .mchat__head-title {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.6rem;
+    min-width: 0;
     font-size: 0.95rem;
   }
 
+  .mchat__head-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+    line-height: 1.2;
+  }
+
+  .mchat__head-text small {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
   .mchat__dot {
-    width: 8px;
-    height: 8px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     background: #22c55e;
     flex-shrink: 0;

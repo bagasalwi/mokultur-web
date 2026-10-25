@@ -78,3 +78,4 @@ Semua request ke `PUBLIC_API_URL` (mokultur-elysia). Endpoint yang dipakai:
 - **Layout cache** in-process: 5 menit per SSR instance.
 - Tidak ada auth user di sisi ini — login/register ada di Laravel admin (`admin.mokultur.com`).
 - **Curhatan** bisa di-submit tanpa login via `POST /api/curhatan/public/submit`.
+- **Chat AI (Moku)**: `src/routes/api/chat/+server.ts` (limit per IP, riwayat, panjang pesan) + tab AI di dashboard. Persona Moku di `src/lib/server/moku-persona.ts`; model membuka jawaban dengan tag `[ekspresi]` yang dikirim sebagai event `{expr}` ke panel. Avatar 2.5D: `src/components/chat/MokuAvatar.svelte`. Renderer + three.js dibundel ke `static/moku/moku-3d.js` oleh `scripts/build-moku.mjs` (jalan di `prebuild`), sengaja di luar build Vite supaya tidak ikut di-precache service worker.
