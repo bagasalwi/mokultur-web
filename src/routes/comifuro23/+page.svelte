@@ -50,7 +50,6 @@
   let crops = $state<Record<string, Crop>>({});
   let status = $state('');
   let statusError = $state(false);
-  let busy = $state(false);
   let fontsReady = $state(false);
   // Touch screens: the preview fills most of a phone screen, so it only takes
   // over touches (drag, pinch) in "Atur foto" mode; otherwise it scrolls the page.
@@ -143,6 +142,7 @@
   }
 
   function schedule() {
+    revision += 1;
     if (!frame && typeof requestAnimationFrame !== 'undefined') frame = requestAnimationFrame(draw);
   }
 
@@ -305,78 +305,127 @@
     return `cf23-cosplan-card-${id}${slug ? `-${slug}` : ''}.png`;
   }
 
-  async function makeFile(id: TemplateId = template): Promise<File> {
-    const blob = await R.toBlob(id, buildData(id, true));
-    return new File([blob], fileName(id), { type: 'image/png' });
-  }
-
-  function saveFile(file: File) {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(file);
-    a.download = file.name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-  }
-
   /**
-   * Saves every ready format in one go: Feed Day 1 and Day 2 as soon as their
-   * photo is in, and Story once both are. Always a plain download (no share
-   * sheet), one PNG after another; a browser may ask once to allow multiple
-   * downloads.
+   * Saving opens a list of the three PNGs, each with its own Download link,
+   * instead of downloading them one after another: Safari lets a page start a
+   * download only from a tap, so the second and third file of an automatic run
+   * never arrived. The PNGs are made as the list opens, so a tap only follows a
+   * link to a file that is already there. Blank templates use the same list.
    */
-  async function saveAll() {
-    if (busy) return;
-    if (!readyFormats.length) { pickMissing(); return; }
-    const ids = [...readyFormats];
-    busy = true;
-    setStatus(ids.length > 1 ? `Menyiapkan ${ids.length} gambar…` : 'Menyiapkan gambar…');
+  type SheetKind = 'card' | 'blank';
+  type Output = { url: string; name: string; width: number; height: number } | { error: true };
+  let sheet = $state<HTMLDialogElement>();
+  let sheetKind = $state<SheetKind>('card');
+  let outputs = $state<Partial<Record<TemplateId, Output>>>({});
+  let saved = $state<Partial<Record<TemplateId, boolean>>>({});
+  // Bumped on every change to the card: the list makes its PNGs again only after one.
+  let revision = 0;
+  let madeFor = '';
+  let savedCount = 0;
+
+  /** Where the list's environment needs a word: iOS saves to Files, in-app browsers may not download at all. */
+  let device = $state<'ios' | 'in-app' | null>(null);
+
+  const isReady = (id: TemplateId) => (R.TEMPLATES[id].days as Day[]).every((day) => days[day].image);
+  const missingFor = (id: TemplateId) => (R.TEMPLATES[id].days as Day[]).filter((day) => !days[day].image);
+
+  async function makeBlob(kind: SheetKind, id: TemplateId): Promise<Blob> {
+    // The fonts are normally in long before; the timer only covers a request that hangs.
+    await Promise.race([loadCf23Assets(), new Promise((resolve) => setTimeout(resolve, 3000))]);
+    return kind === 'blank'
+      ? R.toBlob(id, buildData('day1'), 'image/png', { blank: true })
+      : R.toBlob(id, buildData(id, true));
+  }
+
+  function outputName(kind: SheetKind, id: TemplateId): string {
+    return kind === 'blank' ? `cf23-cosplan-card-template-${id}.png` : fileName(id);
+  }
+
+  function clearOutputs() {
+    for (const out of Object.values(outputs)) if (out && 'url' in out) URL.revokeObjectURL(out.url);
+    outputs = {};
+  }
+
+  /** Makes the PNGs for the list, one at a time, unless the ones it holds are still current. */
+  async function prepare(kind: SheetKind) {
+    const key = `${kind}:${revision}`;
+    if (madeFor === key) return;
+    madeFor = key;
+    clearOutputs();
+    for (const id of ALL) {
+      if (kind === 'card' && !isReady(id)) continue;
+      await makeOutput(kind, id, key);
+      if (madeFor !== key) return;
+    }
+  }
+
+  async function makeOutput(kind: SheetKind, id: TemplateId, key = madeFor) {
+    let out: Output;
+    try {
+      const blob = await makeBlob(kind, id);
+      const t = R.TEMPLATES[id];
+      out = { url: URL.createObjectURL(blob), name: outputName(kind, id), width: t.width, height: t.height };
+    } catch {
+      out = { error: true };
+    }
+    // The card changed while this one was being made: it belongs to nothing now.
+    if (madeFor !== key) { if ('url' in out) URL.revokeObjectURL(out.url); return; }
+    outputs[id] = out;
+  }
+
+  function retryOutput(id: TemplateId) {
+    delete outputs[id];
+    void makeOutput(sheetKind, id);
+  }
+
+  function openSheet(kind: SheetKind) {
+    if (kind === 'card' && !readyFormats.length) { pickMissing(); return; }
+    sheetKind = kind;
+    saved = {};
+    savedCount = 0;
+    setStatus('');
+    void prepare(kind);
+    if (!sheet) return;
+    if (typeof sheet.showModal === 'function') sheet.showModal();
+    else sheet.setAttribute('open', '');
+    // The page behind stays put while the list is up.
+    document.documentElement.style.overflow = 'hidden';
+  }
+
+  function closeSheet() {
+    if (sheet?.open) sheet.close();
+    else onSheetClose();
+  }
+
+  function onSheetClose() {
+    sheet?.removeAttribute('open');
+    document.documentElement.style.overflow = '';
+  }
+
+  /** A click on the backdrop lands on the <dialog> itself, never on its content. */
+  function onSheetClick(event: MouseEvent) {
+    if (event.target === sheet) closeSheet();
+  }
+
+  /** Runs as the Download link is followed; the link itself does the saving. */
+  function markSaved(id: TemplateId) {
+    const first = savedCount === 0;
+    if (!saved[id]) savedCount += 1;
+    saved[id] = true;
+    if (sheetKind === 'blank') {
+      setStatus(`${savedCount} template polosan tersimpan. Area fotonya transparan.`);
+      if (first) countDownload(['blank']);
+      return;
+    }
     const more = nextMissing ? ` Tambah foto Day ${nextMissing} untuk format lainnya.` : '';
-    try {
-      const files: File[] = [];
-      for (const id of ids) files.push(await makeFile(id));
-      for (const [index, file] of files.entries()) {
-        if (index) await new Promise((resolve) => setTimeout(resolve, 450));
-        saveFile(file);
-      }
-      setStatus(`${files.length} PNG tersimpan. Posting dan tag ${instagram.handle}!${more}`);
-      countDownload(['save', ...ids]);
-    } catch {
-      setStatus('Gambar gagal dibuat. Coba lagi, atau pakai foto dengan ukuran lebih kecil.', true);
-    } finally {
-      busy = false;
-    }
+    setStatus(`${savedCount} PNG tersimpan. Posting dan tag ${instagram.handle}!${more}`);
+    countDownload(first ? ['save', id] : [id]);
   }
 
-  /**
-   * The three templates without name, character, series or photo, with the
-   * photo windows transparent, for people who lay the card over a photo in
-   * their own editor. Needs no photo; uses the colours picked for each day.
-   */
-  let busyBlank = $state(false);
-  async function downloadBlank() {
-    if (busyBlank) return;
-    busyBlank = true;
-    setStatus('Menyiapkan template polosan…');
-    try {
-      const data = buildData('day1');
-      const files: File[] = [];
-      for (const id of ALL) {
-        const blob = await R.toBlob(id, data, 'image/png', { blank: true });
-        files.push(new File([blob], `cf23-cosplan-card-template-${id}.png`, { type: 'image/png' }));
-      }
-      for (const [index, file] of files.entries()) {
-        if (index) await new Promise((resolve) => setTimeout(resolve, 450));
-        saveFile(file);
-      }
-      setStatus('3 template polosan tersimpan. Area fotonya transparan.');
-      countDownload(['blank']);
-    } catch {
-      setStatus('Template gagal dibuat. Coba lagi.', true);
-    } finally {
-      busyBlank = false;
-    }
+  /** A format still waiting for a photo: close the list and open the picker for it. */
+  function pickFromSheet(day: Day) {
+    closeSheet();
+    (document.getElementById(`cf23-photo-${day}`) as HTMLInputElement | null)?.click();
   }
 
   /**
@@ -429,6 +478,9 @@
 
     // loadCf23Assets never rejects; the timer only covers a font request that hangs.
     coarse = window.matchMedia('(pointer: coarse)').matches;
+    const ua = navigator.userAgent;
+    if (/Instagram|FBAN|FBAV|FB_IAB|Line\/|TikTok|musical_ly/i.test(ua)) device = 'in-app';
+    else if (/iP(hone|ad|od)/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) device = 'ios';
     const fallback = setTimeout(() => (fontsReady = true), 3000);
     void loadCf23Assets().then(() => { clearTimeout(fallback); fontsReady = true; });
   });
@@ -440,6 +492,8 @@
       if (days[day].url) URL.revokeObjectURL(days[day].url!);
       releasePreview(days[day]);
     }
+    clearOutputs();
+    document.documentElement.style.overflow = '';
   });
 </script>
 
@@ -585,16 +639,16 @@
       <p class="cf23-post__lead">Umumkan cosplan-mu di Instagram sebelum hari-H dan tag <a href={instagram.url} target="_blank" rel="noopener noreferrer">{instagram.handle}</a> biar kami bisa lihat. Pakai <strong>#CF23 #Comifuro23</strong> ya!</p>
 
       <ol class="cf23-post__steps">
-        <li><span>1</span>Simpan Cosplan Card: semua format yang siap tersimpan sekaligus.</li>
+        <li><span>1</span>Download Cosplan Card: Feed Day 1, Feed Day 2, dan Story, satu per satu.</li>
         <li><span>2</span>Posting Feed Day 1 / Day 2, dan Story Day 1 + 2 di Instagram.</li>
         <li><span>3</span>Tempel caption di bawah, lalu tag {instagram.handle}.</li>
       </ol>
 
-      <button type="button" class="cf23-all" onclick={saveAll} disabled={!readyFormats.length || busy}>
+      <button type="button" class="cf23-all" onclick={() => openSheet('card')} disabled={!readyFormats.length} aria-haspopup="dialog">
         <i class="bi bi-download" aria-hidden="true"></i>
         <span>
-          <strong>Download semua ({readyFormats.length || 3} PNG)</strong>
-          <small>{readyFormats.length ? readyLabel : 'Upload foto Day 1 dan Day 2 dulu'}</small>
+          <strong>Download Cosplan Card</strong>
+          <small>{readyFormats.length ? `Siap: ${readyLabel}` : 'Upload foto Day 1 dan Day 2 dulu'}</small>
         </span>
       </button>
 
@@ -607,7 +661,7 @@
         <a class="cf23-ghost cf23-ghost--cream" href={instagram.url} target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram" aria-hidden="true"></i>Buka Instagram</a>
       </div>
 
-      <button type="button" class="cf23-blank" onclick={downloadBlank} disabled={busyBlank}>
+      <button type="button" class="cf23-blank" onclick={() => openSheet('blank')} aria-haspopup="dialog">
         <i class="bi bi-download" aria-hidden="true"></i>
         <span>
           <strong>Download template polosan (3 PNG)</strong>
@@ -625,13 +679,77 @@
         {#if !readyFormats.length}
           <button type="button" class="cf23-primary" onclick={pickMissing}><i class="bi bi-camera-fill" aria-hidden="true"></i>Upload foto Day {nextMissing ?? 1}</button>
         {:else}
-          <button type="button" class="cf23-primary" onclick={saveAll} disabled={busy}>
-            <i class="bi bi-download" aria-hidden="true"></i>Download {readyFormats.length > 1 ? `semua (${readyFormats.length})` : 'PNG'}
+          <button type="button" class="cf23-primary" onclick={() => openSheet('card')} aria-haspopup="dialog">
+            <i class="bi bi-download" aria-hidden="true"></i>Download PNG
           </button>
         {/if}
       </div>
     </div>
   </div>
+
+  <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_noninteractive_element_interactions -->
+  <dialog class="cf23-sheet" bind:this={sheet} aria-labelledby="cf23-sheet-title" onclose={onSheetClose} onclick={onSheetClick}>
+    <div class="cf23-sheet__panel">
+      <div class="cf23-sheet__head">
+        <h2 id="cf23-sheet-title">{sheetKind === 'blank' ? 'Template polosan' : 'Download Cosplan Card'}</h2>
+        <button type="button" class="cf23-sheet__close" onclick={closeSheet} aria-label="Tutup"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+      </div>
+      <p class="cf23-sheet__intro">
+        {sheetKind === 'blank'
+          ? 'Tanpa nama, karakter & foto. Area fotonya transparan. Ketuk Download di tiap gambar.'
+          : 'Ketuk Download di tiap gambar yang mau kamu posting. Satu ketukan, satu PNG.'}
+      </p>
+
+      <ul class="cf23-sheet__list">
+        {#each FORMATS as format (format.id)}
+          {@const out = outputs[format.id]}
+          {@const missing = sheetKind === 'card' ? missingFor(format.id) : []}
+          <li class="cf23-sheet__item" class:is-saved={saved[format.id]}>
+            <div class="cf23-sheet__thumb" class:is-story={format.id === 'story'} class:is-blank={sheetKind === 'blank'}>
+              {#if out && 'url' in out}
+                <img src={out.url} alt={`${sheetKind === 'blank' ? 'Template polosan' : 'Cosplan Card'} ${format.label}`} width={out.width} height={out.height} />
+              {:else if missing.length}
+                <i class="bi bi-camera" aria-hidden="true"></i>
+              {:else if !out}
+                <span class="cf23-sheet__spinner" aria-hidden="true"></span>
+              {:else}
+                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+              {/if}
+            </div>
+            <div class="cf23-sheet__text">
+              <strong>{format.id === 'story' ? 'Story Day 1+2' : format.label}</strong>
+              <small>
+                {#if missing.length}Butuh foto Day {missing.join(' & ')}
+                {:else if out && 'error' in out}Gagal dibuat
+                {:else}{format.id === 'story' ? '9:16 · 1080×1920' : '4:5 · 1080×1350'}{/if}
+              </small>
+            </div>
+            {#if missing.length}
+              <button type="button" class="cf23-sheet__get cf23-sheet__get--ghost" onclick={() => pickFromSheet(missing[0])}>
+                <i class="bi bi-camera-fill" aria-hidden="true"></i>Pilih foto
+              </button>
+            {:else if out && 'url' in out}
+              <a class="cf23-sheet__get" class:is-saved={saved[format.id]} href={out.url} download={out.name} onclick={() => markSaved(format.id)}>
+                <i class="bi {saved[format.id] ? 'bi-check2' : 'bi-download'}" aria-hidden="true"></i>{saved[format.id] ? 'Tersimpan' : 'Download'}
+              </a>
+            {:else if out}
+              <button type="button" class="cf23-sheet__get cf23-sheet__get--ghost" onclick={() => retryOutput(format.id)}>
+                <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>Coba lagi
+              </button>
+            {:else}
+              <span class="cf23-sheet__get is-waiting">Menyiapkan…</span>
+            {/if}
+          </li>
+        {/each}
+      </ul>
+
+      {#if device === 'in-app'}
+        <p class="cf23-sheet__note"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>Tombol Download tidak bereaksi? Browser di dalam Instagram/TikTok sering memblokir download. Buka halaman ini di Safari atau Chrome lewat menu titik tiga di pojok kanan atas.</p>
+      {:else if device === 'ios'}
+        <p class="cf23-sheet__note"><i class="bi bi-phone" aria-hidden="true"></i>Di iPhone, PNG yang di-download masuk ke app Files (folder Unduhan). Mau langsung ke galeri? Tahan gambarnya, lalu pilih Simpan ke Foto.</p>
+      {/if}
+    </div>
+  </dialog>
 </div>
 
 <style lang="scss">
@@ -1304,6 +1422,275 @@
     @media (prefers-reduced-motion: no-preference) {
       transition: transform 80ms ease-out, box-shadow 80ms ease-out;
     }
+  }
+
+  // The download list: a sheet from the bottom edge on phones, a panel in the
+  // middle of the screen from 576px. Each PNG has its own Download link.
+  .cf23-sheet {
+    width: 100%;
+    max-width: none;
+    max-height: none;
+    margin: auto 0 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--brown);
+    overflow: visible;
+
+    &::backdrop {
+      background: rgb(30 7 30 / 0.66);
+    }
+
+    @media (min-width: 576px) {
+      width: min(32rem, calc(100% - 2rem));
+      margin: auto;
+    }
+  }
+
+  .cf23-sheet__panel {
+    max-height: calc(100vh - 1.5rem);
+    max-height: calc(100dvh - 1.5rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.85rem 1rem calc(1rem + env(safe-area-inset-bottom));
+    border: 4px solid var(--brown);
+    border-bottom: 0;
+    border-radius: 1.5rem 1.5rem 0 0;
+    background: var(--cream);
+    font-family: var(--body);
+
+    @media (min-width: 576px) {
+      max-height: calc(100dvh - 3rem);
+      padding: 1.1rem 1.25rem 1.25rem;
+      border-bottom: 4px solid var(--brown);
+      border-radius: 1.5rem;
+      box-shadow: 6px 6px 0 var(--brown);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .cf23-sheet[open] .cf23-sheet__panel { animation: cf23-sheet-in 240ms cubic-bezier(0.16, 1, 0.3, 1); }
+    .cf23-sheet[open]::backdrop { animation: cf23-fade-in 240ms ease-out; }
+  }
+
+  @keyframes cf23-sheet-in {
+    from { transform: translateY(2rem); opacity: 0; }
+  }
+
+  @keyframes cf23-fade-in {
+    from { opacity: 0; }
+  }
+
+  .cf23-sheet__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+
+    h2 {
+      margin: 0;
+      color: var(--brown);
+      font-family: var(--display);
+      font-size: 1.6rem;
+      font-weight: 400;
+      line-height: 1.1;
+      letter-spacing: 0.01em;
+    }
+  }
+
+  .cf23-sheet__close {
+    display: inline-grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: 3px solid var(--brown);
+    border-radius: 14px;
+    background: transparent;
+    color: var(--brown);
+    font-size: 1.1rem;
+    cursor: pointer;
+
+    &:hover { background: rgb(83 31 18 / 0.08); }
+    &:focus-visible { outline: 3px solid var(--pink); outline-offset: 2px; }
+  }
+
+  .cf23-sheet__intro {
+    margin: 0.35rem 0 0.9rem;
+    color: #7a4a3e;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.4;
+    text-wrap: pretty;
+  }
+
+  .cf23-sheet__list {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .cf23-sheet__item {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.6rem 0.5rem 0.5rem;
+    border: 3px solid var(--brown);
+    border-radius: 16px;
+    background: var(--paper);
+
+    &.is-saved { background: #fff; }
+  }
+
+  // One box for every format, so the rows line up; the PNG sits inside it whole.
+  .cf23-sheet__thumb {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 70px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--plum);
+    color: var(--peach);
+    font-size: 1.35rem;
+
+    img {
+      display: block;
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    // Blank templates have see-through photo windows: show them as such.
+    &.is-blank {
+      background: repeating-conic-gradient(#ecd9d4 0 25%, #fff 0 50%) 0 0 / 10px 10px;
+      color: var(--lilac);
+    }
+  }
+
+  .cf23-sheet__spinner {
+    width: 22px;
+    height: 22px;
+    border: 3px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+
+    @media (prefers-reduced-motion: no-preference) {
+      animation: cf23-spin 0.8s linear infinite;
+    }
+  }
+
+  @keyframes cf23-spin {
+    to { transform: rotate(1turn); }
+  }
+
+  .cf23-sheet__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+
+    strong {
+      font-family: var(--display);
+      font-size: 1.15rem;
+      font-weight: 400;
+      line-height: 1.1;
+      letter-spacing: 0.01em;
+    }
+
+    small {
+      color: #7a4a3e;
+      font-size: 0.85rem;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+  }
+
+  .cf23-sheet__get {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 48px;
+    padding: 0.3rem 0.85rem;
+    border: 3px solid var(--brown);
+    border-radius: 14px;
+    background: var(--pink);
+    color: var(--cream);
+    font-family: var(--display);
+    font-size: 1.05rem;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: 3px 3px 0 var(--brown);
+    cursor: pointer;
+
+    &:hover { color: var(--cream); filter: brightness(1.06); }
+    &:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--brown); }
+    &:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+    }
+
+    // Saved: still a link, for a second copy, but no longer the call to action.
+    &.is-saved {
+      background: var(--cream);
+      color: var(--brown);
+      box-shadow: none;
+
+      &:hover { color: var(--brown); }
+    }
+  }
+
+  .cf23-sheet__get--ghost {
+    background: transparent;
+    color: var(--brown);
+    font-family: var(--body);
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    box-shadow: none;
+
+    &:hover { color: var(--brown); background: rgb(83 31 18 / 0.06); }
+  }
+
+  .cf23-sheet__get.is-waiting {
+    border-style: dashed;
+    border-color: #c79a8c;
+    background: transparent;
+    color: #7a4a3e;
+    font-family: var(--body);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    box-shadow: none;
+    cursor: progress;
+  }
+
+  .cf23-sheet__note {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.9rem 0 0;
+    color: #7a4a3e;
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.4;
+
+    i { flex-shrink: 0; margin-top: 0.1rem; color: var(--lilac); }
+  }
+
+  @media (max-width: 400px) {
+    .cf23-sheet__head h2 { font-size: 1.4rem; }
+    .cf23-sheet__item { grid-template-columns: 48px minmax(0, 1fr) auto; gap: 0.6rem; }
+    .cf23-sheet__thumb { width: 48px; height: 60px; }
+    .cf23-sheet__text strong { font-size: 1.05rem; }
+    .cf23-sheet__get { padding-inline: 0.65rem; font-size: 1rem; }
   }
 
   @media (max-width: 420px) {
