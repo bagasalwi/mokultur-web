@@ -884,3 +884,11 @@ export function listAnimeYears(): Promise<{ data: number[]; available: number[] 
 export function getAnime(malId: number): Promise<{ data: AnimeDetail }> {
   return apiFetch<{ data: AnimeDetail }>(`/api/anime/${malId}`);
 }
+
+// ---- Tools ----
+
+/** How many times a browser tool has been used, as its page shows it (the API adds the starting number). */
+export function getToolCount(tool: string): Promise<{ tool: string; count: number }> {
+  // Short: the count is a nicety, and a slow API must not hold up the page.
+  return apiFetch(`/api/tools/${encodeURIComponent(tool)}/count`, { signal: AbortSignal.timeout(1500) });
+}

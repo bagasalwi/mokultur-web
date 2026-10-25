@@ -5,9 +5,7 @@
   import CF23Render from '$lib/cf23/render.js';
   import type { CardData, Slot, TemplateId } from '$lib/cf23/render.js';
   import { loadCf23Assets } from '$lib/cf23/assets';
-  import { get } from 'svelte/store';
   import { PUBLIC_API_URL } from '$env/static/public';
-  import { consent } from '$lib/consent';
 
   /**
    * mokultur.com/comifuro23 — the CF23 Cosplan Card generator (a cosplan is
@@ -99,6 +97,11 @@
     ].join('\n');
   });
   let copied = $state(false);
+
+  // "Cosplan Card sudah dibuat Nx", from the server; the visitor's own card adds one as it is made.
+  let ownCards = $state(0);
+  const cardsMade = $derived(typeof data?.toolCount === 'number' ? data.toolCount + ownCards : null);
+  let countedVisit = false;
 
   function crop(day: Day, id: TemplateId = template): Crop {
     const key = `${id}:${day}`;
@@ -357,6 +360,12 @@
       await makeOutput(kind, id, key);
       if (madeFor !== key) return;
     }
+    // A card made counts once per visit, however often it is changed and made again.
+    if (kind === 'card' && !countedVisit && Object.values(outputs).some((out) => out && 'url' in out)) {
+      countedVisit = true;
+      ownCards += 1;
+      countTool(['generate']);
+    }
   }
 
   async function makeOutput(kind: SheetKind, id: TemplateId, key = madeFor) {
@@ -414,12 +423,12 @@
     saved[id] = true;
     if (sheetKind === 'blank') {
       setStatus(`${savedCount} template polosan tersimpan. Area fotonya transparan.`);
-      if (first) countDownload(['blank']);
+      if (first) countTool(['blank']);
       return;
     }
     const more = nextMissing ? ` Tambah foto Day ${nextMissing} untuk format lainnya.` : '';
     setStatus(`${savedCount} PNG tersimpan. Posting dan tag ${instagram.handle}!${more}`);
-    countDownload(first ? ['save', id] : [id]);
+    countTool(first ? ['save', id] : [id]);
   }
 
   /** A format still waiting for a photo: close the list and open the picker for it. */
@@ -429,12 +438,11 @@
   }
 
   /**
-   * Anonymous download count, sent only when the visitor allowed analytics
-   * cookies (undecided counts as no). The request carries what was saved and
-   * nothing else: no cookie, id or name. It never holds up or breaks a save.
+   * Anonymous usage count. The request carries what was made or saved and
+   * nothing else: no cookie, id or name, so it needs no consent. It never
+   * holds up or breaks a save.
    */
-  function countDownload(items: string[]) {
-    if (get(consent)?.analytics !== true) return;
+  function countTool(items: string[]) {
     try {
       void fetch(`${PUBLIC_API_URL.replace(/\/$/, '')}/api/tools/cf23/downloads`, {
         method: 'POST',
@@ -523,6 +531,9 @@
   <header class="cf23-head container-xl">
     <h1>Cosplan Card CF23</h1>
     <p class="cf23-meta"><i class="bi bi-geo-alt-fill" aria-hidden="true"></i>Comic Frontier 23 · ICE BSD · 31 Okt – 1 Nov 2026</p>
+    {#if cardsMade !== null}
+      <p class="cf23-count"><i class="bi bi-fire" aria-hidden="true"></i>Cosplan Card sudah dibuat {#key cardsMade}<strong class:is-new={ownCards > 0}>{cardsMade.toLocaleString('id-ID')}x</strong>{/key}</p>
+    {/if}
     <p class="cf23-lead">Umumkan cosplan-mu: mau jadi siapa di Day 1 dan Day 2. Upload foto cosplay atau costest-mu, isi nama dan karakter, lalu simpan untuk feed atau story. Fotonya tetap di HP-mu, tidak dikirim ke mana pun.</p>
   </header>
 
@@ -631,7 +642,7 @@
         </fieldset>
       {/each}
 
-      <p class="cf23-privacy"><i class="bi bi-shield-lock-fill" aria-hidden="true"></i>Foto hanya diproses di perangkatmu dan tidak disimpan oleh Mokultur. Kalau kamu mengizinkan cookie analytics, kami hanya menghitung jumlah download, tanpa data pribadi.</p>
+      <p class="cf23-privacy"><i class="bi bi-shield-lock-fill" aria-hidden="true"></i>Foto hanya diproses di perangkatmu dan tidak disimpan oleh Mokultur. Kami hanya menghitung berapa kartu yang dibuat dan di-download, tanpa cookie dan tanpa data pribadi.</p>
     </form>
 
     <section class="cf23-post" aria-labelledby="cf23-post-title">
@@ -802,6 +813,42 @@
     line-height: 1.35;
 
     i { color: var(--orange); }
+  }
+
+  .cf23-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0 0.65rem;
+    padding: 0.2rem 0.8rem 0.2rem 0.65rem;
+    border: 2px solid var(--orange);
+    border-radius: 999px;
+    background: rgb(255 150 100 / 0.12);
+    color: var(--cream);
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1.35;
+
+    i { color: var(--orange); }
+
+    strong {
+      display: inline-block;
+      color: var(--orange);
+      font-family: var(--display);
+      font-size: 1.15rem;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    // The visitor's own card ticking the count up.
+    @media (prefers-reduced-motion: no-preference) {
+      strong.is-new { animation: cf23-count-pop 420ms cubic-bezier(0.16, 1, 0.3, 1); }
+    }
+  }
+
+  @keyframes cf23-count-pop {
+    from { transform: scale(1.35); }
   }
 
   .cf23-lead {
