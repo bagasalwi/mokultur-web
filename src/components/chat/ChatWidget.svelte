@@ -3,7 +3,7 @@
   import { renderMarkdown } from '$lib/chat/markdown';
   import { stripExpressionTags } from '$lib/chat/expressions';
   import { busy, chatError, messages, resetChat, restoreChat, sendChat } from '$lib/chat/session';
-  import { AVATAR_FRAME, AVATAR_POSTER } from '$lib/moku/frames';
+  import { POPOUT_FRAME, POPOUT_POSTER } from '$lib/moku/frames';
   import MokuCanvas from '$components/moku/MokuCanvas.svelte';
 
   /**
@@ -117,8 +117,11 @@
     <div class="mchat__panel" role="dialog" aria-label="Chat dengan Moku-san" hidden={!open}>
       <header class="mchat__head">
         <div class="mchat__head-title">
+          <!-- Moku-san sits on the panel's top edge, her head rising over the rim of her circle as on the button. -->
           <span class="mchat__avatar">
-            <MokuCanvas bind:this={moku} frame={AVATAR_FRAME} poster={AVATAR_POSTER} active={open} />
+            <span class="mchat__avatar-moku">
+              <MokuCanvas bind:this={moku} frame={POPOUT_FRAME} poster={POPOUT_POSTER} active={open} />
+            </span>
           </span>
           <div class="mchat__head-text">
             <strong>{panelTitle}</strong>
@@ -234,6 +237,13 @@
     flex-direction: column;
     align-items: flex-end;
     gap: 0.75rem;
+    /* The column is wider and taller than what is in it (the room above the
+       panel for Moku-san's head, the gaps); only its contents take clicks. */
+    pointer-events: none;
+  }
+
+  .mchat > * {
+    pointer-events: auto;
   }
 
   /* ---- Floating button: Moku-san over the rim ---- */
@@ -369,16 +379,48 @@
     color: #1a1a1a;
   }
 
-  /* ---- Header avatar ---- */
+  /*
+   * ---- Header avatar ----
+   * A 72px circle straddling the panel's top edge, ringed in the header's
+   * colour, with Moku-san live inside it. As on the button, the mask shows the
+   * circle plus everything above its centre line, so her head rises out of it
+   * and over the page while her shoulders stay in. The slot in the header
+   * only holds the space; nothing in it takes clicks.
+   */
   .mchat__avatar {
+    position: relative;
     display: block;
     flex-shrink: 0;
-    width: 48px;
-    height: 48px;
-    overflow: hidden;
-    border: 2px solid var(--site-primary, #f1ff32);
-    border-radius: 12px;
+    width: 72px;
+    height: 44px;
+    pointer-events: none;
+  }
+
+  /* A pixel inside the mask's circle, so its soft edge never shows a yellow line under her shoulders. */
+  .mchat__avatar::before {
+    content: '';
+    position: absolute;
+    left: 1px;
+    top: -25px;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
     background: var(--site-primary, #f1ff32);
+    box-shadow: 0 0 0 5px #0d0d0d;
+  }
+
+  .mchat__avatar-moku {
+    position: absolute;
+    left: 0;
+    top: -50px;
+    width: 72px;
+    height: 96px;
+    -webkit-mask:
+      radial-gradient(circle 36px at 50% calc(100% - 36px), #000 99%, transparent 100%),
+      linear-gradient(#000, #000) top / 100% calc(100% - 36px) no-repeat;
+    mask:
+      radial-gradient(circle 36px at 50% calc(100% - 36px), #000 99%, transparent 100%),
+      linear-gradient(#000, #000) top / 100% calc(100% - 36px) no-repeat;
   }
 
   /* ---- Panel ---- */
@@ -386,13 +428,16 @@
     width: 380px;
     max-width: calc(100vw - 2.5rem);
     height: 520px;
-    max-height: calc(100vh - 7rem);
+    /* Less the room above the panel that Moku-san's head rises into. */
+    max-height: calc(100vh - 7rem - 40px);
+    margin-top: 40px;
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    /* Not clipped, so the head can leave the panel; the first and last rows round its corners instead. */
+    overflow: visible;
     animation: mchat-in 200ms cubic-bezier(0.23, 1, 0.32, 1);
   }
 
@@ -415,7 +460,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.6rem 0.75rem 0.6rem 0.6rem;
+    padding: 0.6rem 0.75rem 0.6rem 0.85rem;
+    border-radius: 16px 16px 0 0;
     background: #0d0d0d;
     color: #fff;
     flex-shrink: 0;
@@ -638,6 +684,7 @@
     flex-shrink: 0;
     margin: 0;
     padding: 0 0.75rem 0.5rem;
+    border-radius: 0 0 16px 16px;
     background: #fff;
     color: #6b7280;
     font-size: 0.7rem;
