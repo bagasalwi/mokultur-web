@@ -2,36 +2,42 @@
   import { onDestroy, onMount, tick } from 'svelte';
   import { absoluteUrl, buildBreadcrumb, buildPageTitle } from '$lib/seo';
   import { renderMarkdown } from '$lib/chat/markdown';
-  import { MOKU_EXPRESSIONS, stripExpressionTags, type MokuExpression } from '$lib/chat/expressions';
+  import { stripExpressionTags, type MokuExpression } from '$lib/chat/expressions';
   import { busy, chatError, messages, resetChat, restoreChat, sendChat } from '$lib/chat/session';
   import { AVATAR_POSTER, STAGE_FRAME, STAGE_POSTER } from '$lib/moku/frames';
-  import { ENOUGH, EXPRESSION_LINES, GESTURES, HEAD_PAT, POKE, TOO_MANY, officeStatus, pick, type Line } from '$lib/moku/lines';
+  import { ENOUGH, HEAD_PAT, POKE, TOO_MANY, mokuStatus, pick, type Line } from '$lib/moku/lines';
   import MokuCanvas from '$components/moku/MokuCanvas.svelte';
   import SectionHead from '$components/ui/SectionHead.svelte';
 
   /**
    * mokultur.com/moku — Moku-san full size and live, beside a chat that is the
    * same conversation as the corner widget (lib/chat/session), which this page
-   * hides. The stage answers in a visual-novel dialogue box: replies from the
-   * AI, and Moku-san's own lines (lib/moku/lines) for taps on the stage, the
-   * gesture buttons and the expression chips, which cost nothing and stay out
-   * of the conversation.
+   * hides. The stage answers in a visual-novel dialogue box: the chat's replies,
+   * and Moku-san's own lines (lib/moku/lines) for her greeting and for taps on
+   * her, which cost nothing and stay out of the conversation.
    */
   let { data } = $props();
 
   const TITLE = 'Moku-san';
   const DESCRIPTION =
-    'Ngobrol langsung dengan Moku-san, asisten AI Mokultur: pekerja kantoran, penggemar Frieren dan anime action, tsundere akut. Tanya soal artikel, event, talent, dan info Mokultur.';
+    'Ngobrol dengan Moku-san (Monika Kuriru), asisten pribadi Mokultur. Minta rekomendasi anime dan film, cari artikel, cek jadwal event, atau tanya cara kerja sama dengan Mokultur.';
   const PROMPTS = [
-    'Rekomendasi anime action, dong',
-    'Kenapa kamu suka Frieren?',
-    'Ada artikel anime terbaru?',
+    'Rekomendasiin anime buat weekend, dong',
+    'Film apa yang wajib ditonton?',
+    'Ada artikel terbaru apa?',
     'Event apa yang sebentar lagi?',
-    'Kerja di Mokultur ngapain aja?',
+    'Kamu suka nonton apa?',
     'Cara jadi media partner Mokultur?',
   ];
-  const GREETING: Line = { text: 'Hmph, akhirnya ada yang mampir. Aku Moku-san. Mau tanya apa? Ketik aja, aku jawab. B-bukan karena senang ditanya, ya!', expression: 'tsundere' };
-  const WELCOME_BACK: Line = { text: 'Oh, kamu lagi. Obrolan tadi masih ada di sebelah, lanjut aja. Aku nggak nungguin, kok.', expression: 'tsundere' };
+  /** What Moku-san helps with, each a way into the chat. */
+  const HELP = [
+    { icon: 'bi-film', title: 'Rekomendasi tontonan', text: 'Ceritakan mood-mu, Moku-san kurasikan anime atau film yang pas, lengkap dengan alasannya.', prompt: 'Moku-san, rekomendasiin tontonan yang cocok buat aku, dong' },
+    { icon: 'bi-journal-text', title: 'Artikel dan rubrik', text: 'Dari Know Your Culture sampai Rapor Kultur, langsung dengan tautannya.', prompt: 'Ada artikel terbaru apa di Mokultur?' },
+    { icon: 'bi-calendar-event', title: 'Event terdekat', text: 'Jadwal, tanggal, dan lokasi event yang diliput Mokultur.', prompt: 'Event apa yang sebentar lagi?' },
+    { icon: 'bi-people', title: 'Kerja sama', text: 'Kolaborasi, iklan, atau media partner, dan ke mana harus menghubungi.', prompt: 'Gimana cara kerja sama dengan Mokultur?' },
+  ];
+  const GREETING: Line = { text: 'Hmph, akhirnya ada yang mampir. Aku Monika Kuriru, panggil aja Moku-san. Mau cari apa? B-bukan karena aku senang ditanya, ya!', expression: 'tsundere' };
+  const WELCOME_BACK: Line = { text: 'Oh, kamu lagi. Obrolan tadi masih ada, lanjut aja. Aku nggak nungguin, kok.', expression: 'tsundere' };
 
   const siteName = $derived(data.settings?.site_name ?? 'Mokultur');
   const chatOn = $derived(data.settings?.ai_chat_enabled !== false);
@@ -40,29 +46,25 @@
   let ready = $state(false);
   let input = $state('');
   let listEl = $state<HTMLDivElement>();
+  let chatEl = $state<HTMLElement>();
   let status = $state('');
 
   // The dialogue box: a line of Moku-san's own, typed out, or the reply as it arrives.
   let say = $state<{ mode: 'line' | 'reply' | 'thinking'; text: string }>({ mode: 'line', text: '' });
   // The whole of each line or reply, once, for screen readers; the box itself types out.
   let announce = $state('');
-  let mood = $state<MokuExpression>('netral');
   let cursor = $state<'pointer' | 'default'>('default');
 
   let typer: ReturnType<typeof setInterval> | undefined;
-  let moodTimer: ReturnType<typeof setTimeout> | undefined;
   let greetTimer: ReturnType<typeof setTimeout> | undefined;
   let pokeTimer: ReturnType<typeof setTimeout> | undefined;
   let pokes = 0;
   let lastLine: Line | undefined;
   const reduceMotion = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /** Moku-san's face for `seconds`, then back to netral; the chips follow it. */
+  /** Moku-san's face for `seconds`, then back to netral. */
   function feel(name: MokuExpression, seconds: number) {
-    mood = name;
     moku?.hold(name, seconds);
-    clearTimeout(moodTimer);
-    moodTimer = setTimeout(() => (mood = 'netral'), seconds * 1000);
   }
 
   function speak(line: Line) {
@@ -83,11 +85,6 @@
       say = { mode: 'line', text: line.text.slice(0, shown) };
       if (shown >= line.text.length) clearInterval(typer);
     }, 22);
-  }
-
-  function gesture(name: keyof typeof GESTURES) {
-    moku?.play(name);
-    speak(GESTURES[name].line);
   }
 
   /** A tap on the stage: on the head it is a pat, anywhere else on Moku-san a poke. */
@@ -112,10 +109,6 @@
   function onStageMove(event: PointerEvent) {
     if (event.pointerType !== 'mouse') return;
     cursor = moku?.partAt(event.clientX, event.clientY) ? 'pointer' : 'default';
-  }
-
-  function showExpression(name: MokuExpression) {
-    speak({ text: EXPRESSION_LINES[name].text, expression: name });
   }
 
   async function scrollLog() {
@@ -153,6 +146,12 @@
     }).then(scrollLog);
   }
 
+  /** A topic from further down the page: asked, and the chat brought up so its newest message and input are in view. */
+  function askAbout(prompt: string) {
+    chatEl?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'end' });
+    ask(prompt);
+  }
+
   function onSubmit(event: SubmitEvent) {
     event.preventDefault();
     ask(input);
@@ -165,8 +164,8 @@
 
   onMount(() => {
     restoreChat();
-    status = officeStatus();
-    const clock = setInterval(() => (status = officeStatus()), 60_000);
+    status = mokuStatus();
+    const clock = setInterval(() => (status = mokuStatus()), 60_000);
     greetTimer = setTimeout(() => speak($messages.length ? WELCOME_BACK : GREETING), 700);
     scrollLog();
     return () => clearInterval(clock);
@@ -174,7 +173,6 @@
 
   onDestroy(() => {
     clearInterval(typer);
-    clearTimeout(moodTimer);
     clearTimeout(greetTimer);
     clearTimeout(pokeTimer);
   });
@@ -188,11 +186,11 @@
   <meta property="og:title" content={buildPageTitle(TITLE, siteName)} />
   <meta property="og:description" content={DESCRIPTION} />
   <meta property="og:url" content={absoluteUrl('/moku')} />
-  <meta property="og:image" content={absoluteUrl('/moku/moku-og.jpg?v=1')} />
+  <meta property="og:image" content={absoluteUrl('/moku/moku-og.jpg?v=2')} />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:image" content={absoluteUrl('/moku/moku-og.jpg?v=1')} />
+  <meta name="twitter:image" content={absoluteUrl('/moku/moku-og.jpg?v=2')} />
   <link rel="preload" href={STAGE_POSTER} as="image" type="image/webp" />
   {@html `<script type="application/ld+json">${JSON.stringify(buildBreadcrumb([{ name: TITLE, path: '/moku' }]))}<\/script>`}
 </svelte:head>
@@ -208,16 +206,17 @@
     <section class="moku-stage" aria-labelledby="moku-title">
       <header class="moku-stage__head">
         <div>
+          <p class="moku-stage__eyebrow">Asisten pribadi Mokultur</p>
           <h1 id="moku-title">Moku-san</h1>
-          <p>Asisten AI Mokultur. Pekerja kantoran, penggemar Frieren dan anime action, tsundere akut.</p>
+          <p class="moku-stage__intro">Monika Kuriru, yang siap bantu kamu cari artikel, cek event, sampai milih tontonan berikutnya. Tanya aja, walau jawabnya sambil gengsi.</p>
         </div>
         {#if status}
-          <span class="moku-status"><span class="moku-status__dot" aria-hidden="true"></span>{status}</span>
+          <span class="moku-status" class:is-away={!chatOn}><span class="moku-status__dot" aria-hidden="true"></span>{chatOn ? status : 'Lagi istirahat'}</span>
         {/if}
       </header>
 
       <div class="moku-scene-wrap">
-        <!-- Taps here are a bonus; the Colek button below does the same from the keyboard. -->
+        <!-- Taps here are a bonus (Moku-san answers a pat or a poke); nothing on the page needs them. -->
         <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
         <div class="moku-scene" style:cursor onclick={onStageClick} onpointermove={onStageMove}>
           <span class="moku-scene__disc" aria-hidden="true"></span>
@@ -241,37 +240,14 @@
         <p class="visually-hidden" aria-live="polite">{announce}</p>
       </div>
 
-      <div class="moku-controls">
-        <div class="moku-gestures" role="group" aria-label="Gerakan Moku-san">
-          {#each Object.entries(GESTURES) as [name, g] (name)}
-            <button type="button" class="theme-btn theme-btn--ghost theme-btn--sm" onclick={() => gesture(name as keyof typeof GESTURES)} disabled={$busy}>
-              <i class="bi {g.icon}" aria-hidden="true"></i>{g.label}
-            </button>
-          {/each}
-          <button type="button" class="theme-btn theme-btn--ghost theme-btn--sm" onclick={() => poke('body')} disabled={$busy}>
-            <i class="bi bi-hand-index" aria-hidden="true"></i>Colek
-          </button>
-        </div>
-        <div class="moku-moods" role="group" aria-label="Ekspresi Moku-san">
-          {#each MOKU_EXPRESSIONS as name (name)}
-            <button type="button" class="moku-mood" class:is-active={mood === name} aria-pressed={mood === name} onclick={() => showExpression(name)} disabled={$busy}>
-              {EXPRESSION_LINES[name].label}
-            </button>
-          {/each}
-        </div>
-        <p class="moku-controls__hint">
-          <i class="bi bi-hand-index-thumb" aria-hidden="true"></i>
-          {ready ? 'Ketuk kepala atau badan Moku-san buat nyolek. Matanya ikut gerakan kursormu.' : 'Ketuk Moku-san buat nyolek.'}
-        </p>
-      </div>
     </section>
 
-    <section class="moku-chat" aria-labelledby="moku-chat-title">
+    <section class="moku-chat" aria-labelledby="moku-chat-title" bind:this={chatEl}>
       <header class="moku-chat__head">
         <img src={AVATAR_POSTER} alt="" width="40" height="40" />
         <div>
           <h2 id="moku-chat-title">Ngobrol sama Moku-san</h2>
-          <p>Jawabannya dari AI, bisa keliru.</p>
+          <p><span class="moku-chat__dot" class:is-away={!chatOn} aria-hidden="true"></span>{chatOn ? 'Online, biasanya langsung dibalas' : 'Lagi istirahat'}</p>
         </div>
         {#if $messages.length}
           <button type="button" class="moku-chat__reset" onclick={restart} title="Mulai obrolan baru" aria-label="Mulai obrolan baru" disabled={$busy}>
@@ -282,9 +258,17 @@
 
       <div class="moku-log" bind:this={listEl}>
         {#if !$messages.length}
-          <p class="moku-log__empty">
-            {chatOn ? 'Belum ada obrolan. Pilih topik di bawah atau tulis pertanyaanmu sendiri.' : 'Moku-san lagi cuti: chat sedang dimatikan. Kamu masih bisa nyolek dan lihat ekspresinya.'}
-          </p>
+          <!-- Before the first message: where to start, next to the input, as the corner widget does. -->
+          <div class="moku-log__start">
+            <p class="moku-log__empty">{chatOn ? 'Mau mulai dari mana? Pilih salah satu, atau tulis pertanyaanmu sendiri.' : 'Moku-san lagi istirahat. Coba lagi nanti, ya.'}</p>
+            {#if chatOn}
+              <div class="moku-prompts" role="group" aria-label="Topik untuk memulai">
+                {#each PROMPTS as prompt (prompt)}
+                  <button type="button" class="moku-prompt" onclick={() => ask(prompt)} disabled={$busy}>{prompt}</button>
+                {/each}
+              </div>
+            {/if}
+          </div>
         {/if}
         {#each $messages as m, i (i)}
           <div class="moku-msg moku-msg--{m.role}">
@@ -302,21 +286,13 @@
         {#if $chatError}<p class="moku-log__error">{$chatError}</p>{/if}
       </div>
 
-      {#if chatOn}
-        <div class="moku-prompts" role="group" aria-label="Topik cepat">
-          {#each PROMPTS as prompt (prompt)}
-            <button type="button" class="moku-prompt" onclick={() => ask(prompt)} disabled={$busy}>{prompt}</button>
-          {/each}
-        </div>
-      {/if}
-
       <form class="moku-form" onsubmit={onSubmit}>
         <label class="visually-hidden" for="moku-input">Pesan untuk Moku-san</label>
         <input
           id="moku-input"
           type="text"
           bind:value={input}
-          placeholder={chatOn ? 'Tanya Moku-san…' : 'Chat sedang dimatikan'}
+          placeholder={chatOn ? 'Tanya Moku-san…' : 'Moku-san lagi istirahat'}
           maxlength="1000"
           autocomplete="off"
           enterkeyhint="send"
@@ -324,13 +300,14 @@
         />
         <button type="submit" aria-label="Kirim" disabled={$busy || !chatOn || !input.trim()}><i class="bi bi-send-fill" aria-hidden="true"></i></button>
       </form>
+      <p class="moku-chat__note">Jawaban Moku-san bisa keliru. Cek lagi info yang penting, ya.</p>
     </section>
   </div>
 
   <section class="moku-about" aria-labelledby="moku-about-title">
-    <SectionHead title="Kenalan sama Moku-san" sub="Profil singkat rekan kerja paling gengsian di Mokultur." headingId="moku-about-title" />
+    <SectionHead title="Kenalan sama Moku-san" sub="Asisten pribadi Mokultur yang paling gengsian." headingId="moku-about-title" />
     <div class="moku-about__grid">
-      <article class="moku-id" aria-label="Kartu pegawai Moku-san">
+      <article class="moku-id" aria-label="Profil Moku-san">
         <div class="moku-id__band">
           <span>Mokultur</span>
           <span>Be The Cultured!</span>
@@ -338,25 +315,30 @@
         <div class="moku-id__body">
           <img src={AVATAR_POSTER} alt="Moku-san" width="96" height="96" />
           <div>
-            <p class="moku-id__name">Moku-san</p>
-            <p class="moku-id__role">Penjawab pertanyaan pengunjung</p>
+            <p class="moku-id__name">Monika Kuriru</p>
+            <p class="moku-id__role">Moku-san · Asisten pribadi Mokultur</p>
           </div>
         </div>
         <dl class="moku-id__facts">
-          <div><dt>Divisi</dt><dd>Meja Tanya Mokultur</dd></div>
-          <div><dt>Jam kerja</dt><dd>Kapan pun kamu buka chat. Lembur terus, pokoknya.</dd></div>
-          <div><dt>Suka</dt><dd>Frieren: Beyond Journey's End, anime action, kopi pantry</dd></div>
+          <div><dt>Tugas</dt><dd>Bantu kamu nemu artikel, event, dan info Mokultur.</dd></div>
+          <div><dt>Hobi</dt><dd>Nonton anime dan film, mengkurasi tontonan, dan mengkarbitkan orang.</dd></div>
+          <div><dt>Keahlian</dt><dd>Berpikir logis. Rekomendasinya selalu ada alasannya.</dd></div>
           <div><dt>Sifat</dt><dd>Tsundere akut. Jangan dipuji, nanti salah tingkah.</dd></div>
         </dl>
       </article>
 
-      <div class="moku-how">
-        <h3>Biar ngobrolnya lancar</h3>
+      <div class="moku-help">
+        <h3>Moku-san bisa bantu</h3>
         <ul>
-          <li><i class="bi bi-chat-dots" aria-hidden="true"></i><span><strong>Tanya soal Mokultur.</strong> Artikel, kategori, event, talent, media partner, sampai kontak. Moku-san menjawab dari data Mokultur, lengkap dengan tautannya.</span></li>
-          <li><i class="bi bi-hand-index" aria-hidden="true"></i><span><strong>Colek dan sapa.</strong> Ketuk Moku-san atau pakai tombol Sapa, Angguk, dan Finger heart. Yang ini tidak dihitung sebagai pesan.</span></li>
-          <li><i class="bi bi-emoji-smile" aria-hidden="true"></i><span><strong>Lihat semua ekspresinya.</strong> Dua belas wajah, dari tsundere sampai lega. Saat menjawab, ekspresinya ikut isi jawaban.</span></li>
-          <li><i class="bi bi-arrow-left-right" aria-hidden="true"></i><span><strong>Obrolannya nyambung.</strong> Chat di pojok kanan bawah dan halaman ini memakai obrolan yang sama, dan hilang saat tab ditutup.</span></li>
+          {#each HELP as item (item.title)}
+            <li>
+              <button type="button" class="moku-help__item" onclick={() => askAbout(item.prompt)} disabled={$busy || !chatOn}>
+                <i class="bi {item.icon}" aria-hidden="true"></i>
+                <span class="moku-help__text"><strong>{item.title}</strong>{item.text}</span>
+                <i class="bi bi-arrow-right moku-help__go" aria-hidden="true"></i>
+              </button>
+            </li>
+          {/each}
         </ul>
       </div>
     </div>
@@ -424,16 +406,25 @@
       line-height: 1.05;
     }
 
-    p {
-      max-width: 44ch;
-      margin: 0.4rem 0 0;
-      color: rgba(255, 255, 255, 0.78);
-      line-height: 1.55;
-    }
-
     @media (min-width: 768px) {
       padding: 2rem 2rem 0;
     }
+  }
+
+  .moku-stage__eyebrow {
+    margin: 0 0 0.35rem;
+    color: var(--site-primary, #f1ff32);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .moku-stage__intro {
+    max-width: 46ch;
+    margin: 0.5rem 0 0;
+    color: rgba(255, 255, 255, 0.78);
+    line-height: 1.55;
   }
 
   .moku-status {
@@ -450,7 +441,9 @@
     white-space: nowrap;
   }
 
-  .moku-status__dot {
+  .moku-status__dot,
+  .moku-chat__dot {
+    flex-shrink: 0;
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -458,9 +451,20 @@
     box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25);
   }
 
+  .moku-status.is-away .moku-status__dot,
+  .moku-chat__dot.is-away {
+    background: #9ca3af;
+    box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.25);
+  }
+
   .moku-scene-wrap {
     position: relative;
     margin-top: 0.5rem;
+    padding-bottom: 1rem;
+
+    @media (min-width: 768px) {
+      padding-bottom: 0;
+    }
   }
 
   // Phones: the scene takes the frame's own shape, so Moku-san fills it, and
@@ -579,88 +583,12 @@
     50% { opacity: 0.9; transform: translateY(-3px); }
   }
 
-  .moku-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    padding: 1.1rem 1.5rem 1.5rem;
-
-    @media (min-width: 768px) {
-      padding: 1.25rem 2rem 1.75rem;
-    }
-  }
-
-  .moku-gestures {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-
-    .theme-btn { min-height: 44px; }
-    .theme-btn:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
-  }
-
-  // One scrolling row on phones, wrapped on wider screens.
-  .moku-moods {
-    display: flex;
-    gap: 0.4rem;
-    margin: 0 -1.5rem;
-    padding: 0.1rem 1.5rem 0.35rem;
-    overflow-x: auto;
-    scrollbar-width: none;
-    scroll-snap-type: x proximity;
-
-    &::-webkit-scrollbar { display: none; }
-
-    @media (min-width: 768px) {
-      flex-wrap: wrap;
-      margin: 0;
-      padding: 0;
-      overflow: visible;
-    }
-  }
-
-  .moku-mood {
-    flex-shrink: 0;
-    min-height: 44px;
-    padding: 0 0.95rem;
-    border: 1px solid rgba(255, 255, 255, 0.24);
-    border-radius: 999px;
-    background: transparent;
-    color: rgba(255, 255, 255, 0.88);
-    font-size: 0.85rem;
-    font-weight: 700;
-    scroll-snap-align: start;
-    cursor: pointer;
-    transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
-
-    &:hover { border-color: rgba(255, 255, 255, 0.6); color: #fff; }
-    &.is-active {
-      border-color: var(--site-primary, #f1ff32);
-      background: var(--site-primary, #f1ff32);
-      color: var(--site-primary-contrast, #0d0d0d);
-    }
-    &:disabled { opacity: 0.5; cursor: not-allowed; }
-    &:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
-
-    @media (min-width: 768px) {
-      min-height: 38px;
-    }
-  }
-
-  .moku-controls__hint {
-    display: flex;
-    gap: 0.45rem;
-    margin: 0;
-    color: rgba(255, 255, 255, 0.66);
-    font-size: 0.82rem;
-    line-height: 1.45;
-  }
-
   // ---- Chat card ----
   .moku-chat {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    scroll-margin-bottom: 1rem;
     height: min(78svh, 640px);
     border: 1px solid #e5e5e5;
     border-radius: 22px;
@@ -698,7 +626,10 @@
     }
 
     p {
-      margin: 0.1rem 0 0;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      margin: 0.2rem 0 0;
       color: #6b7280;
       font-size: 0.8rem;
     }
@@ -736,12 +667,18 @@
     }
   }
 
+  .moku-log__start {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: auto;
+  }
+
   .moku-log__empty {
-    margin: auto 0;
+    margin: 0;
     color: #6b7280;
     font-size: 0.9rem;
     line-height: 1.55;
-    text-align: center;
   }
 
   .moku-log__error {
@@ -787,33 +724,23 @@
     color: var(--site-primary-contrast, #0d0d0d);
   }
 
-  // One scrolling row on phones; wrapped where there is room to see them all.
   .moku-prompts {
     display: flex;
-    gap: 0.4rem;
-    padding: 0.75rem 1.1rem 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar { display: none; }
-
-    @media (min-width: 992px) {
-      flex-wrap: wrap;
-      overflow: visible;
-    }
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 
   .moku-prompt {
-    flex-shrink: 0;
-    min-height: 40px;
-    padding: 0 0.9rem;
+    min-height: 44px;
+    padding: 0.45rem 0.95rem;
     border: 1px solid #e5e5e5;
     border-radius: 999px;
     background: #fff;
     color: #1a1a1a;
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     font-weight: 700;
-    white-space: nowrap;
+    line-height: 1.3;
+    text-align: left;
     cursor: pointer;
 
     &:hover { border-color: #1a1a1a; }
@@ -826,7 +753,7 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    margin: 0.75rem 1.1rem 1.1rem;
+    margin: 0.75rem 1.1rem 0;
     padding: 0.3rem 0.3rem 0.3rem 1rem;
     border: 1px solid #d4d4d4;
     border-radius: 999px;
@@ -861,6 +788,14 @@
       &:disabled { opacity: 0.35; cursor: not-allowed; }
       &:focus-visible { outline: 3px solid var(--site-primary, #f1ff32); outline-offset: 2px; }
     }
+  }
+
+  .moku-chat__note {
+    margin: 0;
+    padding: 0.5rem 1.1rem 0.9rem;
+    color: #6b7280;
+    font-size: 0.75rem;
+    text-align: center;
   }
 
   // ---- About ----
@@ -955,7 +890,7 @@
     }
   }
 
-  .moku-how {
+  .moku-help {
     h3 {
       margin: 0 0 0.75rem;
       font-size: 1.1rem;
@@ -965,19 +900,35 @@
 
     ul {
       display: grid;
-      gap: 1rem;
+      gap: 0.75rem;
       margin: 0;
       padding: 0;
       list-style: none;
+
+      @media (min-width: 576px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
 
-    li {
-      display: flex;
-      gap: 0.85rem;
-      line-height: 1.6;
-    }
+    li { display: flex; }
+  }
 
-    i {
+  // Each topic is a way into the chat: the whole card asks it.
+  .moku-help__item {
+    display: flex;
+    flex: 1;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 1rem;
+    border: 1px solid #e5e5e5;
+    border-radius: 18px;
+    background: #fff;
+    color: #1a1a1a;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+
+    > .bi:first-child {
       display: inline-grid;
       flex-shrink: 0;
       place-items: center;
@@ -985,10 +936,38 @@
       height: 40px;
       border-radius: 12px;
       background: color-mix(in srgb, var(--site-primary, #f1ff32) 30%, #fff);
-      color: #1a1a1a;
       font-size: 1.05rem;
     }
 
-    strong { font-weight: 800; }
+    &:hover:not(:disabled) {
+      border-color: #1a1a1a;
+      box-shadow: 0 10px 24px rgba(10, 10, 10, 0.08);
+    }
+
+    &:hover:not(:disabled) .moku-help__go { transform: translateX(3px); color: #1a1a1a; }
+    &:disabled { opacity: 0.55; cursor: not-allowed; }
+    &:focus-visible { outline: 3px solid var(--site-dark, #0d0d0d); outline-offset: 2px; }
+  }
+
+  .moku-help__text {
+    flex: 1;
+    min-width: 0;
+    color: #4b5563;
+    font-size: 0.88rem;
+    line-height: 1.5;
+
+    strong {
+      display: block;
+      margin-bottom: 0.15rem;
+      color: #1a1a1a;
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+  }
+
+  .moku-help__go {
+    align-self: center;
+    color: #9ca3af;
+    transition: transform 160ms ease, color 160ms ease;
   }
 </style>

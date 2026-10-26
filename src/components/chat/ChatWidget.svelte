@@ -122,7 +122,7 @@
           </span>
           <div class="mchat__head-text">
             <strong>{panelTitle}</strong>
-            <small><span class="mchat__dot" aria-hidden="true"></span>Moku-san · asisten AI, bisa keliru</small>
+            <small><span class="mchat__dot" aria-hidden="true"></span>Asisten pribadi Mokultur</small>
           </div>
         </div>
         <div class="mchat__head-actions">
@@ -190,6 +190,7 @@
           <i class="bi bi-send-fill"></i>
         </button>
       </form>
+      <p class="mchat__note">Jawaban Moku-san bisa keliru. Cek lagi info yang penting, ya.</p>
     </div>
   {/if}
 
@@ -627,10 +628,20 @@
   .mchat__form {
     display: flex;
     gap: 0.4rem;
-    padding: 0.6rem;
+    padding: 0.6rem 0.6rem 0.35rem;
     background: #fff;
     border-top: 1px solid #ececf0;
     flex-shrink: 0;
+  }
+
+  .mchat__note {
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0 0.75rem 0.5rem;
+    background: #fff;
+    color: #6b7280;
+    font-size: 0.7rem;
+    text-align: center;
   }
 
   .mchat__input {
