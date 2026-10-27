@@ -13,6 +13,8 @@ import { PUBLIC_API_URL } from '$env/static/public';
  * empty AI tab leaves the chat working exactly as it did before.
  */
 export type AiSettings = {
+  /** The provider picked at Settings → AI, key included; null leaves this process on its own env. */
+  provider: { id: string | null; baseUrl: string; apiKey: string } | null;
   model: string | null;
   fastModel: string | null;
   systemPrompt: string | null;
@@ -22,6 +24,7 @@ export type AiSettings = {
 };
 
 const EMPTY: AiSettings = {
+  provider: null,
   model: null,
   fastModel: null,
   systemPrompt: null,

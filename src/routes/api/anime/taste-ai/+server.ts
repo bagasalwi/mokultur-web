@@ -1,7 +1,7 @@
 import { error, json } from '@sveltejs/kit';
-import { env } from '$env/dynamic/private';
 import type { RequestHandler } from './$types';
 import { getAiSettings } from '$lib/server/ai-settings';
+import { aiEndpoint, postChatCompletion } from '$lib/server/ai-request';
 
 /**
  * Writes the personality read on a quiz result.
@@ -73,15 +73,13 @@ function describeAnswers(answers: Record<string, number>): string {
 }
 
 export const POST: RequestHandler = async ({ request, getClientAddress }) => {
-  if (!env.AI_API_KEY || !env.AI_BASE_URL || !env.AI_MODEL) {
-    throw error(503, 'AI belum dikonfigurasi.');
-  }
+  const ai = await getAiSettings(fetch);
+  const endpoint = aiEndpoint(ai);
+  if (!endpoint) throw error(503, 'AI belum dikonfigurasi.');
 
   if (rateLimited(clientIp(request, getClientAddress))) {
     throw error(429, 'Terlalu banyak permintaan.');
   }
-
-  const ai = await getAiSettings(fetch);
 
   let body: {
     answers?: Record<string, number>;
@@ -125,20 +123,16 @@ Aturan:
 
   let res: Response;
   try {
-    res = await fetch(`${env.AI_BASE_URL}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${env.AI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: ai.fastModel ?? env.AI_FAST_MODEL ?? env.AI_MODEL,
+    res = await postChatCompletion(
+      endpoint,
+      {
+        model: endpoint.fastModel,
         max_tokens: 900,
         temperature: 0.8,
         messages: [{ role: 'user', content: prompt }],
-      }),
-      signal: AbortSignal.timeout(15_000),
-    });
+      },
+      15_000,
+    );
   } catch {
     throw error(504, 'AI tidak merespons.');
   }

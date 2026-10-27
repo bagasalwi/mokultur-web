@@ -1,8 +1,8 @@
 import { error, json } from '@sveltejs/kit';
-import { env } from '$env/dynamic/private';
 import { getSiteFacts, searchArticles } from '$lib/chat/knowledge';
 import { createThinkStripper } from '$lib/chat/think-stripper';
 import { getAiSettings } from '$lib/server/ai-settings';
+import { aiEndpoint, postChatCompletion } from '$lib/server/ai-request';
 import { MOKU_DATA_RULES, MOKU_EXPRESSION_FORMAT, MOKU_PERSONA } from '$lib/server/moku-persona';
 import { isMokuExpression, type MokuExpression } from '$lib/chat/expressions';
 import type { RequestHandler } from './$types';
@@ -98,11 +98,9 @@ function createExpressionSplitter(onExpression: (name: MokuExpression) => void, 
 }
 
 export const POST: RequestHandler = async ({ request, getClientAddress }) => {
-  if (!env.AI_API_KEY || !env.AI_BASE_URL || !env.AI_MODEL) {
-    throw error(503, 'Fitur chat belum dikonfigurasi.');
-  }
-
   const ai = await getAiSettings(fetch);
+  const endpoint = aiEndpoint(ai);
+  if (!endpoint) throw error(503, 'Fitur chat belum dikonfigurasi.');
 
   if (rateLimited(clientIp(request, getClientAddress), ai.rateLimit ?? DEFAULT_RATE_LIMIT)) {
     return json({ error: 'Kebanyakan pesan. Coba lagi beberapa menit lagi ya.' }, { status: 429 });
@@ -131,22 +129,18 @@ export const POST: RequestHandler = async ({ request, getClientAddress }) => {
 
   let upstream: Response;
   try {
-    upstream = await fetch(`${env.AI_BASE_URL}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${env.AI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: ai.model ?? env.AI_MODEL,
+    upstream = await postChatCompletion(
+      endpoint,
+      {
+        model: endpoint.model,
         stream: true,
         // Reasoning tokens are drawn from this budget, so a small cap yields an empty answer.
         max_tokens: ai.maxTokens ?? 2048,
         temperature: ai.temperature ?? 0.3,
         messages: [{ role: 'system', content: buildSystemPrompt(facts, articles, ai.systemPrompt) }, ...history],
-      }),
-      signal: AbortSignal.timeout(60_000),
-    });
+      },
+      60_000,
+    );
   } catch {
     throw error(502, 'Tidak bisa menghubungi layanan AI.');
   }
