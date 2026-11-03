@@ -1,7 +1,7 @@
 import type { LayoutServerLoad } from './$types';
 import type { SiteSettings, NavbarItem, SocialMediaItem, Category } from '$lib/api';
 import { getSettings, listCategories, getSocialMedia, getNavbar } from '$lib/api';
-import { BRAND, SITE_NOINDEX, WEB_FEATURE_LIST, webFeatureOn } from '$lib/server/site';
+import { BRAND, SITE_NOINDEX, SITE_THEME, WEB_FEATURE_LIST, webFeatureOn } from '$lib/server/site';
 import type { WebFeature } from '$lib/features';
 
 // 60s, not 5 minutes. The API already caches these responses for 300s and
@@ -113,6 +113,6 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
     navFooter: keep ? _cache.navFooter.filter(keep) : _cache.navFooter,
     user: locals.user,
     // Per-deployment switches (src/lib/server/site.ts) the pages and components need.
-    site: { noindex: SITE_NOINDEX, features: WEB_FEATURE_LIST, brand: BRAND },
+    site: { noindex: SITE_NOINDEX, features: WEB_FEATURE_LIST, brand: BRAND, theme: SITE_THEME },
   };
 };

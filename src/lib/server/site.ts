@@ -22,6 +22,16 @@ export const DASHBOARD_URL = (env.DASHBOARD_URL || 'https://dashboard.mokultur.c
  */
 export const SITE_NOINDEX = env.SITE_NOINDEX === '1' || env.SITE_NOINDEX === 'true';
 
+/**
+ * Visual identity. 'mokultur' is the stylesheet as it is; 'seputarotaku' puts
+ * data-theme="seputarotaku" on <html>, which switches on the overrides in
+ * src/styles/themes/_seputarotaku.scss (see docs/DESIGN-SEPUTAROTAKU.md).
+ * Nothing in that file matches without the attribute, so mokultur.com is
+ * untouched by it.
+ */
+export type SiteTheme = 'mokultur' | 'seputarotaku';
+export const SITE_THEME: SiteTheme = env.SITE_THEME === 'seputarotaku' ? 'seputarotaku' : 'mokultur';
+
 /** Optional parts of the site (WEB_FEATURES, '*' = all, as on mokultur.com). */
 export const WEB_FEATURE_LIST: WebFeature[] = parseWebFeatures(env.WEB_FEATURES ?? '*');
 

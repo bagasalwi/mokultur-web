@@ -157,6 +157,10 @@
 
 <svelte:head>
   <link rel="preload" href={ICON_FONT_URL} as="font" type="font/woff2" crossorigin="anonymous" />
+  {#if data.site.theme === 'seputarotaku'}
+    <!-- The theme's one typeface; declared in styles/_fonts.scss, used only under data-theme. -->
+    <link rel="preload" href="/themes/seputarotaku/Figtree.woff2?v=1" as="font" type="font/woff2" crossorigin="anonymous" />
+  {/if}
   {#if noindex}
     <meta name="robots" content="noindex, nofollow" />
   {:else if isAnimePath($page.url.pathname)}

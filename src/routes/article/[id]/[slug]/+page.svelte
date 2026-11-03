@@ -347,7 +347,7 @@
         <div class="home-collab-card__chips article-detail__meta">
           {#if a.author}
             <span>
-              Publish By <a
+              {data.site.theme === 'seputarotaku' ? 'Oleh' : 'Publish By'} <a
                 href="/@{a.author.username ?? a.author.id}"
                 class="ms-1 text-decoration-none"
                 style="color: var(--site-primary, #f1ff32);"

@@ -7,8 +7,11 @@ tidak berubah sama sekali. Spesimen visualnya ada di
 `docs/seputarotaku-styleguide.html`; sumber brand-nya di
 `docs/seputarotaku-reference/`.
 
-Status: **referensi, belum diimplementasikan.** Bagian "Implementasi" di bawah
-menjelaskan cara memasangnya tanpa mengganggu Mokultur.
+Status: **diimplementasikan** di `src/styles/themes/_seputarotaku.scss`
+(saklar `SITE_THEME=seputarotaku`, lihat bab 5). Komponen yang belum diberi
+tema: strip atas masthead (belum ada markup-nya), halaman kontak, media
+partner, dan curhatan; keduanya masih memakai gaya Mokultur dengan token
+warna yang sama.
 
 ---
 
@@ -543,7 +546,7 @@ tidak aktif, tanpa tema.
 
 ---
 
-## 5. Implementasi (rencana, belum dikerjakan)
+## 5. Implementasi
 
 Satu codebase, satu tema tambahan, nol perubahan pada tampilan Mokultur.
 
@@ -554,9 +557,11 @@ Satu codebase, satu tema tambahan, nol perubahan pada tampilan Mokultur.
    `+layout.server.ts` ikut mengembalikan `site.theme` untuk komponen yang
    perlu bercabang markup (Navbar strip atas, Hero, dan posisi badge
    kategori di ArticleCard).
-2. **Font**: `static/fonts/Figtree-[wght].woff2` (variable 300–900, subset
-   Latin, `font-display: swap`), preload hanya saat tema aktif (di
-   `+layout.svelte`).
+2. **Font**: `static/themes/seputarotaku/Figtree.woff2` + `Figtree-ext.woff2`
+   (variable 300–900, subset Latin dan Latin-ext, `font-display: swap`),
+   dideklarasikan di `_fonts.scss`, preload hanya saat tema aktif (di
+   `+layout.svelte`). Diletakkan di luar `/fonts/` supaya service worker
+   mokultur.com tidak ikut mem-precache.
 3. **Stylesheet**: `src/styles/themes/_seputarotaku.scss`, di-import paling
    akhir di `app.scss`. Semua selektor diawali `html[data-theme='seputarotaku']`
    sehingga spesifisitas selalu menang atas `custom.scss` tanpa `!important`.

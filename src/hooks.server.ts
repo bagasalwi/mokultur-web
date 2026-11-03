@@ -3,7 +3,7 @@ import { jwtVerify } from 'jose';
 import { env } from '$env/dynamic/private';
 import { LOUNGE_ENABLED } from '$lib/features';
 import { isAnimePath } from '$lib/route-policy';
-import { SITE_NOINDEX } from '$lib/server/site';
+import { SITE_NOINDEX, SITE_THEME } from '$lib/server/site';
 
 const COOKIE_NAME = 'mokultur_token';
 const SECRET_BYTES = new TextEncoder().encode(env.JWT_SECRET ?? '');
@@ -43,7 +43,14 @@ export const handle: Handle = async ({ event, resolve }) => {
     }
   }
 
-  const response = await resolve(event);
+  // The theme attribute goes on <html> in the server render itself, so the
+  // themed styles apply to the first paint and hydration changes nothing.
+  const response = await resolve(
+    event,
+    SITE_THEME === 'mokultur'
+      ? undefined
+      : { transformPageChunk: ({ html }) => html.replace('<html lang="id">', `<html lang="id" data-theme="${SITE_THEME}">`) },
+  );
 
   // A site kept out of search (SITE_NOINDEX) says so on every page, endpoint and redirect.
   // Files in static/ never reach this hook; the vhost's own header covers those.

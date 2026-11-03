@@ -47,3 +47,7 @@
 @import 'custom';
 @import 'reader';
 @import 'me';
+
+// 5. Per-site themes. Every rule is scoped to html[data-theme='…'], which
+//    hooks.server.ts sets from SITE_THEME; without it nothing here matches.
+@import 'themes/seputarotaku';
