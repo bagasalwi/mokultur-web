@@ -4,38 +4,50 @@ Referensi tampilan untuk deployment kedua codebase ini. Tujuannya satu: situs
 ini tidak boleh terbaca sebagai "Mokultur dengan warna merah". Semua yang
 tercatat di sini berlaku hanya saat `SITE_THEME=seputarotaku`; mokultur.com
 tidak berubah sama sekali. Spesimen visualnya ada di
-`docs/seputarotaku-styleguide.html`.
+`docs/seputarotaku-styleguide.html`; sumber brand-nya di
+`docs/seputarotaku-reference/`.
 
 Status: **referensi, belum diimplementasikan.** Bagian "Implementasi" di bawah
 menjelaskan cara memasangnya tanpa mengganggu Mokultur.
 
 ---
 
-## 1. Arah: "Hinomaru & Garis Miring"
+## 1. Arah: "Hinomaru & Kotak Merah"
 
-Referensinya adalah brand Seputar Otaku yang sudah hidup di YouTube dan
-Instagram (dicek 2026-11-03 lewat kanal YouTube; Instagram tidak bisa dibuka
-tanpa login): latar charcoal gelap dengan ilustrasi anime abu-abu, **pita merah
-miring** yang membelah banner, wordmark "OTAKU" bergaya techno kotak, cakram
-merah berisi S, dan thumbnail berlatar merah tua dengan judul putih tebal
-uppercase yang kata kuncinya **disorot kotak merah**. Di web, bahasa itu
-dipakai begini:
+Sumber utamanya adalah **template post Instagram Seputar Otaku** (contoh di
+`docs/seputarotaku-reference/ig-post.jpg`, dicek 2026-11-03), karena itulah
+wajah brand yang dilihat pembaca setiap hari. Yang ada di post itu:
 
-- **Chrome gelap, bidang baca terang.** Masthead, hero, footer, dan satu
-  panel sorotan memakai charcoal (`--so-charcoal`) seperti banner mereka;
-  daftar berita dan isi artikel tetap putih supaya nyaman dibaca lama.
-- **Cakram merah (hinomaru)** adalah satu-satunya bentuk bulat di situs:
-  penanda judul bagian, avatar, dan logo. Tidak ada tombol pill, tidak ada
-  kartu membulat.
-- **Garis miring 14°** (dari pita banner) hanya di tiga tempat: pita merah di
-  tepi kiri bidang gelap, tepi kanan foto unggulan (`clip-path`), dan kotak
-  sorotan di balik satu kata kunci (`.hl`, skew −14°). Tidak di kartu, tidak
-  di tombol.
-- **Tipe seperti thumbnail mereka:** judul bagian dan judul pendek Barlow 800
-  uppercase; judul berita Barlow Condensed supaya padat; label Chakra Petch
-  (techno kotak, seirama wordmark).
-- Sisanya **putih, tinta, dan garis**: padat seperti situs berita Jepang,
-  merah secukupnya.
+- Latar **hitam** (#0b0c0e) dengan **glow merah tua** dari pojok kiri atas.
+- Logo: cakram merah berisi S + wordmark "seputar otaku" lowercase dua baris.
+- **Kotak merah kategori** ("JAPAN"): uppercase tebal, sudut sedikit membulat,
+  di **atas** judul.
+- Judul **putih, tebal, sentence-case**, huruf geometris bulat (bukan
+  kondensed, bukan uppercase).
+- Baris **"Oleh Mochizou"**: byline kecil, nama ditebalkan.
+- Tidak ada garis miring, tidak ada warna kedua, tidak ada ornamen lain.
+
+Banner YouTube mereka (pita merah miring, wordmark techno) tidak dipakai lagi
+sebagai sumber motif; post adalah bahasa yang konsisten, banner hanya satu
+artefak.
+
+Di web, bahasa post itu dipakai begini:
+
+- **Chrome gelap, bidang baca terang.** Masthead (baris merek), hero, footer,
+  dan satu panel gelap per halaman memakai `.glow`: hitam dengan glow merah
+  di pojok kiri atas. Daftar berita dan isi artikel tetap putih supaya nyaman
+  dibaca lama.
+- **Kotak merah = kategori.** Di semua kartu berfoto, hero, dan kepala
+  artikel, kategori adalah badge merah di atas judul, persis post. Di daftar
+  padat (baris, sidebar, hasil pencarian) kategori menjadi teks merah di
+  baris meta supaya daftar tetap tenang.
+- **Satu keluarga huruf, Figtree**, pengganti terdekat untuk huruf geometris
+  bulat di post (a dua tingkat, g satu tingkat, ujung t miring). Judul 700/800
+  sentence-case dengan tracking rapat; hanya label yang uppercase.
+- **Cakram merah (hinomaru)** adalah satu-satunya bentuk bulat: logo, avatar,
+  penanda judul bagian. Selain itu satu radius 6px (panel besar 10px).
+- **Byline "Oleh Nama"** dipakai persis seperti post: di hero, Terbaru, dan
+  kepala artikel.
 
 Mode per permukaan: beranda dan arsip = **Read** (padat, mudah dipindai);
 detail artikel = **Read** (nyaman dibaca lama); dashboard pembaca, pencarian,
@@ -45,15 +57,15 @@ auth = **Operate**.
 
 | Mokultur (incumbent) | Seputar Otaku |
 |---|---|
-| Inter di semua tempat | Barlow 800 (judul bagian), Barlow Condensed (judul berita), label Chakra Petch |
-| Tombol pill 999px, hover terangkat + bayangan | Tombol kotak 2px, hover ganti warna, tanpa bayangan |
-| Badge kategori isi penuh di atas judul | Kategori merah di baris meta **di bawah** judul |
-| Section head: garis aksen kiri 4px | Section head: garis tinta 2px di atas + cakram merah |
-| Kartu putih membulat 12px, bayangan, `card-hover` | Tanpa kartu; foto + teks dipisah garis 1px, sudut 0 |
-| Hero: gradien gelap di atas foto | Hero: panel charcoal, foto dipotong miring, pita merah, judul putih di bidang solid |
-| Navbar putih, cookie card hitam melayang | Masthead charcoal berpita merah + baris kategori putih, cookie bar penuh di bawah |
-| Archive hero gelap membulat 28px | Archive header putih, judul kondensed besar, tab bergaris |
-| Panel "Pick" gelap | Panel putih berbingkai tinta 2px, kata kunci disorot kotak merah miring |
+| Inter di semua tempat | Figtree, satu keluarga untuk judul, label, dan isi |
+| Tombol pill 999px, hover terangkat + bayangan | Tombol radius 6px, sentence-case, hover ganti warna, tanpa bayangan |
+| Badge kategori warna aksen, sudut membulat besar | Kotak merah 4px uppercase persis template post; di daftar padat jadi teks merah di baris meta |
+| Section head: garis aksen kiri 4px | Section head: garis tinta 2px di atas + cakram merah, judul sentence-case 800 |
+| Kartu putih membulat 12px, bayangan, `card-hover` | Tanpa kartu; foto 6px + teks dipisah garis 1px |
+| Hero: gradien gelap di atas foto | Hero: panel hitam berglow merah, badge + judul putih di bidang solid di bawah foto |
+| Navbar putih, cookie card hitam melayang | Masthead hitam berglow + baris kategori putih, cookie bar penuh di bawah |
+| Archive hero gelap membulat 28px | Archive header putih bergaris tinta, judul besar sentence-case, tab bergaris |
+| Panel "Pick" gelap | Panel putih berbingkai tinta 2px, kata "Pick" di kotak merah |
 
 ---
 
@@ -66,11 +78,12 @@ Semua token diawali `--so-`. Nilai merek tetap bisa diubah dari dashboard:
 html[data-theme='seputarotaku'] {
   /* Warna */
   --so-red:        var(--site-primary, #c01c28);
-  --so-red-deep:   #8e1420;      /* hover, teks merah di atas putih kecil */
+  --so-red-deep:   #8e1420;      /* hover, teks merah kecil di atas putih */
   --so-red-tint:   #fdeceb;      /* latar sorotan, selection */
   --so-ink:        var(--site-dark, #121417);
   --so-ink-2:      #2a2f36;      /* hover di atas tinta */
-  --so-charcoal:   #1a1b1e;      /* masthead, hero, footer: latar banner mereka */
+  --so-black:      #0b0c0e;      /* latar post: masthead, hero, footer */
+  --so-glow:       rgba(192, 28, 40, 0.55); /* glow merah di pojok bidang hitam */
   --so-paper:      #ffffff;      /* bidang konten */
   --so-ground:     #f5f6f8;      /* latar halaman, abu dingin */
   --so-text:       #15181c;
@@ -80,16 +93,14 @@ html[data-theme='seputarotaku'] {
   --so-ok:         #1f7a4d;
   --so-warn:       #b8640f;
 
-  /* Tipografi */
-  --so-font-ui:      'Barlow', 'Segoe UI', Roboto, Arial, sans-serif;
-  --so-font-display: 'Barlow Condensed', 'Arial Narrow', 'Barlow', sans-serif;
-  --so-font-label:   'Chakra Petch', 'Barlow', sans-serif;
+  /* Tipografi: satu keluarga */
+  --so-font-ui:      'Figtree', 'Plus Jakarta Sans', 'Segoe UI', Roboto, Arial, sans-serif;
+  --so-font-display: var(--so-font-ui);
+  --so-font-label:   var(--so-font-ui);
 
   /* Bentuk */
-  --so-radius:     2px;          /* kontrol */
-  --so-radius-img: 0;
-  --so-slant:      14deg;        /* kemiringan pita, tepi foto, dan sorotan */
-  --so-slant-clip: polygon(0 0, 100% 0, calc(100% - 2.5rem) 100%, 0 100%); /* tepi kanan foto unggulan; 1.5rem ≤575px */
+  --so-radius:     6px;          /* foto, tombol, input, chip; badge 4px */
+  --so-radius-lg:  10px;         /* panel besar: hero, Pick, modal, spotlight */
 
   /* Ritme */
   --so-gutter:     1.5rem;       /* 1rem ≤575px */
@@ -105,41 +116,62 @@ html[data-theme='seputarotaku'] {
 ```
 
 Kontras: `--so-muted` di atas putih 6.3:1; `--so-red` di atas putih 5.9:1;
-putih di atas `--so-red` 5.9:1; putih di atas `--so-ink` 17:1. Teks merah
+putih di atas `--so-red` 5.9:1; putih di atas `--so-black` 19:1. Teks merah
 boleh dipakai sampai 0.75rem.
+
+**Bidang hitam** (`.glow`):
+
+```css
+.glow {
+  position: relative;
+  background-color: var(--so-black);
+  background-image: radial-gradient(42rem 26rem at 0 0, var(--so-glow), transparent 62%);
+  color: #fff;
+}
+/* baris masthead pendek: glow lebih lembut supaya tidak jadi garis merah */
+.navbar-brand-row.glow, .navbar-compact.glow { --so-glow: rgba(192, 28, 40, 0.38); }
+```
+
+Ukuran gradien tetap dalam rem, bukan persen, supaya glow terlihat sama di
+masthead setinggi 64px dan di hero setinggi 600px.
 
 ### Font
 
-| Peran | Keluarga | Bobot yang dipakai | Catatan |
+| Peran | Keluarga | Bobot | Catatan |
 |---|---|---|---|
-| Display | Barlow Condensed | 600, 700 | Judul artikel, judul hero, angka peringkat, H1 arsip |
-| Display pendek | Barlow | 800 | Judul bagian, judul sidebar, judul Pick: uppercase, tracking 0.03em, seperti thumbnail YouTube mereka |
-| UI & badan | Barlow | 400, 500, 600 | Teks antarmuka dan isi artikel |
-| Label | Chakra Petch | 600 | Kategori, waktu, caption, tab, pintasan keyboard. Selalu uppercase, tracking 0.08em, ≤0.8rem |
+| Display | Figtree | 800 | H1 artikel, H1 arsip, judul hero, judul bagian, angka peringkat, wordmark |
+| Judul | Figtree | 700 | Judul kartu, baris daftar; 600 untuk judul kecil di sidebar dan hasil pencarian |
+| UI & badan | Figtree | 400, 500 | Teks antarmuka dan isi artikel |
+| Label | Figtree | 700 | Kategori, waktu, caption, tab, badge: uppercase, tracking 0.06em, ≤0.75rem |
 
-Ketiganya lisensi OFL; di-host sendiri di `static/fonts/` sebagai woff2
-(subset Latin), dideklarasikan di `src/styles/themes/_seputarotaku-fonts.scss`.
-Deklarasi `@font-face` yang tidak dipakai tidak diunduh browser, jadi aman
-ikut di bundel Mokultur.
+Lisensi OFL; di-host sendiri di `static/fonts/Figtree-[wght].woff2` (variable,
+subset Latin, `font-display: swap`), dideklarasikan di
+`src/styles/themes/_seputarotaku-fonts.scss`. Deklarasi `@font-face` yang
+tidak dipakai tidak diunduh browser, jadi aman ikut di bundel Mokultur.
+Kalau font asli template post diketahui dan lisensinya mengizinkan, ganti di
+satu tempat: `--so-font-ui`.
 
 ### Skala tipe
 
-| Token | Ukuran / leading | Font | Dipakai |
+| Token | Ukuran / leading | Bobot | Dipakai |
 |---|---|---|---|
-| display-xl | clamp(2.25rem, 5vw, 3.25rem) / 1.05, tracking -0.01em | Condensed 700 | H1 artikel, H1 arsip |
-| display-lg | clamp(1.75rem, 3vw, 2.5rem) / 1.08 | Condensed 700 | Judul hero utama |
-| display-md | 1.25rem / 1.15 | Barlow 800, uppercase, tracking 0.03em | Judul bagian |
-| sorotan (`.hl`) | mengikuti judulnya | kotak `--so-red`, teks putih, `skewX(-14deg)`, isi di-skew balik | Satu kata kunci: "Pick", "Terkini", kata penting di judul hero |
-| title-lg | 1.375rem / 1.2 | Condensed 600 | Judul kartu besar, rail hero |
-| title | 1.125rem / 1.25 | Condensed 600 | Judul kartu, baris daftar |
-| title-sm | 1rem / 1.3 | Barlow 600 | Judul di sidebar, read-also |
-| body-lg | 1.0625rem / 1.75 | Barlow 400 | Isi artikel (maks 68ch) |
-| body | 0.9375rem / 1.6 | Barlow 400 | Antarmuka |
-| body-sm | 0.875rem / 1.5 | Barlow 400/500 | Deskripsi kartu, footer |
-| label | 0.75rem / 1 | Chakra 600 uppercase | Kategori, meta, tab |
-| label-xs | 0.6875rem / 1 | Chakra 600 uppercase | Caption, pintasan |
+| display-xl | clamp(1.875rem, 4vw, 2.75rem) / 1.08, tracking -0.025em | 800 | H1 artikel, H1 arsip |
+| display-lg | clamp(1.5rem, 2.6vw, 2.125rem) / 1.1, tracking -0.02em | 800 | Judul hero utama, EventSpotlight |
+| display-md | 1.25rem / 1.15, tracking -0.015em | 800 | Judul bagian, sentence-case |
+| sorotan (`.hl`) | mengikuti judulnya, radius 0.2em | 800 | Satu kata kunci di kotak merah: "Pick" |
+| title-lg | 1.25rem / 1.18 | 700 | Judul kartu besar |
+| title | 1.0625rem / 1.22 | 700 | Judul kartu, baris daftar, rail hero |
+| title-sm | 1rem / 1.3 | 600 | Judul di sidebar, read-also, hasil pencarian |
+| body-lg | 1.0625rem / 1.75 | 400 | Isi artikel (maks 68ch) |
+| body | 0.9375rem / 1.6 | 400 | Antarmuka |
+| body-sm | 0.875rem / 1.5 | 400/500 | Deskripsi kartu, footer, byline |
+| label | 0.75rem / 1 | 700 uppercase 0.06em | Kategori teks, meta, tab |
+| badge | 0.6875rem / 1 | 700 uppercase 0.06em | Kotak merah kategori, kotak tinta status |
+| label-xs | 0.6875rem / 1 | 700 uppercase | Caption, pintasan |
 
-Angka selalu `font-variant-numeric: tabular-nums` di label dan tabel.
+Semua judul `letter-spacing` negatif dan `text-wrap: balance`. Angka selalu
+`font-variant-numeric: tabular-nums` di label dan tabel. Byline: "Oleh " 400 +
+nama 700, `body-sm`.
 
 ---
 
@@ -152,13 +184,12 @@ kolom. Tidak ada `.container` kustom baru.
 
 ### Permukaan & kedalaman
 Tiga lapisan: `--so-ground` (halaman), `--so-paper` (bidang konten, tanpa
-bayangan, dipisah garis), dan `--so-charcoal` (chrome: masthead, hero,
+bayangan, dipisah garis), dan `.glow` (chrome: baris merek masthead, hero,
 footer, plus satu bidang gelap di tengah halaman: TechSection immersive di
-beranda, "Baca selanjutnya" di artikel, EventSpotlight di event). Setiap
-bidang charcoal yang menyentuh tepi kiri memakai **pita merah miring**
-(`.band::before`: strip 1.5rem × 8rem menggantung dari tepi kiri atas, `skewX(-14deg)` dengan origin kiri atas, sehingga kemiringannya tetap 14° berapa pun tinggi bidangnya dan tidak menabrak isi; padding kiri bidang 3.75rem, 3rem di ponsel). Satu-satunya
-bayangan di situs adalah pada lapisan melayang (search palette, auth modal,
-menu akun): `0 12px 32px rgba(18,20,23,.18)`.
+beranda, "Baca selanjutnya" di artikel, EventSpotlight di event). Teks di
+bidang gelap selalu di latar solid, tidak pernah di atas foto dengan gradasi.
+Satu-satunya bayangan di situs adalah pada lapisan melayang (search palette,
+auth modal, menu akun): `0 12px 32px rgba(18,20,23,.18)`.
 
 ### Garis
 - 1px `--so-rule`: pemisah baris daftar, sidebar, footer kolom.
@@ -167,9 +198,10 @@ menu akun): `0 12px 32px rgba(18,20,23,.18)`.
   NavProgress.
 
 ### Bentuk
-Gambar radius 0. Kontrol 2px. Tepi miring (`--so-slant-clip`) hanya pada foto
-utama hero dan foto hero artikel; thumbnail dan foto kartu tetap persegi.
-Panel (Pick, auth, search palette) berbingkai tinta 2px tanpa potongan.
+Satu radius: `--so-radius` 6px untuk foto, thumbnail, tombol, input, chip,
+pagination; badge 4px; panel besar (hero, Pick, modal, spotlight, "Baca
+selanjutnya") `--so-radius-lg` 10px. Masthead dan footer tanpa radius (penuh
+lebar). Bulat hanya cakram logo, avatar, dan penanda judul bagian.
 
 ### Gerak
 Satu momen yang diarahkan: **garis bawah merah tumbuh dari kiri** pada judul
@@ -201,31 +233,31 @@ newsletter, push, swg) **tidak dibuatkan tema**; begitu pula anime dan forum.
 **Navbar / masthead** (`layout/Navbar.svelte`, varian `times`)
 - Strip atas 32px, latar `--so-ink`, teks putih 70%: kiri "ANIME · JEJEPANGAN
   · TOKUSATSU" (label), kanan ikon sosial 16px dan tombol "Masuk" (label
-  putih, border putih 40%). Ponsel: strip disembunyikan.
-- Baris merek 64px, latar `--so-charcoal` dengan pita merah miring di tepi
-  kiri (seperti banner YouTube): logo cakram 36px + wordmark putih Barlow
-  Condensed 700 1.5rem ("seputar otaku", lowercase seperti logo). Kanan:
-  pencarian (ikon putih, label "Cari" ≥768px), avatar merah. Ponsel: burger
-  kiri, logo tengah, pencarian kanan; tinggi 56px.
-- Baris kategori 44px: link Barlow Condensed 600 1rem uppercase tracking
-  0.04em, warna `--so-text`; hover merah; aktif garis bawah 3px merah
-  menempel pada garis tinta 2px di bawah baris. Ponsel: scroll horizontal,
-  tanpa wrap, gradasi putih di tepi kanan sebagai petunjuk.
-- Scrolled: baris merek dan kategori digabung jadi satu baris charcoal 56px
-  (logo 28px, link putih 0.9375rem, pita merah tetap), tanpa bayangan.
+  putih, border putih 40%, radius 4px). Ponsel: strip disembunyikan.
+- Baris merek 64px, `.glow` dengan glow lembut (0.38): logo cakram 36px +
+  wordmark putih Figtree 800 1.375rem lowercase dua baris ("seputar / otaku",
+  seperti logo di post). Kanan: pencarian (ikon putih, label "Cari" ≥768px),
+  avatar merah. Ponsel: burger kiri, logo tengah, pencarian kanan; tinggi
+  56px.
+- Baris kategori 44px: link Figtree 700 0.875rem uppercase tracking 0.03em,
+  warna `--so-text`; hover merah; aktif garis bawah 3px merah menempel pada
+  garis tinta 2px di bawah baris. Ponsel: scroll horizontal, tanpa wrap,
+  gradasi putih di tepi kanan sebagai petunjuk.
+- Scrolled: baris merek dan kategori digabung jadi satu baris `.glow` 56px
+  (logo 28px, wordmark satu baris 1.125rem, link putih 0.8125rem), tanpa
+  bayangan.
 - Sheet menu ponsel: panel putih dari kiri, lebar 84%, bingkai kanan tinta
-  2px; daftar kategori Condensed 1.25rem dipisah garis; tautan ekstra
+  2px; daftar kategori Figtree 700 1.125rem dipisah garis; tautan ekstra
   (Seputar Otaku's Pick, Semua artikel, Penulis) sebagai label; sosial di
   bawah.
-- Menu akun: panel putih bingkai tinta 2px, lipatan, item dengan ikon 16px.
+- Menu akun: panel putih bingkai tinta 2px radius 10px, item dengan ikon 16px.
 
 **Footer** (`layout/Footer.svelte`)
-- Latar `--so-charcoal`, garis atas 4px `--so-red`, pita merah miring di tepi
-  kiri. Padding 3rem/2rem.
+- `.glow`, garis atas 4px `--so-red`. Padding 3rem/2rem.
 - Kolom 1: logo cakram + wordmark putih, tagline `body-sm` putih 70%.
-- Kolom tautan: judul kolom label putih 50%, tautan Barlow 500 0.9375rem
+- Kolom tautan: judul kolom label putih 50%, tautan Figtree 500 0.9375rem
   putih 85%, hover putih + garis bawah merah.
-- Sosial: tombol kotak 36px, border putih 25%, hover latar merah.
+- Sosial: tombol 36px radius 6px, border putih 25%, hover latar merah.
 - Baris bawah dipisah garis putih 12%: © tahun · nama situs kiri, "Kebijakan
   Privasi · Kontak · Pengaturan cookie" kanan, keduanya label putih 50%.
 
@@ -233,104 +265,114 @@ newsletter, push, swg) **tidak dibuatkan tema**; begitu pula anime dan forum.
 
 **CookieConsent**: bar penuh di tepi bawah, latar `--so-paper`, garis atas
 tinta 2px, padding 1rem gutter. Judul `title-sm`, teks `body-sm`, tiga aksi
-kotak (ghost, outline, primer merah). ≤575px aksi menumpuk penuh lebar.
-Bukan kartu hitam melayang.
+(ghost, outline, primer merah). ≤575px aksi menumpuk penuh lebar. Bukan kartu
+hitam melayang.
 
 ### 4.2 Tombol, label, kontrol (dasar: `.theme-btn`, `.badge-main`, form)
 
-**Tombol** `.theme-btn`: tinggi 40px (sm 32px), padding 0 1rem, radius 2px,
-Barlow 600 0.875rem uppercase tracking 0.06em, ikon 16px gap 0.5rem.
+**Tombol** `.theme-btn`: tinggi 40px (sm 32px), padding 0 1rem, radius 6px,
+Figtree 700 0.875rem sentence-case, ikon 16px gap 0.5rem.
 - primary: latar merah, teks putih; hover `--so-red-deep`.
 - dark: latar tinta, teks putih; hover `--so-ink-2`.
 - surface/outline: latar putih, border 1.5px tinta, teks tinta; hover latar
   `--so-ground`.
-- ghost: transparan, teks tinta, hover latar `--so-ground`; di atas tinta
+- ghost: transparan, teks tinta, hover latar `--so-ground`; di atas hitam
   teks putih, hover putih 10%.
-- icon: 40×40 kotak.
+- icon: 40×40.
 - Tidak ada box-shadow, tidak ada transform. `is-loading`: teks 60%, spinner
-  cakram merah 14px berputar.
+  cakram 14px berputar.
 
-**Kategori** `.badge-main`: bukan badge isi. Teks label merah
-(`--so-red-deep` jika <0.75rem), tanpa latar, tanpa padding. Di atas foto
-(magazine/overlay) baru memakai latar merah penuh, padding 0.25rem 0.5rem,
-radius 0.
+**Kategori** `.badge-main`: **kotak merah** persis post: latar `--so-red`,
+teks putih Figtree 700 0.6875rem uppercase tracking 0.06em, padding 0.35rem
+0.5rem, radius 4px, **di atas judul**. Dipakai di hero, kartu vertical,
+magazine, feature-tile, kepala artikel. Di daftar padat (horizontal, minimal,
+compact-news, rank, hasil pencarian, read-also) kategori jadi teks label
+merah di baris meta tanpa latar.
 
-**Sorotan** `.hl` (Terkini, Live, Preview, "Pick", kata kunci hero): kotak
-merah miring −14°, label putih, radius 0, padding 0.05em 0.4em. Hanya ini
-yang berisi warna penuh; satu per judul.
+**Status** (`Live`, `Terkini`, `Preview`, `Tersalin`): badge yang sama dengan
+latar `--so-ink` (`Tersalin` memakai `--so-ok`). Berdampingan dengan badge
+kategori, kategori selalu di kiri. Maksimal dua badge per judul.
 
-**Chip/tag** (`PopularTags`, `GenreChips`, interest): kotak radius 2px,
-border 1px `--so-rule`, Barlow 500 0.875rem, "#" berwarna merah; aktif latar
-tinta teks putih. Minimum tinggi 36px (interest editor 44px).
+**Sorotan** `.hl`: kotak merah di balik satu kata kunci di judul bagian
+("Pick"); radius 0.2em, padding 0.06em 0.4em, bobot 800. Satu per judul.
 
-**Input**: tinggi 44px, border 1.5px `--so-rule`, radius 2px, Barlow 1rem;
+**Chip/tag** (`PopularTags`, `GenreChips`, interest): radius 6px, border 1px
+`--so-rule`, Figtree 500 0.875rem, "#" berwarna merah; aktif latar tinta teks
+putih. Minimum tinggi 36px (interest editor 44px).
+
+**Input**: tinggi 44px, border 1.5px `--so-rule`, radius 6px, Figtree 1rem;
 focus border tinta + outline merah 2px offset 2px; error border merah + pesan
-`label-xs` merah di bawah. Label field Chakra `label` `--so-muted`.
-Select/checkbox/radio `accent-color` merah. Textarea radius 2px.
+`label-xs` merah di bawah. Label field `label` `--so-muted`.
+Select/checkbox/radio `accent-color` merah. Textarea radius 6px.
 
-**Tab** (archive nav, PopularArticlesCard, AuthModal): label Chakra, padding
-0.75rem 0, dipisah garis 1px; aktif garis bawah 3px merah, teks tinta.
+**Tab** (archive nav, PopularArticlesCard, AuthModal): label 700 uppercase,
+padding 0.75rem 0, dipisah garis 1px; aktif garis bawah 3px merah, teks
+tinta.
 
 ### 4.3 Judul bagian (`ui/SectionHead.svelte`)
 Garis tinta 2px di atas, padding-top 0.75rem. Kiri: cakram merah 10px +
-judul `display-md` (Barlow 800 uppercase). Subjudul `body-sm` muted di bawah judul. Slot aksi
-("Lihat semua →") di kanan sebagai Barlow 600 0.875rem, panah bergerak 2px ke
-kanan saat hover. Tidak ada border-left.
+judul `display-md` (Figtree 800 sentence-case). Subjudul `body-sm` muted di
+bawah judul. Slot aksi ("Lihat semua →") di kanan sebagai Figtree 700
+0.875rem, panah bergerak 2px ke kanan saat hover. Tidak ada border-left.
 
 ### 4.4 Kartu artikel (`articles/ArticleCard.svelte`, `common/ArticleCard.svelte`)
-Semua varian berbagi: foto radius 0, tanpa border/bayangan; judul Condensed;
-baris meta di **bawah** judul: `KATEGORI` merah · waktu muted, keduanya
-label; hover judul = garis bawah merah tumbuh.
-- **vertical** (default situs): foto 16:10, judul `title`, deskripsi
-  `body-sm` 2 baris, meta. Grid 4 kolom desktop, 2 kolom ≤767px.
-- **horizontal**: thumb 160×107 kiri, judul `title`, meta; dipisah garis.
-- **magazine**: foto 4:5 dengan lipatan, judul putih di atas gradasi tinta
-  dari bawah, kategori badge merah isi penuh di pojok kiri atas.
-- **minimal**: thumb 72px, judul `title-sm`, tanpa deskripsi.
+Semua varian berbagi: foto radius 6px, tanpa border/bayangan; judul Figtree
+700 sentence-case; hover judul = garis bawah merah tumbuh. Kartu berfoto
+menyusun seperti post: foto, badge kategori, judul, (deskripsi), meta.
+- **vertical** (default situs): foto 16:10, badge, judul `title`, deskripsi
+  `body-sm` 2 baris, meta waktu label muted. Grid 4 kolom desktop, 2 kolom
+  ≤767px.
+- **horizontal**: thumb 3:2 120px kiri, judul `title`, meta "KATEGORI ·
+  waktu" di bawah; dipisah garis.
+- **magazine**: foto 4:5 radius 6px, gradasi tinta dari bawah, badge lalu
+  judul putih di dalam bidang bawah.
+- **minimal**: thumb 72px, judul `title-sm`, meta; tanpa deskripsi.
 - **compact-news**: tanpa foto, kategori di kiri sebagai kolom label 88px,
   judul `title-sm`.
-- **feature-tile**: foto 3:2 dengan lipatan, judul `title-lg`.
+- **feature-tile**: foto 3:2, badge, judul `title-lg`.
 - **borderless-feed**: seperti horizontal tanpa garis, gap 1rem.
 
 ### 4.5 Beranda
 
 **Hero** (`hero/Hero.svelte`, rekomendasi `top-stories`)
-- Panel `--so-charcoal` penuh lebar kontainer dengan pita merah miring di
-  tepi kiri; ini versi web dari banner mereka.
-- Kolom utama 7/12: foto 16:9 dengan tepi kanan miring; di bawahnya judul
-  `display-lg` putih, deskripsi putih 70% maks 2 baris, meta label (kategori
-  merah, waktu putih 60%). Teks di bidang solid, bukan gradasi di atas foto.
-- Rail 5/12: empat baris dipisah garis putih 14%, thumb 96×64, judul
-  `title` putih, meta. Baris pertama mendapat sorotan "TERKINI".
+- Panel `.glow` radius 10px penuh lebar kontainer; ini versi web dari post
+  mereka.
+- Kolom utama 7/12: foto 16:9 radius 6px; di bawahnya badge kategori, judul
+  `display-lg` putih, deskripsi putih 70% maks 2 baris, lalu byline "Oleh
+  **Nama**" + waktu label putih 60%. Teks di bidang solid, bukan gradasi di
+  atas foto.
+- Rail 5/12: empat baris dipisah garis putih 14%, thumb 96×64, badge
+  kategori, judul `title` putih, waktu label. Baris pertama mendapat badge
+  status tinta "TERKINI" di sebelah kategori.
 - Varian lain (cinematic, split, ticker, masthead, editorial-grid,
-  spotlight-stack) mengikuti panel charcoal yang sama; cinematic kehilangan
+  spotlight-stack) mengikuti panel `.glow` yang sama; cinematic kehilangan
   gradasi dan memakai bidang solid di bawah foto untuk teks.
 
 **Terbaru** (`home/LatestList.svelte`, `latest_section_style` disarankan
 `news-list`): baris 1px, thumb 3:2 lebar 180px (ponsel 104px), judul
 `title`, deskripsi `body-sm` (sembunyi ≤575px), meta "KATEGORI · 4 jam lalu ·
-oleh Penulis". Setiap baris penuh dapat diklik; hover hanya judul.
+Oleh **Penulis**". Setiap baris penuh dapat diklik; hover hanya judul.
 
 **Seputar Otaku's Pick** (`home/ReaderSection.svelte`): panel `--so-paper`
-bingkai tinta 2px, padding 1.5rem. Judul `display-md` 1.5rem dengan kata
-"Pick" sebagai sorotan `.hl`. Deskripsi, lalu grid kartu vertical 4 kolom.
-CTA "Pilih minat →" tombol primary. Bukan panel gelap.
+bingkai tinta 2px radius 10px, padding 1.5rem. Judul `display-md` 1.5rem
+dengan kata "Pick" sebagai sorotan `.hl`. Deskripsi, lalu grid kartu vertical
+4 kolom. CTA "Pilih minat →" tombol primary. Bukan panel gelap.
 
 **Liputan & Press Release / EventSection** (`standard`): SectionHead + grid
 kartu vertical 4 kolom + tombol "Lihat semua".
 
 **TechSection** (`immersive`): satu-satunya bidang gelap di tengah beranda.
-Latar `--so-charcoal` dengan pita merah kiri, judul bagian putih dengan
-cakram merah, kartu magazine, garis putih 12%.
+`.glow` radius 10px, judul bagian putih dengan cakram merah, kartu magazine,
+garis putih 12%.
 
 **NewsroomBlock**: lead feature-tile kiri + empat compact-news kanan dipisah
 garis; judul blok dari SectionHead.
 
-**WritersCard**: judul sidebar; daftar avatar cakram 32px + nama Barlow 600 +
+**WritersCard**: judul sidebar; daftar avatar cakram 32px + nama Figtree 700 +
 jumlah artikel label.
 
-**AdBanner**: bingkai 1px `--so-rule`, label "IKLAN" `label-xs` muted di sudut
-kanan atas, gambar radius 0.
+**AdBanner**: bingkai 1px `--so-rule` radius 6px, label "IKLAN" `label-xs`
+muted di sudut kanan atas.
 
 **Artikel Lainnya**: grid vertical 4 kolom, tanpa kartu, dipisah gap 1.5rem,
 garis tinta 2px di atas bagian.
@@ -344,68 +386,68 @@ Komponen beranda yang dimatikan: `Cf23PromoCard`, `MokuThreadsPromo`,
 **SideCard** (bingkai semua widget): tanpa kotak. Judul `display-md`
 1.0625rem dengan cakram merah 8px, garis tinta 2px di bawah judul, lead
 `body-sm` muted, konten, footer dipisah garis 1px. Varian `dark` (satu widget
-per halaman): latar charcoal, pita merah kiri, teks putih.
+per halaman): `.glow` radius 10px, teks putih.
 
-**PopularArticlesCard** ("Terpopuler"): tab Chakra (Hari ini / Minggu ini);
-peringkat 1 = foto 16:9 + angka "1" Condensed 700 2.5rem merah di pojok kiri
-atas foto; peringkat 2–5 = baris angka Condensed 700 1.5rem merah kolom
-2rem + judul `title-sm` + meta, dipisah garis.
+**PopularArticlesCard** ("Terpopuler"): tab label (Hari ini / Minggu ini);
+peringkat 1 = foto 16:9 + angka "1" Figtree 800 2.5rem merah di pojok kiri
+atas foto (latar putih, radius bawah-kanan 6px); peringkat 2–5 = baris angka
+Figtree 800 1.5rem merah kolom 2rem + judul `title-sm` + meta, dipisah garis.
 
-**PopularTags**: chip kotak sesuai 4.2.
+**PopularTags**: chip sesuai 4.2.
 
 **SocialFollowCard** ("Ikuti Seputar Otaku"): baris ikon platform 20px
-tinta + nama akun Barlow 600 + platform label muted + tombol "Ikuti" outline
+tinta + nama akun Figtree 700 + platform label muted + tombol "Ikuti" outline
 sm kanan; dipisah garis. Tanpa gradasi warna platform.
 
 **GoogleNewsFollow**: tombol dark penuh lebar dengan ikon; varian inline di
-artikel: baris kotak bingkai 1px.
+artikel: baris bingkai 1px radius 6px.
 
-**ContactCard**: email/WhatsApp sebagai baris label + nilai Barlow 600;
+**ContactCard**: email/WhatsApp sebagai baris label + nilai Figtree 700;
 tombol outline.
 
-**MediaPartnerCard**: grid logo 3 kolom, tiap logo kotak 1px rule, grayscale
-→ berwarna saat hover.
+**MediaPartnerCard**: grid logo 3 kolom, tiap logo bingkai 1px radius 6px,
+grayscale → berwarna saat hover.
 
 ### 4.7 Artikel (`routes/article/[id]/[slug]`, `article_detail_style`
 disarankan `classic`)
 
-**Kepala artikel**: latar `--so-paper`; breadcrumb label muted; judul
-`display-xl` maks 20 kata ditampilkan penuh; deskripsi `body-lg` muted; baris
-penulis: avatar cakram 32px, nama Barlow 600 + tautan, tanggal label
-tabular; garis merah 3px lebar 56px di bawah baris penulis sebagai penutup
-kepala. Foto hero 16:9 penuh lebar kolom dengan tepi kanan miring, caption
-`label-xs` muted di bawah, rata kiri.
+**Kepala artikel**: susunan post di atas putih. Breadcrumb label muted; badge
+kategori merah; judul `display-xl` maks 20 kata ditampilkan penuh; deskripsi
+`body-lg` muted; baris penulis: avatar cakram 32px, "Oleh **Nama**" + tautan,
+tanggal dan waktu baca label tabular. Foto hero 16:9 penuh lebar kolom radius
+6px, caption `label-xs` muted di bawah, rata kiri. Tidak ada garis hias di
+bawah kepala.
 
 **Baris aksi** (`ShareButtons`, `BookmarkButton` share, Komentar): tombol
-outline sm kotak 36px dengan ikon; label "Bagikan", "Simpan", "Komentar"
+outline sm 36px radius 6px dengan ikon; label "Bagikan", "Simpan", "Komentar"
 muncul ≥768px. Keadaan tersimpan: latar tinta ikon putih. "Tersalin":
 `--so-ok`.
 
-**Isi** `.bodyArticle`: Barlow `body-lg`, maks 68ch, warna `--so-text`.
-- h2 Condensed 700 1.75rem, h3 1.5rem, h4 Barlow 600 1.125rem; margin atas
-  2rem, bawah 0.75rem.
+**Isi** `.bodyArticle`: Figtree `body-lg`, maks 68ch, warna `--so-text`.
+- h2 Figtree 800 1.5rem tracking -0.02em, h3 1.25rem, h4 700 1.125rem;
+  margin atas 2rem, bawah 0.75rem.
 - Tautan merah, garis bawah 1.5px offset 0.15em; hover `--so-red-deep`.
-- Blockquote: tanpa border-left; Condensed 600 1.5rem leading 1.3, cakram
+- Blockquote: tanpa border-left; Figtree 600 1.25rem leading 1.35, cakram
   merah 10px di awal, padding 1rem 0, garis 1px atas-bawah.
-- Figure: gambar radius 0, caption `label-xs` muted.
+- Figure: gambar radius 6px, caption `label-xs` muted.
 - Tabel: garis 1px, header label, angka tabular.
-- Kode/pre: latar `--so-ground`, 1px rule.
+- Kode/pre: latar `--so-ground`, 1px rule, radius 6px.
 - Paragraf pertama tidak diberi drop cap.
 
 **Read-also** ("Baca juga"): blok di dalam isi, garis tinta 2px atas, label
 "BACA JUGA" merah, judul `title-sm`, thumb 72px kanan.
 
-**Baca selanjutnya** (`article-next`, ponsel): bidang charcoal penuh dengan
-pita merah kiri, label putih 50% "BERIKUTNYA", judul Condensed putih, panah.
+**Baca selanjutnya** (`article-next`, ponsel): `.glow` radius 10px, label
+putih 50% "BERIKUTNYA", judul Figtree 700 putih, panah.
 
-**Komentar**: judul bagian `display-md`; form: textarea 2px, tombol primary
-"Kirim"; tamu melihat kotak bingkai 1px "Masuk untuk berkomentar" dengan
-tombol outline. Daftar komentar: avatar cakram 32px, nama Barlow 600, waktu
-label, isi body; balasan menjorok 2.5rem dengan garis 1px kiri (1px, bukan
-aksen).
+**Komentar**: judul bagian `display-md`; form: textarea radius 6px, tombol
+primary "Kirim"; tamu melihat kotak bingkai 1px radius 6px "Masuk untuk
+berkomentar" dengan tombol outline. Daftar komentar: avatar cakram 32px, nama
+Figtree 700, waktu label, isi body; balasan menjorok 2.5rem dengan garis 1px
+kiri (1px, bukan aksen).
 
 **PhotoStory** (`photo_story` aktif): header tinta, galeri grid 3 kolom radius
-0, viewer layar penuh tinta dengan caption label.
+6px, viewer layar penuh `--so-black` dengan caption label.
 
 **ArticleStoryShare**: tombol outline sm "Bagikan ke Story".
 
@@ -421,31 +463,31 @@ artikel label ("128 ARTIKEL"). Chips/sub-navigasi sebagai tab (4.2).
 Kategori mendapat tombol "Ikuti topik" outline di kanan.
 
 **Daftar**: `latest-row` seperti Terbaru. Search: field 52px bingkai tinta
-2px, ikon kiri, hasil berbaris; "tidak ada hasil" sebagai kotak bingkai 1px
-dengan saran kategori.
+2px radius 6px, ikon kiri, hasil berbaris; "tidak ada hasil" sebagai kotak
+bingkai 1px dengan saran kategori.
 
-**Pagination**: kotak 40px bingkai 1px `--so-rule`, angka Barlow 600
-tabular; aktif latar tinta teks putih; hover teks merah; prev/next ikon.
+**Pagination**: kotak 40px radius 6px bingkai 1px `--so-rule`, angka Figtree
+600 tabular; aktif latar tinta teks putih; hover teks merah; prev/next ikon.
 
 **Author** (`creator-profile-*`): header putih, avatar cakram 96px dengan
 cincin merah 3px, nama `display-xl`, handle label, deskripsi; statistik
-sebagai baris label + angka Condensed (bukan tile metrik).
+sebagai baris label + angka Figtree 800 (bukan tile metrik).
 
 ### 4.9 Event (`event/*`, `routes/event`)
 
-**EventCard**: poster 3:4 radius 0; tab tanggal miring (sorotan `.hl`) di
-kiri atas poster: latar merah, Chakra putih "31 OKT–1 NOV"; nama Condensed
-`title`; tempat dan harga label muted dengan ikon 14px.
+**EventCard**: poster 3:4 radius 6px; tab tanggal = badge merah di pojok kiri
+atas poster ("31 OKT–1 NOV"); nama Figtree 700 `title`; tempat dan harga
+label muted dengan ikon 14px.
 
-**EventSpotlight** (event berikutnya): panel charcoal dengan pita merah
-kiri, label putih 50% "BERIKUTNYA", nama Condensed putih 2rem, countdown
-angka Condensed tabular, tombol primary.
+**EventSpotlight** (event berikutnya): `.glow` radius 10px, label putih 50%
+"BERIKUTNYA", nama `display-lg` putih, countdown angka Figtree 800 tabular,
+tombol primary.
 
 **EventScheduleSection / EventAgendaRow**: tabel garis 1px, kolom tanggal
-label tabular lebar 7rem, nama event Barlow 600, lokasi muted.
+label tabular lebar 7rem, nama event Figtree 700, lokasi muted.
 
 **AddToCalendar**: `<details>` dengan tombol outline sm; menu panel putih
-bingkai tinta 2px.
+bingkai tinta 2px radius 10px.
 
 **EventPromoCard**: dihapus dari rotasi (fitur promosi ikut event_section
 standard saja).
@@ -453,15 +495,14 @@ standard saja).
 ### 4.10 Pencarian & auth
 
 **SearchPalette** (`search/SearchPalette.svelte`): overlay tinta 55%; panel
-putih lebar 640px bingkai tinta 2px, bayangan satu-satunya. Bar:
-ikon lensa, input Barlow 1.25rem tanpa border, tombol tutup label "ESC"
-Chakra. Grup "Jelajahi kategori" sebagai chip kotak. Hasil: baris thumb
-56px + judul `title-sm` + meta label, aktif latar `--so-ground` + garis
-kiri... **tidak**: aktif memakai latar `--so-red-tint`. Footer: pintasan
-`label-xs`.
+putih lebar 640px bingkai tinta 2px radius 10px, bayangan satu-satunya. Bar:
+ikon lensa, input Figtree 1.25rem tanpa border, tombol tutup label "ESC"
+radius 4px. Grup "Jelajahi kategori" sebagai chip. Hasil: baris thumb 56px +
+judul `title-sm` + meta label (kategori teks merah); aktif latar
+`--so-red-tint`. Footer: pintasan `label-xs`.
 
-**AuthModal**: panel putih 440px bingkai tinta 2px; cakram logo
-48px; judul Condensed 1.75rem; tab Masuk/Daftar (4.2); field 4.2; tombol
+**AuthModal**: panel putih 440px bingkai tinta 2px radius 10px; cakram logo
+48px; judul Figtree 800 1.5rem; tab Masuk/Daftar (4.2); field 4.2; tombol
 primary penuh; "Lanjutkan dengan Google" outline dengan ikon; perks sebagai
 daftar ikon 16px + `body-sm`. Google login saat ini tidak aktif di situs ini:
 tombol disembunyikan.
@@ -470,33 +511,33 @@ tombol disembunyikan.
 
 Mode Operate. Header halaman: judul `display-xl` + cakram, tab (Untuk Kamu /
 Tersimpan / Riwayat / Aktivitas) sebagai tab 4.2, sticky di bawah masthead.
-**ReaderItem**: baris 1px, thumb 160×107, judul `title`, alasan rekomendasi
-label merah ("KARENA KAMU MENGIKUTI ANIME"). **InterestEditor**: chip kotak
-44px, latar panel `--so-ground` bingkai 1px, tombol "Simpan minat" primary.
-**ReadingHistory**: baris berkelompok per hari, tanggal label.
+**ReaderItem**: baris 1px, thumb 160×107 radius 6px, judul `title`, alasan
+rekomendasi label merah ("KARENA KAMU MENGIKUTI ANIME"). **InterestEditor**:
+chip 44px, latar panel `--so-ground` bingkai 1px radius 6px, tombol "Simpan
+minat" primary. **ReadingHistory**: baris berkelompok per hari, tanggal label.
 **BottomNav** (ponsel): bar putih garis tinta 2px atas, 4 ikon 24px + label
-Chakra 0.625rem, aktif merah. **BookmarkButton** surface: outline; tersimpan:
-tinta. **FollowTopic**: outline sm; diikuti: dark dengan centang.
-Halaman akun: form 4.2.
+0.625rem, aktif merah. **BookmarkButton** surface: outline; tersimpan: tinta.
+**FollowTopic**: outline sm; diikuti: dark dengan centang. Halaman akun: form
+4.2.
 
 ### 4.12 Halaman statis, kontak, media partner, error
 
 **Pages** (`/page/[id]`): judul `display-xl`, isi seperti `.bodyArticle`,
 maks 68ch, daftar isi tidak ada. **Contact**: dua kolom, form 4.2 + ContactCard.
-**Media partner**: header arsip + grid logo 4 kolom kotak 1px, hover
-berwarna; tombol "Jadi media partner" primary. **Error 404/500**: cakram
-merah 96px berisi angka Condensed putih, judul Condensed, tombol dark
+**Media partner**: header arsip + grid logo 4 kolom bingkai 1px radius 6px,
+hover berwarna; tombol "Jadi media partner" primary. **Error 404/500**: cakram
+merah 96px berisi angka Figtree 800 putih, judul Figtree 800, tombol dark
 "Kembali ke beranda", pencarian.
 
 ### 4.13 Curhatan (halaman masih ada, promo mati)
-`CurhatCard`: kotak bingkai 1px, kutipan Condensed 1.25rem, meta label;
-aksi ikon kotak. `CurhatForm`: 4.2. Tidak perlu dikerjakan sebelum halaman
+`CurhatCard`: bingkai 1px radius 6px, kutipan Figtree 600 1.125rem, meta
+label; aksi ikon. `CurhatForm`: 4.2. Tidak perlu dikerjakan sebelum halaman
 ini diputuskan tetap atau dihapus.
 
 ### 4.14 Lain-lain
-**Carousel** (`ui/Carousel.svelte`): kontrol kotak 40px tinta, indikator
-kotak 8×8 putih 50%, aktif merah. **ShareSheet**: panel bawah putih garis
-tinta 2px atas, grid ikon 4 kolom kotak. **ArticleRankItem**: 4.6.
+**Carousel** (`ui/Carousel.svelte`): kontrol 40px radius 6px tinta, indikator
+8×8 radius 2px putih 50%, aktif merah. **ShareSheet**: panel bawah putih garis
+tinta 2px atas, grid ikon 4 kolom. **ArticleRankItem**: 4.6.
 **ChatWidget, PushPrompt, Cf23, Talent*, Anime*, Moku*, Reels, Newsletter**:
 tidak aktif, tanpa tema.
 
@@ -511,10 +552,11 @@ Satu codebase, satu tema tambahan, nol perubahan pada tampilan Mokultur.
    menambahkan `data-theme="seputarotaku"` pada `<html>` lewat
    `transformPageChunk`, sehingga SSR dan klien sama dan tidak ada kedip.
    `+layout.server.ts` ikut mengembalikan `site.theme` untuk komponen yang
-   perlu bercabang markup (hanya Navbar strip atas dan Hero).
-2. **Font**: `static/fonts/Barlow.woff2`, `BarlowCondensed.woff2`,
-   `ChakraPetch.woff2` (subset Latin, `font-display: swap`), preload hanya
-   saat tema aktif (di `+layout.svelte`).
+   perlu bercabang markup (Navbar strip atas, Hero, dan posisi badge
+   kategori di ArticleCard).
+2. **Font**: `static/fonts/Figtree-[wght].woff2` (variable 300–900, subset
+   Latin, `font-display: swap`), preload hanya saat tema aktif (di
+   `+layout.svelte`).
 3. **Stylesheet**: `src/styles/themes/_seputarotaku.scss`, di-import paling
    akhir di `app.scss`. Semua selektor diawali `html[data-theme='seputarotaku']`
    sehingga spesifisitas selalu menang atas `custom.scss` tanpa `!important`.
@@ -523,9 +565,9 @@ Satu codebase, satu tema tambahan, nol perubahan pada tampilan Mokultur.
    `hero_type=top-stories`, `card_style=vertical`,
    `latest_section_style=news-list`, `article_detail_style=classic`,
    `event_section_style=standard`, `tech_section_style=immersive`,
-   `navbar_bg=#1a1b1e`, `navbar_text=#ffffff`, `primary_color=#c01c28`,
+   `navbar_bg=#0b0c0e`, `navbar_text=#ffffff`, `primary_color=#c01c28`,
    `dark_color=#121417`.
-5. **Tahapan**: (a) fondasi: token, font, tombol, label, section head,
+5. **Tahapan**: (a) fondasi: token, font, tombol, badge, section head,
    kartu, masthead, footer, cookie; (b) beranda: hero, Terbaru, Pick, event,
    tech, sidebar; (c) artikel dan arsip; (d) pencarian, auth, dashboard,
    event, pagination, error. Tiap tahap dicek dengan screenshot desktop
@@ -538,22 +580,23 @@ Satu codebase, satu tema tambahan, nol perubahan pada tampilan Mokultur.
 ## Do & Don't
 
 **Do**
-- Pakai cakram merah hanya sebagai penanda kecil dan logo; satu per judul.
+- Pakai cakram merah hanya sebagai logo, avatar, dan penanda kecil; satu per
+  judul.
 - Pisahkan konten dengan garis, bukan kotak.
-- Letakkan kategori di baris meta, di bawah judul.
-- Barlow Condensed untuk judul berita; Barlow 800 uppercase untuk judul
-  bagian dan judul pendek.
-- Garis miring hanya di pita bidang gelap, tepi foto unggulan, dan sorotan
-  satu kata kunci; thumbnail kecil tetap persegi.
-- Bidang gelap hanya untuk chrome (masthead, hero, footer) dan satu panel
-  per halaman; bidang baca tetap putih.
+- Kategori = kotak merah di atas judul pada kartu berfoto, hero, dan kepala
+  artikel; teks merah di baris meta pada daftar padat.
+- Judul sentence-case dengan tracking rapat; uppercase hanya untuk label dan
+  badge.
+- Byline "Oleh **Nama**" di hero, Terbaru, dan kepala artikel.
+- Bidang gelap hanya `.glow` (hitam + glow merah dari pojok kiri atas) untuk
+  chrome dan satu panel per halaman; bidang baca tetap putih.
 
 **Don't**
-- Jangan pill, jangan radius >2px pada kontrol, jangan bayangan pada kartu.
+- Jangan pill, jangan radius >10px, jangan bayangan pada kartu.
 - Jangan gradasi gelap di atas foto hero; teks selalu di bidang solid.
-- Jangan border-left aksen pada judul, kutipan, atau kartu; pita merah hanya
-  di tepi bidang charcoal.
-- Jangan sorot lebih dari satu kata per judul, dan jangan sorot seluruh judul.
+- Jangan garis miring, jangan huruf kondensed, jangan judul uppercase.
+- Jangan border-left aksen pada judul, kutipan, atau kartu.
+- Jangan lebih dari dua badge per judul, dan jangan sorot seluruh judul.
 - Jangan tambah warna aksen kedua; status memakai `--so-ok`/`--so-warn`
-  saja.
+  saja. Glow merah hanya di `.glow`, bukan di bidang putih.
 - Jangan pakai Inter di situs ini, termasuk sebagai fallback pertama.
