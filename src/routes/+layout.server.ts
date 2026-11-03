@@ -1,6 +1,8 @@
 import type { LayoutServerLoad } from './$types';
 import type { SiteSettings, NavbarItem, SocialMediaItem, Category } from '$lib/api';
 import { getSettings, listCategories, getSocialMedia, getNavbar } from '$lib/api';
+import { BRAND, SITE_NOINDEX, WEB_FEATURE_LIST, webFeatureOn } from '$lib/server/site';
+import type { WebFeature } from '$lib/features';
 
 // 60s, not 5 minutes. The API already caches these responses for 300s and
 // busts that cache the moment settings are saved, so a long window here just
@@ -49,6 +51,13 @@ function applyPreview(settings: SiteSettings | null, url: URL): SiteSettings | n
   return preview ?? settings;
 }
 
+const FEATURE_PATHS: Array<[string, WebFeature]> = [
+  ['/talent', 'talent'],
+  ['/ratecard', 'ratecard'],
+  ['/moku', 'moku'],
+  ['/comifuro23', 'comifuro23'],
+];
+
 /**
  * Menu entries whose destination a feature flag can switch off.
  *
@@ -61,6 +70,8 @@ function navAllowed(settings: SiteSettings | null) {
   const disabled: string[] = [];
   if (settings && settings.anime_enabled === false) disabled.push('/anime');
   if (settings && settings.event_enabled === false) disabled.push('/event');
+  // Pages a site does not have at all (WEB_FEATURES).
+  for (const [path, feature] of FEATURE_PATHS) if (!webFeatureOn(feature)) disabled.push(path);
   if (!disabled.length) return null;
 
   return (item: NavbarItem) => {
@@ -101,5 +112,7 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
     navHeader: keep ? _cache.navHeader.filter(keep) : _cache.navHeader,
     navFooter: keep ? _cache.navFooter.filter(keep) : _cache.navFooter,
     user: locals.user,
+    // Per-deployment switches (src/lib/server/site.ts) the pages and components need.
+    site: { noindex: SITE_NOINDEX, features: WEB_FEATURE_LIST, brand: BRAND },
   };
 };

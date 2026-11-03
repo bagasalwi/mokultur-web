@@ -6,6 +6,7 @@ import { aiEndpoint, postChatCompletion } from '$lib/server/ai-request';
 import { MOKU_DATA_RULES, MOKU_EXPRESSION_FORMAT, MOKU_PERSONA } from '$lib/server/moku-persona';
 import { isMokuExpression, type MokuExpression } from '$lib/chat/expressions';
 import type { RequestHandler } from './$types';
+import { requireWebFeature } from '$lib/server/site';
 
 const MAX_MESSAGE_CHARS = 1000;
 const MAX_HISTORY = 10;
@@ -98,6 +99,7 @@ function createExpressionSplitter(onExpression: (name: MokuExpression) => void, 
 }
 
 export const POST: RequestHandler = async ({ request, getClientAddress }) => {
+  requireWebFeature('moku');
   const ai = await getAiSettings(fetch);
   const endpoint = aiEndpoint(ai);
   if (!endpoint) throw error(503, 'Fitur chat belum dikonfigurasi.');

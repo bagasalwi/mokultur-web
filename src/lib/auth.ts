@@ -5,7 +5,8 @@ import { env } from '$env/dynamic/private';
 
 const SECRET_BYTES = new TextEncoder().encode(env.JWT_SECRET ?? '');
 export const COOKIE_NAME = 'mokultur_token';
-export const COOKIE_DOMAIN = '.mokultur.com';
+/** Shared with the API's host so its credentialed requests carry the login. A second site sets its own. */
+export const COOKIE_DOMAIN = env.COOKIE_DOMAIN || '.mokultur.com';
 export const COOKIE_TTL_DAYS = 30;
 export const COOKIE_TTL_SECONDS = 60 * 60 * 24 * COOKIE_TTL_DAYS;
 

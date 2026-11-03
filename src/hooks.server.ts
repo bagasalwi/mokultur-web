@@ -3,6 +3,7 @@ import { jwtVerify } from 'jose';
 import { env } from '$env/dynamic/private';
 import { LOUNGE_ENABLED } from '$lib/features';
 import { isAnimePath } from '$lib/route-policy';
+import { SITE_NOINDEX } from '$lib/server/site';
 
 const COOKIE_NAME = 'mokultur_token';
 const SECRET_BYTES = new TextEncoder().encode(env.JWT_SECRET ?? '');
@@ -44,7 +45,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   const response = await resolve(event);
 
-  if (isAnimePath(event.url.pathname)) {
+  // A site kept out of search (SITE_NOINDEX) says so on every page, endpoint and redirect.
+  // Files in static/ never reach this hook; the vhost's own header covers those.
+  if (SITE_NOINDEX) {
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  } else if (isAnimePath(event.url.pathname)) {
     response.headers.set('X-Robots-Tag', 'noindex, follow');
   }
 

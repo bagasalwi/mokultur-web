@@ -86,13 +86,12 @@
     closeMenu();
     openSearchPalette();
   }
-  const EXTRA_LINKS = [
-    { href: '/untuk-kamu', icon: 'bi-stars', label: "Mokultur's Pick" },
+  $: siteName = settings?.site_name ?? 'Mokultur';
+  $: EXTRA_LINKS = [
+    { href: '/untuk-kamu', icon: 'bi-stars', label: `${siteName}'s Pick` },
     { href: '/index-article', icon: 'bi-collection', label: 'Semua artikel' },
     { href: '/author', icon: 'bi-people', label: 'Penulis' },
   ];
-
-  $: siteName = settings?.site_name ?? 'Mokultur';
   $: siteLogo = settings?.site_logo ?? null;
   const year = new Date().getFullYear();
 

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { page } from '$app/state';
+  import { hasWebFeature } from '$lib/features';
   import { onMount } from 'svelte';
   import { CF23_PROMO_UNTIL } from '$lib/cf23/assets';
 
@@ -56,8 +58,12 @@
     observer.observe(host);
     return () => observer.disconnect();
   });
+
+  // Only on a site that offers it (WEB_FEATURES).
+  const featureOn = $derived(hasWebFeature(page.data.site?.features, 'comifuro23'));
 </script>
 
+{#if featureOn}
 {#if visible}
   <section class="cf23-promo" aria-labelledby="cf23-promo-title" bind:this={host} onpointermove={onTilt} onpointerleave={() => { tiltX = 0; tiltY = 0; }}>
     <div class="cf23-promo__copy">
@@ -76,6 +82,7 @@
       <button type="submit">Buat card <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
     </form>
   </section>
+{/if}
 {/if}
 
 <style lang="scss">

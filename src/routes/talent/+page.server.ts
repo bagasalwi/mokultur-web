@@ -1,7 +1,9 @@
 import type { PageServerLoad } from './$types';
 import { listTalents } from '$lib/api';
+import { requireWebFeature } from '$lib/server/site';
 
 export const load: PageServerLoad = async ({ setHeaders }) => {
+  requireWebFeature('talent');
   setHeaders({ 'cache-control': 'public, max-age=300, stale-while-revalidate=900' });
 
   const res = await listTalents().catch(() => null);

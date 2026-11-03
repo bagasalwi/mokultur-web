@@ -1,11 +1,12 @@
 import { isAnimePath } from '$lib/route-policy';
+import { INTERNAL_API_URL, SITE_NOINDEX } from '$lib/server/site';
 /**
  * The API runs on this same box. Going through api.mokultur.com sent every
  * sitemap request out through Cloudflare and back in, where a bot check or a
  * hiccup turned Google's fetch into a 503; the loopback address cannot.
  * Same address src/lib/api.ts uses for server-side loads.
  */
-const API_INTERNAL = 'http://127.0.0.1:3001';
+const API_INTERNAL = INTERNAL_API_URL;
 
 export function cleanSitemap(xml: string): string {
   const seen = new Set<string>();
@@ -29,6 +30,8 @@ export function cleanSitemap(xml: string): string {
 export const excludeAnimeFromSitemap = cleanSitemap;
 
 export async function sitemapResponse(fetcher: typeof fetch, path: string): Promise<Response> {
+  // A site kept out of search publishes no sitemap.
+  if (SITE_NOINDEX) return new Response('Sitemap tidak ditemukan.', { status: 404, headers: { 'cache-control': 'no-store' } });
   try {
     const upstream = await fetcher(`${API_INTERNAL}/${path}`, { signal: AbortSignal.timeout(10000) });
     if (upstream.status === 404) return new Response('Sitemap tidak ditemukan.', { status: 404, headers: { 'cache-control': 'no-store' } });

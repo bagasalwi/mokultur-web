@@ -1,7 +1,14 @@
 import type { RequestHandler } from './$types';
 import { PUBLIC_SITE_URL } from '$env/static/public';
+import { SITE_NOINDEX } from '$lib/server/site';
 
 export const GET: RequestHandler = async () => {
+  if (SITE_NOINDEX) {
+    // Not crawled at all, and no sitemap to point at.
+    return new Response('User-agent: *\nDisallow: /\n', {
+      headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'public, max-age=3600' },
+    });
+  }
   const body = [
     'User-agent: *',
     'Allow: /',

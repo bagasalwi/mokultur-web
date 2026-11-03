@@ -1,6 +1,7 @@
 import type { RequestHandler } from './$types';
 import { json } from '@sveltejs/kit';
 import { COOKIE_NAME } from '$lib/auth';
+import { INTERNAL_API_URL } from '$lib/server/site';
 
 /**
  * The reader's login cookie lives on mokultur.com only, so likes go through
@@ -14,7 +15,7 @@ export const POST: RequestHandler = async ({ params, request, url, cookies, loca
   if (!locals.user) return json({ error: 'Masuk untuk menyukai artikel.' }, { status: 401, headers });
   const token = cookies.get(COOKIE_NAME);
   try {
-    const response = await fetch(`http://127.0.0.1:3001/api/articles/${params.id}/like`, {
+    const response = await fetch(`${INTERNAL_API_URL}/api/articles/${params.id}/like`, {
       method: 'POST',
       headers: { origin: url.origin, ...(token ? { cookie: `${COOKIE_NAME}=${token}` } : {}) },
       signal: AbortSignal.timeout(8000),

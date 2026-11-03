@@ -1,8 +1,10 @@
 import type { PageServerLoad } from './$types';
 import { getRatecard } from '$lib/api';
 import { error } from '@sveltejs/kit';
+import { requireWebFeature } from '$lib/server/site';
 
 export const load: PageServerLoad = async ({ setHeaders }) => {
+  requireWebFeature('ratecard');
   let ratecard;
   try {
     ({ data: ratecard } = await getRatecard());

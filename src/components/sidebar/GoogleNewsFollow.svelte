@@ -11,9 +11,9 @@
   /** 'card' for sidebars; 'inline' is the slim row at the end of an article. */
   export let variant: 'card' | 'inline' = 'card';
 
-  const FALLBACK = 'https://news.google.com/search?q=mokultur&hl=id&gl=ID&ceid=ID:id';
   $: siteName = settings?.site_name ?? 'Mokultur';
-  $: href = settings?.google_news_url || FALLBACK;
+  // Without the publication link set, a Google News search for the site's name.
+  $: href = settings?.google_news_url || `https://news.google.com/search?q=${encodeURIComponent(siteName.toLowerCase())}&hl=id&gl=ID&ceid=ID:id`;
 </script>
 
 {#if variant === 'card'}

@@ -1,4 +1,4 @@
-import { PUBLIC_API_URL } from '$env/static/public';
+import { PUBLIC_API_URL, PUBLIC_SITE_URL } from '$env/static/public';
 
 /**
  * Avatar paths arrive in three shapes because the accounts predate the split
@@ -15,7 +15,7 @@ export function avatarUrl(img: string | null | undefined): string | null {
   // legacy Laravel storage path (e.g. "storage/profile/xxx.jpg")
   if (img.startsWith('storage/') || img.startsWith('/storage/')) {
     const p = img.startsWith('/') ? img : `/${img}`;
-    return `https://mokultur.com${p}`;
+    return `${PUBLIC_SITE_URL}${p}`;
   }
   return img;
 }

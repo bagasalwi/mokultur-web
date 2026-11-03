@@ -1,6 +1,7 @@
 import type { RequestHandler } from './$types';
 import { COOKIE_NAME } from '$lib/auth';
 import { json } from '@sveltejs/kit';
+import { INTERNAL_API_URL } from '$lib/server/site';
 
 const headers = { 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex, nofollow' };
 const allowed = /^(feed|interests|saved|history|articles\/[1-9]\d*(?:\/bookmark)?)$/;
@@ -19,7 +20,7 @@ const proxy: RequestHandler = async ({ params, request, url, cookies, locals, fe
   }
   try {
     const token = cookies.get(COOKIE_NAME);
-    const response = await fetch(`http://127.0.0.1:3001/api/me/reader/${path}${url.search}`, {
+    const response = await fetch(`${INTERNAL_API_URL}/api/me/reader/${path}${url.search}`, {
       method: request.method,
       headers: { 'content-type': 'application/json', origin: url.origin, ...(token ? { cookie: `${COOKIE_NAME}=${token}` } : {}) },
       body, signal: AbortSignal.timeout(8000),

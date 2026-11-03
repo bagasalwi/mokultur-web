@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { page } from '$app/stores';
+  import { hasWebFeature } from '$lib/features';
   import { PUBLIC_API_URL } from '$env/static/public';
   import SideCard from './SideCard.svelte';
 
@@ -31,8 +33,12 @@
       message = cause instanceof Error ? cause.message : 'Gagal mendaftar.';
     }
   }
+
+  // Only on a site that offers it (WEB_FEATURES).
+  $: featureOn = hasWebFeature($page.data.site?.features, 'newsletter');
 </script>
 
+{#if featureOn}
 {#snippet form()}
   {#if status === 'done'}
     <p class="nl-done" role="status"><i class="bi bi-envelope-check" aria-hidden="true"></i> {message}</p>
@@ -58,6 +64,7 @@
     <p class="nl-footer__title">Rangkuman mingguan Mokultur</p>
     {@render form()}
   </div>
+{/if}
 {/if}
 
 <style>

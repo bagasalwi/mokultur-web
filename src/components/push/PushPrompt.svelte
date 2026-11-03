@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { page } from '$app/stores';
+  import { hasWebFeature } from '$lib/features';
   import { onMount } from 'svelte';
   import { consent } from '$lib/consent';
   import { disablePush, dismissedRecently, enablePush, pushState, rememberDismiss, type PushState } from '$lib/push';
@@ -47,8 +49,12 @@
   }
 
   $: showCard = ready && !hidden && $consent !== null && state === 'available';
+
+  // Only on a site that offers it (WEB_FEATURES).
+  $: featureOn = hasWebFeature($page.data.site?.features, 'push');
 </script>
 
+{#if featureOn}
 {#if variant === 'card'}
   {#if showCard}
     <aside class="push-card" aria-label="Notifikasi berita">
@@ -82,6 +88,7 @@
       <button type="button" class="push-btn" on:click={enable} disabled={busy}>{busy ? 'Mengaktifkan…' : 'Aktifkan'}</button>
     {/if}
   </div>
+{/if}
 {/if}
 
 <style>

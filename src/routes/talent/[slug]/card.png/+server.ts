@@ -1,6 +1,7 @@
 import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
 import { PUBLIC_API_URL } from '$env/static/public';
+import { requireWebFeature } from '$lib/server/site';
 
 /**
  * Same-origin proxy for the talent share card.
@@ -11,6 +12,7 @@ import { PUBLIC_API_URL } from '$env/static/public';
  * attribute is honoured and the visitor never leaves the page.
  */
 export const GET: RequestHandler = async ({ params, fetch, setHeaders }) => {
+  requireWebFeature('talent');
   const upstream = `${PUBLIC_API_URL}/api/talents/${encodeURIComponent(params.slug)}/share.png`;
   const res = await fetch(upstream);
 

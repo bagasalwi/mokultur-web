@@ -1,4 +1,4 @@
-import { PUBLIC_API_URL } from '$env/static/public';
+import { PUBLIC_API_URL, PUBLIC_SITE_URL } from '$env/static/public';
 
 export type Thread = {
   id: number;
@@ -144,7 +144,7 @@ export function imgUrl(path: string | null | undefined): string | null {
   // legacy Laravel storage path
   if (path.startsWith('storage/') || path.startsWith('/storage/')) {
     const p = path.startsWith('/') ? path : `/${path}`;
-    return `https://mokultur.com${p}`;
+    return `${PUBLIC_SITE_URL}${p}`;
   }
   return path;
 }

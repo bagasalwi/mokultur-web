@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { page } from '$app/stores';
+  import { hasWebFeature } from '$lib/features';
   import { imgSrcset, imgUrl } from '$lib/img';
   import type { IgProfile, Reel } from '$lib/api';
   import { imgFallback } from '$lib/format';
@@ -26,8 +28,12 @@
 
 
   $: igUrl = profile ? `https://www.instagram.com/${profile.username}/` : 'https://www.instagram.com/';
+
+  // Only on a site that offers it (WEB_FEATURES).
+  $: featureOn = hasWebFeature($page.data.site?.features, 'reels');
 </script>
 
+{#if featureOn}
 {#if reels.length > 0}
   <section class="section-md reels-section">
     <div class="container-xl">
@@ -107,6 +113,7 @@
       </div>
     </div>
   </section>
+{/if}
 {/if}
 
 <style>

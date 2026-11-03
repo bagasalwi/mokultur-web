@@ -37,6 +37,21 @@ PUBLIC_SITE_URL=http://localhost:5173   # URL site ini sendiri
 
 > `PUBLIC_API_URL` di-embed ke dalam JS bundle saat build. Jika URL berubah, perlu `npm run build` ulang.
 
+### Situs kedua (seputarotaku-web)
+
+Kode yang sama dipasang kedua kali untuk Seputar Otaku (`/var/www/seputarotaku-web`, `new.seputarotaku.com`), dengan `.env` sendiri. Semua dibaca saat runtime (`src/lib/server/site.ts`), default-nya nilai mokultur.com:
+
+| Variabel | Fungsi |
+|---|---|
+| `INTERNAL_API_URL` | API untuk load SSR (default `http://127.0.0.1:3001`) |
+| `COOKIE_DOMAIN` | domain cookie login pembaca (default `.mokultur.com`) |
+| `DASHBOARD_URL` | tujuan redirect `/admin` |
+| `SITE_NOINDEX=1` | seluruh situs `noindex, nofollow`, `robots.txt` Disallow semua, tanpa sitemap/RSS, tanpa Analytics/AdSense/Subscribe with Google |
+| `WEB_FEATURES` | fitur opsional yang dipakai: `talent,ratecard,moku,comifuro23,reels,newsletter,push,swg` (`*` = semua). Yang tidak disebut: halamannya 404, komponennya tidak tampil |
+| `ORG_LOGO`, `SITE_ALTERNATE_NAME`, `TWITTER_HANDLE`, `SITE_DESCRIPTION` | merek di JSON-LD, tag Twitter, dan manifest (kosong = tag dihilangkan / pakai setting) |
+
+Perbedaan antar-situs selalu lewat env atau `site_settings`, jangan lewat pengecekan host di kode.
+
 ## Struktur Routes
 
 ```

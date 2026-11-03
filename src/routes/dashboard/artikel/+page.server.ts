@@ -26,7 +26,7 @@ export const load: PageServerLoad = async ({ parent, cookies, fetch, url }) => {
   // The sidebar hides this page from readers, but a typed-in URL must not be a
   // way around that.
   if (!profile.canWrite) {
-    throw error(403, 'Halaman ini khusus untuk penulis Mokultur.');
+    throw error(403, 'Halaman ini khusus untuk penulis.');
   }
 
   const page = Math.max(1, Number(url.searchParams.get('page') ?? '1') || 1);

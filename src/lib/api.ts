@@ -1,7 +1,10 @@
 import { browser } from '$app/environment';
 import { PUBLIC_API_URL } from '$env/static/public';
 
-const BASE = browser ? PUBLIC_API_URL : 'http://127.0.0.1:3001';
+// Server-side loads use the API over loopback; INTERNAL_API_URL points a second
+// site at its own instance. Read here, not from $lib/server, because this module
+// also runs in the browser.
+const BASE = browser ? PUBLIC_API_URL : (process.env.INTERNAL_API_URL || 'http://127.0.0.1:3001').replace(/\/$/, '');
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {

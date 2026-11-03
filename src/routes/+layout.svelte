@@ -13,6 +13,7 @@
   import Analytics from '$components/common/Analytics.svelte';
   import type { LayoutData } from './$types';
   import { isAnimePath } from '$lib/route-policy';
+  import { hasWebFeature } from '$lib/features';
 
   export let data: LayoutData;
 
@@ -87,12 +88,12 @@
   onMount(() => {
     mounted = true;
     loadBootstrapIfNeeded();
-    if (data.settings?.ai_chat_enabled) {
+    if (chatAvailable) {
       onFirstInteraction(() => void import('$components/chat/ChatWidget.svelte').then((m) => (ChatWidget = m.default)), 8_000);
     }
   });
 
-  $: if (mounted && !isPrivateRoute) loadSwg();
+  $: if (mounted && !isPrivateRoute && swgOn) loadSwg();
 
   $: if (typeof document !== 'undefined') {
     const r = document.documentElement.style;
@@ -125,6 +126,12 @@
 
   $: origin = $page.url.origin;
   $: siteName = data.settings?.site_name ?? 'Mokultur';
+  $: noindex = data.site.noindex;
+  $: brand = data.site.brand;
+  // Subscribe with Google is tied to Mokultur's publication; a site kept out of search loads no Google tags at all.
+  $: swgOn = hasWebFeature(data.site.features, 'swg') && !noindex;
+  $: chatAvailable = Boolean(data.settings?.ai_chat_enabled) && hasWebFeature(data.site.features, 'moku');
+  $: orgLogo = brand.orgLogo ? (brand.orgLogo.startsWith('http') ? brand.orgLogo : `${origin}${brand.orgLogo}`) : data.settings?.site_logo ?? null;
 
   $: orgSchema = JSON.stringify({
     '@context': 'https://schema.org',
@@ -132,7 +139,7 @@
     name: siteName,
     url: origin,
     // The same logo file the article publisher markup uses (API schema builder).
-    logo: { '@type': 'ImageObject', url: `${origin}/assets/mokultur/MOKULTUR-LOGO.png` },
+    ...(orgLogo ? { logo: { '@type': 'ImageObject', url: orgLogo } } : {}),
     sameAs: (data.socials ?? []).map((s) => s.url),
   });
 
@@ -141,7 +148,7 @@
     '@type': 'WebSite',
     name: siteName,
     // Helps Google settle on a single site name in search results.
-    alternateName: 'Mokultur ID',
+    ...(brand.alternateName ? { alternateName: brand.alternateName } : {}),
     url: origin,
     // No SearchAction: Google retired the sitelinks search box in 2024, and the
     // old index-article?search= target was the last thing still feeding it.
@@ -150,11 +157,13 @@
 
 <svelte:head>
   <link rel="preload" href={ICON_FONT_URL} as="font" type="font/woff2" crossorigin="anonymous" />
-  {#if isAnimePath($page.url.pathname)}
+  {#if noindex}
+    <meta name="robots" content="noindex, nofollow" />
+  {:else if isAnimePath($page.url.pathname)}
     <meta name="robots" content="noindex, follow" />
   {/if}
   <!-- Google Reader Revenue Manager (Subscribe with Google, open access). Public pages only. -->
-  {#if !isPrivateRoute}
+  {#if !isPrivateRoute && swgOn}
     {@html `<script>
   (self.SWG_BASIC = self.SWG_BASIC || []).push( basicSubscriptions => {
     basicSubscriptions.init({
@@ -173,9 +182,12 @@
   {/if}
   <meta property="og:locale" content="id_ID" />
   <meta property="og:site_name" content={siteName} />
-  <meta name="twitter:site" content="@mokultur" />
-  <link rel="alternate" type="application/rss+xml" title="Mokultur" href="/rss.xml" />
-  <meta name="twitter:creator" content="@mokultur" />
+  <meta name="apple-mobile-web-app-title" content={siteName} />
+  <!-- Colours the browser/status bar. Matches the navbar, which is what sits directly beneath it once installed. -->
+  <meta name="theme-color" content={navbarBg} />
+  {#if brand.twitter}<meta name="twitter:site" content={brand.twitter} />{/if}
+  {#if !noindex}<link rel="alternate" type="application/rss+xml" title={siteName} href="/rss.xml" />{/if}
+  {#if brand.twitter}<meta name="twitter:creator" content={brand.twitter} />{/if}
   {@html `<script type="application/ld+json">${orgSchema}<\/script>`}
   {@html `<script type="application/ld+json">${websiteSchema}<\/script>`}
   {@html `<style>
@@ -205,7 +217,7 @@
 
 <svelte:window on:keydown={searchShortcut} />
 
-{#if ChatWidget && data.settings?.ai_chat_enabled && !isPrivateRoute && !hideChat}
+{#if ChatWidget && chatAvailable && data.settings && !isPrivateRoute && !hideChat}
   <svelte:component
     this={ChatWidget}
     title={data.settings.ai_chat_title}
@@ -222,8 +234,9 @@
   <!-- Logging in and signing up happen here, over whatever page the reader is on. -->
   <AuthModal siteName={data.settings?.site_name ?? 'Mokultur'} logo={data.settings?.site_logo ?? null} />
 {/if}
+<!-- Nothing reports to Google from a site kept out of search: the preview would land in the live site's numbers. -->
 <Analytics
-  measurementId={data.settings?.google_analytics ?? null}
-  adsenseEnabled={data.settings?.adsense_enabled ?? false}
-  adsensePublisherId={data.settings?.adsense_publisher_id ?? null}
+  measurementId={noindex ? null : data.settings?.google_analytics ?? null}
+  adsenseEnabled={noindex ? false : data.settings?.adsense_enabled ?? false}
+  adsensePublisherId={noindex ? null : data.settings?.adsense_publisher_id ?? null}
 />
