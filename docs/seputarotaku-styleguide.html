@@ -6,9 +6,9 @@
 <title>Seputar Otaku Style Reference</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&family=Chakra+Petch:wght@600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700&family=Chakra+Petch:wght@600&display=swap">
 <style>
-  /* Layout: a reference book. One column of specimens on a cool grey ground; every specimen sits on white "paper" framed by a hairline, the way the site itself separates content with rules instead of cards. Single light theme by choice: it documents a light-only site. */
+  /* Layout: a reference book. One column of specimens on a cool grey ground; every specimen sits on white "paper" framed by a hairline, the way the site itself separates content with rules instead of cards. Single light theme by choice: it documents a site whose reading surfaces are light and whose chrome (masthead, hero, footer) is charcoal like the brand's own banner. */
   :root {
     color-scheme: light;
     --so-red: #c01c28;
@@ -26,8 +26,9 @@
     --so-font-ui: 'Barlow', 'Segoe UI', Roboto, Arial, sans-serif;
     --so-font-display: 'Barlow Condensed', 'Arial Narrow', 'Barlow', sans-serif;
     --so-font-label: 'Chakra Petch', 'Barlow', sans-serif;
-    --so-fold: 14px;
-    --so-fold-clip: polygon(0 0, 100% 0, 100% calc(100% - var(--so-fold)), calc(100% - var(--so-fold)) 100%, 0 100%);
+    --so-charcoal: #1a1b1e;
+    --so-slant: 14deg;
+    --so-slant-clip: polygon(0 0, 100% 0, calc(100% - 2.5rem) 100%, 0 100%);
     --so-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
     --so-fast: 140ms;
     --so-base: 220ms;
@@ -60,7 +61,7 @@
 
   section.ref { padding-block: 2.5rem 0; }
   .ref-head { border-top: 2px solid var(--so-ink); padding-top: 0.75rem; margin-bottom: 1.25rem; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.5rem 1rem; }
-  .ref-head h2 { font-family: var(--so-font-display); font-weight: 700; font-size: 1.75rem; line-height: 1.1; text-transform: uppercase; letter-spacing: 0.02em; display: flex; align-items: center; gap: 0.6rem; }
+  .ref-head h2 { font-family: var(--so-font-ui); font-weight: 800; font-size: 1.5rem; line-height: 1.1; text-transform: uppercase; letter-spacing: 0.03em; display: flex; align-items: center; gap: 0.6rem; }
   .ref-head h2::before { content: ''; width: 12px; height: 12px; border-radius: 50%; background: var(--so-red); flex: none; }
   .ref-head .src { font-family: var(--so-font-label); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--so-muted); }
   .ref p.note { max-width: 68ch; color: var(--so-muted); font-size: 0.9375rem; margin-bottom: 1.25rem; }
@@ -84,7 +85,12 @@
   .cat { color: var(--so-red); }
   .muted { color: var(--so-muted); }
   .disc { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--so-red); flex: none; }
-  .fold { clip-path: var(--so-fold-clip); }
+  .slant { clip-path: var(--so-slant-clip); }
+  .hl { display: inline-block; background: var(--so-red); color: #fff; padding: 0.05em 0.4em 0; transform: skewX(calc(-1 * var(--so-slant))); }
+  .hl > span { display: inline-block; transform: skewX(var(--so-slant)); }
+  .band { position: relative; overflow: hidden; }
+  /* The brand's diagonal band: a fixed 1.5rem strip hanging from the top-left edge, 8rem tall, so its slant stays at 14° whatever the panel's height and never crosses into the content. */
+  .band::before { content: ''; position: absolute; top: -1rem; left: 0; width: 1.5rem; height: 8rem; background: var(--so-red); transform: skewX(calc(-1 * var(--so-slant))); transform-origin: top left; pointer-events: none; }
   .ph { position: relative; background: #e3e7ec; background-image: repeating-linear-gradient(135deg, transparent 0 10px, rgba(18,20,23,.06) 10px 11px); display: grid; place-items: center; color: var(--so-muted); font-family: var(--so-font-label); font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; overflow: hidden; max-width: 100%; }
   .ph--dark { background: #2a2f36; background-image: repeating-linear-gradient(135deg, transparent 0 10px, rgba(255,255,255,.06) 10px 11px); color: rgba(255,255,255,.55); }
   .tl { font-family: var(--so-font-display); font-weight: 600; line-height: 1.2; }
@@ -125,7 +131,7 @@
   .tabs a.is-on { color: var(--so-ink); border-color: var(--so-red); }
   .tabs a:hover { color: var(--so-red); }
   .sh { border-top: 2px solid var(--so-ink); padding-top: 0.75rem; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 0.5rem 1rem; margin-bottom: 1rem; }
-  .sh h3 { font-family: var(--so-font-display); font-weight: 700; font-size: 1.5rem; line-height: 1.1; text-transform: uppercase; letter-spacing: 0.02em; display: flex; align-items: center; gap: 0.6rem; }
+  .sh h3 { font-family: var(--so-font-ui); font-weight: 800; font-size: 1.25rem; line-height: 1.1; text-transform: uppercase; letter-spacing: 0.03em; display: flex; align-items: center; gap: 0.6rem; }
   .sh .sub { color: var(--so-muted); font-size: 0.875rem; margin-top: 0.15rem; }
   .sh .more { font: 600 0.875rem var(--so-font-ui); display: inline-flex; align-items: center; gap: 0.35rem; }
   .sh .more svg { width: 16px; height: 16px; transition: transform var(--so-fast) var(--so-ease); }
@@ -147,7 +153,7 @@
   .ts .k { font-family: var(--so-font-label); font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--so-muted); line-height: 1.5; }
   .t-xl { font-family: var(--so-font-display); font-weight: 700; font-size: clamp(2.25rem, 5vw, 3.25rem); line-height: 1.05; letter-spacing: -0.01em; }
   .t-lg { font-family: var(--so-font-display); font-weight: 700; font-size: clamp(1.75rem, 3vw, 2.5rem); line-height: 1.08; }
-  .t-md { font-family: var(--so-font-display); font-weight: 700; font-size: 1.5rem; line-height: 1.15; text-transform: uppercase; letter-spacing: 0.02em; }
+  .t-md { font-family: var(--so-font-ui); font-weight: 800; font-size: 1.25rem; line-height: 1.15; text-transform: uppercase; letter-spacing: 0.03em; }
   .t-tl { font-family: var(--so-font-display); font-weight: 600; font-size: 1.375rem; line-height: 1.2; }
   .t-t { font-family: var(--so-font-display); font-weight: 600; font-size: 1.125rem; line-height: 1.25; }
   .t-ts { font-weight: 600; font-size: 1rem; line-height: 1.3; }
@@ -159,17 +165,19 @@
   .folds { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; align-items: start; }
   .folds .ph { aspect-ratio: 16/10; }
   .panel { background: var(--so-paper); border: 2px solid var(--so-ink); padding: 1.25rem; position: relative; }
-  .panel.fold { border: 0; outline: 2px solid var(--so-ink); outline-offset: -2px; }
   .panel--ink { background: var(--so-ink); color: #fff; }
 
   /* Masthead */
   .mh { font-size: 15px; }
-  .mh-top { background: var(--so-ink); color: rgba(255,255,255,.7); height: 32px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; gap: 1rem; }
+  .mh-top { background: var(--so-ink); border-bottom: 1px solid rgba(255,255,255,.1); color: rgba(255,255,255,.7); height: 32px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; gap: 1rem; }
   .mh-top .lbl { font-size: 0.65rem; }
   .mh-top .soc { display: flex; gap: 0.75rem; align-items: center; }
   .mh-top .soc svg { width: 15px; height: 15px; fill: currentColor; }
   .mh-top .masuk { border: 1px solid rgba(255,255,255,.4); color: #fff; padding: 0.3rem 0.55rem; font-family: var(--so-font-label); font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; }
-  .mh-brand { height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; gap: 1rem; background: var(--so-paper); }
+  .mh-brand { height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem 0 3rem; gap: 1rem; background: var(--so-charcoal); color: #fff; }
+  .mh-brand .logo .word { color: #fff; }
+  .mh-brand .btn--ghost { color: #fff; } .mh-brand .btn--ghost:hover { background: rgba(255,255,255,.1); }
+  .mh-brand .avatar { background: var(--so-red); }
   .logo { display: inline-flex; align-items: center; gap: 0.6rem; }
   .logo .mark { width: 36px; height: 36px; border-radius: 50%; background: var(--so-red); display: grid; place-items: center; position: relative; flex: none; }
   .logo .mark::before { content: ''; width: 14px; height: 18px; background: #fff; clip-path: polygon(20% 0, 100% 0, 100% 18%, 42% 18%, 42% 41%, 100% 41%, 100% 100%, 0 100%, 0 82%, 58% 82%, 58% 59%, 0 59%, 0 0); }
@@ -184,16 +192,18 @@
   .mh-cats a:hover { color: var(--so-red); }
   .mh-cats a.is-on { border-color: var(--so-red); }
   .mh--mobile { max-width: 390px; margin: 0 auto; border-inline: 1px solid var(--so-rule); }
-  .mh--mobile .mh-brand { height: 56px; padding: 0 0.75rem; }
+  .mh--mobile .mh-brand { height: 56px; padding: 0 0.5rem 0 2.5rem; }
+  @media (max-width: 575px) { .mh-top { display: none; } }
   .mh--mobile .logo .mark { width: 32px; height: 32px; }
   .mh--mobile .mh-cats { padding: 0 0.75rem; position: relative; }
   .mh--mobile .mh-cats::after { content: ''; position: absolute; right: 0; top: 0; bottom: 2px; width: 40px; background: linear-gradient(90deg, transparent, var(--so-paper)); pointer-events: none; }
   .mh--scrolled .mh-brand { height: 56px; }
   .mh--scrolled .logo .mark { width: 28px; height: 28px; } .mh--scrolled .logo .word { font-size: 1.25rem; }
   .mh--scrolled .mh-cats ul { gap: 1.25rem; } .mh--scrolled .mh-cats a { font-size: 0.9375rem; }
-  .mh--scrolled .mh-inline { display: flex; align-items: center; gap: 2rem; height: 56px; padding: 0 1.5rem; background: var(--so-paper); border-bottom: 2px solid var(--so-ink); }
+  .mh--scrolled .mh-inline { display: flex; align-items: center; gap: 2rem; height: 56px; padding: 0 1.5rem 0 3rem; background: var(--so-charcoal); color: #fff; }
+  .mh--scrolled .logo .word { color: #fff; } .mh--scrolled .btn--ghost { color: #fff; }
   .mh--scrolled .mh-inline ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 1.25rem; white-space: nowrap; overflow: hidden; flex: 1; min-width: 0; }
-  .mh--scrolled .mh-inline ul a { font-family: var(--so-font-display); font-weight: 600; font-size: 0.9375rem; letter-spacing: 0.04em; text-transform: uppercase; line-height: 56px; display: block; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+  .mh--scrolled .mh-inline ul a { font-family: var(--so-font-display); font-weight: 600; font-size: 0.9375rem; letter-spacing: 0.04em; text-transform: uppercase; line-height: 56px; display: block; border-bottom: 3px solid transparent; color: #fff; }
   .mh--scrolled .mh-inline ul a.is-on { border-color: var(--so-red); }
   .progress { height: 3px; background: linear-gradient(90deg, var(--so-red) 62%, transparent 62%); }
 
@@ -217,13 +227,15 @@
   .card--cn .tl { font-family: var(--so-font-ui); font-size: 1rem; line-height: 1.3; }
 
   /* Hero */
-  .hero { background: var(--so-paper); border-top: 2px solid var(--so-ink); border-bottom: 2px solid var(--so-ink); padding: 1.5rem; display: grid; gap: 1.5rem 2rem; grid-template-columns: 1fr; }
+  .hero { background: var(--so-charcoal); color: #fff; padding: 1.5rem 1.5rem 1.5rem 3.75rem; display: grid; gap: 1.5rem 2rem; grid-template-columns: 1fr; }
+  .hero .tl { color: #fff; } .hero .tl a { background-image: linear-gradient(var(--so-red), var(--so-red)); }
+  .hero .muted { color: rgba(255,255,255,.6); }
   @media (min-width: 860px) { .hero { grid-template-columns: 7fr 5fr; } }
   .hero-lead .ph { aspect-ratio: 16/9; margin-bottom: 0.9rem; }
   .hero-lead .tl { font-size: clamp(1.75rem, 3vw, 2.5rem); font-weight: 700; line-height: 1.08; }
-  .hero-lead .desc { color: var(--so-muted); margin-top: 0.5rem; max-width: 60ch; }
+  .hero-lead .desc { color: rgba(255,255,255,.7); margin-top: 0.5rem; max-width: 60ch; }
   .hero-rail { display: grid; align-content: start; }
-  .hero-rail .row { display: grid; grid-template-columns: 96px 1fr; gap: 0.9rem; padding: 0.85rem 0; border-top: 1px solid var(--so-rule); align-items: start; }
+  .hero-rail .row { display: grid; grid-template-columns: 96px 1fr; gap: 0.9rem; padding: 0.85rem 0; border-top: 1px solid rgba(255,255,255,.14); align-items: start; }
   .hero-rail .row:first-child { border-top: 0; padding-top: 0; }
   .hero-rail .ph { aspect-ratio: 3/2; }
   .hero-rail .tl { font-size: 1.125rem; }
@@ -233,19 +245,19 @@
   .lrow .ph { aspect-ratio: 3/2; }
   .lrow .tl { font-size: 1.25rem; }
   .lrow .desc { color: var(--so-muted); font-size: 0.875rem; margin-top: 0.3rem; }
-  @media (max-width: 575px) { .lrow { grid-template-columns: 104px 1fr; gap: 0.85rem; } .lrow .desc { display: none; } .lrow .tl { font-size: 1.125rem; } }
+  @media (max-width: 575px) { .lrow { grid-template-columns: 104px 1fr; gap: 0.85rem; } .lrow .desc { display: none; } .lrow .tl { font-size: 1.125rem; } .hero, .ft, .spot { padding-left: 3rem; } }
 
   /* Pick panel */
   .pick { background: var(--so-paper); outline: 2px solid var(--so-ink); outline-offset: -2px; padding: 1.5rem; }
   .pick-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem; margin-bottom: 1.25rem; }
-  .pick-head h3 { font-family: var(--so-font-display); font-weight: 700; font-size: 1.75rem; line-height: 1.1; text-transform: uppercase; letter-spacing: 0.02em; display: flex; align-items: center; gap: 0.6rem; }
-  .pick-head h3 .badge { font-family: var(--so-font-display); font-size: 1.1rem; letter-spacing: 0.04em; padding: 0.15rem 0.45rem 0.1rem; }
+  .pick-head h3 { font-family: var(--so-font-ui); font-weight: 800; font-size: 1.5rem; line-height: 1.1; text-transform: uppercase; letter-spacing: 0.03em; display: flex; align-items: center; gap: 0.6rem; }
+  .pick-head h3 .hl { font-size: 1.25rem; }
   .pick-head .sub { color: var(--so-muted); font-size: 0.875rem; }
 
   /* Sidebar */
   .side { display: grid; gap: 2rem; max-width: 340px; }
   .side-head { display: flex; align-items: center; gap: 0.5rem; border-bottom: 2px solid var(--so-ink); padding-bottom: 0.5rem; margin-bottom: 0.75rem; }
-  .side-head h4 { font-family: var(--so-font-display); font-weight: 700; font-size: 1.25rem; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.1; }
+  .side-head h4 { font-family: var(--so-font-ui); font-weight: 800; font-size: 1.0625rem; text-transform: uppercase; letter-spacing: 0.03em; line-height: 1.1; }
   .side-head .disc { width: 8px; height: 8px; }
   .rank1 { position: relative; margin-bottom: 0.5rem; }
   .rank1 .ph { aspect-ratio: 16/9; }
@@ -264,10 +276,10 @@
   /* Event */
   .ev { position: relative; }
   .ev .ph { aspect-ratio: 3/4; }
-  .ev .date { position: absolute; top: 0; left: 0; background: var(--so-red); color: #fff; font-family: var(--so-font-label); font-weight: 600; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.4rem 0.5rem; line-height: 1; }
+  .ev .date { position: absolute; top: 0.6rem; left: -0.25rem; transform: skewX(calc(-1 * var(--so-slant))); background: var(--so-red); color: #fff; font-family: var(--so-font-label); font-weight: 600; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.4rem 0.5rem; line-height: 1; }
   .ev .tl { font-size: 1.125rem; margin-top: 0.6rem; }
   .ev .meta svg { width: 14px; height: 14px; stroke: currentColor; }
-  .spot { background: var(--so-ink); color: #fff; padding: 1.5rem; display: grid; gap: 0.75rem; }
+  .spot { background: var(--so-ink); color: #fff; padding: 1.5rem 1.5rem 1.5rem 3.75rem; display: grid; gap: 0.75rem; }
   .spot .tl { font-size: 2rem; font-weight: 700; color: #fff; }
   .spot .cd { display: flex; gap: 1.5rem; }
   .spot .cd div { display: grid; }
@@ -359,7 +371,7 @@
   .bnav a.is-on { color: var(--so-red); }
 
   /* Footer */
-  .ft { background: var(--so-ink); color: #fff; border-top: 4px solid var(--so-red); padding: 3rem 1.5rem 1.5rem; }
+  .ft { background: var(--so-charcoal); color: #fff; border-top: 4px solid var(--so-red); padding: 3rem 1.5rem 1.5rem 3.75rem; }
   .ft-grid { display: grid; gap: 2rem; grid-template-columns: 1fr; }
   @media (min-width: 760px) { .ft-grid { grid-template-columns: 1.4fr 1fr 1fr 1fr; } }
   .ft .tag { color: rgba(255,255,255,.7); font-size: 0.875rem; margin-top: 0.75rem; max-width: 36ch; }
@@ -410,9 +422,9 @@
 
 <div class="wrap">
   <header class="doc-head">
-    <div class="doc-meta"><span>new.seputarotaku.com</span><span>Tema: Hinomaru &amp; Lipatan</span><span>Referensi, belum dipasang</span><span>3 Nov 2026</span></div>
+    <div class="doc-meta"><span>new.seputarotaku.com</span><span>Tema: Hinomaru &amp; Garis Miring</span><span>Referensi, belum dipasang</span><span>3 Nov 2026</span></div>
     <h1>Seputar Otaku<br><em>Style Reference</em></h1>
-    <p>Identitas diambil dari logo sendiri: huruf S dari pita kertas terlipat di dalam cakram merah. Cakram merah jadi satu-satunya bentuk bulat di situs; lipatan jadi motif sudut pada bidang unggulan. Sisanya putih dingin, tinta, dan garis, rapat seperti situs berita Jepang. Spesifikasi lengkap ada di <code>docs/DESIGN-SEPUTAROTAKU.md</code>.</p>
+    <p>Diambil dari brand Seputar Otaku yang sudah ada di YouTube dan Instagram: charcoal gelap, pita merah miring, cakram merah berisi S, dan judul tebal uppercase dengan sorotan kotak merah. Di web, chrome-nya gelap (masthead, hero, footer) dan bidang bacanya putih; cakram merah jadi satu-satunya bentuk bulat, garis miring jadi motif tepi. Spesifikasi lengkap ada di <code>docs/DESIGN-SEPUTAROTAKU.md</code>.</p>
   </header>
 
   <nav class="doc-nav" aria-label="Bagian">
@@ -441,15 +453,15 @@
       <table class="diff">
         <thead><tr><th>Mokultur</th><th>Seputar Otaku</th></tr></thead>
         <tbody>
-          <tr><td>Inter di semua tempat</td><td>Barlow + Barlow Condensed, label Chakra Petch</td></tr>
+          <tr><td>Inter di semua tempat</td><td>Barlow 800 (judul bagian), Barlow Condensed (judul berita), Chakra Petch (label)</td></tr>
           <tr><td>Tombol pill 999px, hover terangkat + bayangan</td><td>Tombol kotak 2px, hover ganti warna, tanpa bayangan</td></tr>
           <tr><td>Badge kategori isi penuh di atas judul</td><td>Kategori merah di baris meta di bawah judul</td></tr>
           <tr><td>Section head: garis aksen kiri 4px</td><td>Garis tinta 2px di atas + cakram merah</td></tr>
           <tr><td>Kartu putih membulat 12px, bayangan, hover terangkat</td><td>Tanpa kartu: foto + teks dipisah garis 1px, sudut 0</td></tr>
-          <tr><td>Hero gelap, gradien, teks di atas foto</td><td>Hero terang, foto di atas, judul tinta di bawah</td></tr>
-          <tr><td>Navbar hitam, cookie card hitam melayang</td><td>Masthead putih bergaris tinta, cookie bar penuh di bawah</td></tr>
+          <tr><td>Hero: gradien gelap di atas foto</td><td>Hero: panel charcoal, foto dipotong miring, pita merah, judul putih di bidang solid</td></tr>
+          <tr><td>Navbar putih, cookie card hitam melayang</td><td>Masthead charcoal berpita merah + baris kategori putih, cookie bar penuh di bawah</td></tr>
           <tr><td>Archive hero gelap membulat 28px</td><td>Archive header putih, judul kondensed besar, tab bergaris</td></tr>
-          <tr><td>Panel "Pick" gelap</td><td>Panel putih berbingkai tinta 2px dengan lipatan</td></tr>
+          <tr><td>Panel "Pick" gelap</td><td>Panel putih berbingkai tinta 2px, kata kunci disorot kotak merah miring</td></tr>
         </tbody>
       </table>
     </div>
@@ -464,6 +476,7 @@
         <div><div class="c" style="background:#8e1420"></div><div class="n"><b>--so-red-deep</b>#8e1420 · hover, merah kecil</div></div>
         <div><div class="c" style="background:#fdeceb"></div><div class="n"><b>--so-red-tint</b>#fdeceb · sorotan, selection</div></div>
         <div><div class="c" style="background:#121417"></div><div class="n"><b>--so-ink</b>#121417 · dark_color</div></div>
+        <div><div class="c" style="background:#1a1b1e"></div><div class="n"><b>--so-charcoal</b>#1a1b1e · masthead, hero, footer</div></div>
         <div><div class="c" style="background:#2a2f36"></div><div class="n"><b>--so-ink-2</b>#2a2f36 · hover di atas tinta</div></div>
         <div><div class="c" style="background:#15181c"></div><div class="n"><b>--so-text</b>#15181c</div></div>
         <div><div class="c" style="background:#5b6472"></div><div class="n"><b>--so-muted</b>#5b6472 · meta, caption (6.3:1)</div></div>
@@ -478,12 +491,13 @@
 
   <section class="ref" id="tipe">
     <div class="ref-head"><h2>Tipografi</h2><span class="src">Barlow · Barlow Condensed · Chakra Petch (OFL, self-host)</span></div>
-    <p class="note">Semua judul lebih besar dari 1rem memakai Barlow Condensed. Label (kategori, waktu, tab, caption) selalu Chakra Petch uppercase dengan tracking 0.08em, maksimal 0.8rem. Angka tabular di label dan tabel.</p>
+    <p class="note">Judul berita memakai Barlow Condensed; judul bagian dan judul pendek uppercase memakai Barlow 800 seperti thumbnail YouTube mereka. Label (kategori, waktu, tab, caption) selalu Chakra Petch uppercase, mengikuti wordmark techno mereka. Sorotan kotak merah miring dipakai untuk satu kata kunci, bukan seluruh judul.</p>
     <div class="spec">
       <div class="ts">
         <div><span class="k">display-xl · Condensed 700 · clamp(2.25–3.25rem)/1.05</span><div class="t-xl">Comifuro 23 Resmi Usai, Dua Hari Penuh Keseruan</div></div>
         <div><span class="k">display-lg · Condensed 700 · clamp(1.75–2.5rem)/1.08</span><div class="t-lg">Good Smile Company Temukan Program Berbahaya di Situs Resminya</div></div>
-        <div><span class="k">display-md · Condensed 700 uppercase · 1.5rem</span><div class="t-md">Liputan &amp; Press Release</div></div>
+        <div><span class="k">display-md · Barlow 800 uppercase 0.03em · 1.25rem · judul bagian</span><div class="t-md">Liputan &amp; Press Release</div></div>
+        <div><span class="k">sorotan · .hl · kotak merah miring 14° di balik kata kunci</span><div class="t-lg">Anime sekarang <span class="hl"><span>kebanyakan!</span></span></div></div>
         <div><span class="k">title-lg · Condensed 600 · 1.375rem/1.2</span><div class="t-tl">Death Stranding Isolations Rilis Teaser Perdana, Tayang di Disney+ 2027</div></div>
         <div><span class="k">title · Condensed 600 · 1.125rem/1.25</span><div class="t-t">Xing Su, Sebuah Game Action RPG Anime Resmi Meluncur di China pada 2028</div></div>
         <div><span class="k">title-sm · Barlow 600 · 1rem/1.3</span><div class="t-ts">Nonton Anime The Detective Is Already Dead Season 2 Episode 5 Sub Indo</div></div>
@@ -497,14 +511,14 @@
   </section>
 
   <section class="ref" id="bentuk">
-    <div class="ref-head"><h2>Bentuk, garis, kedalaman</h2><span class="src">radius 0 / 2px · lipatan 14px · tiga lapisan</span></div>
-    <p class="note">Lipatan hanya di bidang unggulan: foto utama hero, foto hero artikel, panel Pick, panel auth, search palette, EventSpotlight. Thumbnail kecil tetap persegi. Satu-satunya bayangan ada di lapisan melayang.</p>
+    <div class="ref-head"><h2>Bentuk, garis, kedalaman</h2><span class="src">radius 0 / 2px · garis miring 14° · tiga lapisan</span></div>
+    <p class="note">Garis miring 14° (dari pita banner mereka) hanya di tiga tempat: pita merah di tepi kiri bidang gelap (masthead, hero, footer), tepi kanan foto unggulan, dan sorotan kata kunci. Thumbnail kecil tetap persegi. Satu-satunya bayangan ada di lapisan melayang.</p>
     <div class="spec">
       <div class="folds">
-        <div><div class="ph fold">Foto unggulan, lipatan</div><div class="spec-cap" style="margin-top:.5rem">clip-path · kanan-bawah 14px</div></div>
+        <div><div class="ph slant">Foto unggulan, tepi miring</div><div class="spec-cap" style="margin-top:.5rem">clip-path · tepi kanan 14°</div></div>
         <div><div class="ph">Thumbnail, persegi</div><div class="spec-cap" style="margin-top:.5rem">radius 0, tanpa bingkai</div></div>
-        <div><div class="panel fold" style="aspect-ratio:16/10;display:grid;align-content:end"><div class="lbl cat">Panel</div><div class="t-t">Bingkai tinta 2px + lipatan</div></div><div class="spec-cap" style="margin-top:.5rem">Pick, auth, search</div></div>
-        <div><div class="panel panel--ink fold" style="aspect-ratio:16/10;display:grid;align-content:end"><div class="lbl" style="color:rgba(255,255,255,.55)">Berikutnya</div><div class="t-t" style="color:#fff">Pita tinta</div></div><div class="spec-cap" style="margin-top:.5rem">Satu per halaman</div></div>
+        <div><div class="panel" style="aspect-ratio:16/10;display:grid;align-content:end"><div class="lbl cat">Panel</div><div class="t-t">Bingkai tinta 2px</div></div><div class="spec-cap" style="margin-top:.5rem">Pick, auth, search</div></div>
+        <div><div class="panel panel--ink band" style="aspect-ratio:16/10;display:grid;align-content:end;background:var(--so-charcoal);border-color:var(--so-charcoal)"><div class="lbl" style="color:rgba(255,255,255,.55)">Berikutnya</div><div class="t-t" style="color:#fff">Bidang charcoal + pita merah</div></div><div class="spec-cap" style="margin-top:.5rem">Masthead, hero, footer, spotlight</div></div>
       </div>
     </div>
     <div class="cmp">
@@ -566,12 +580,12 @@
 
   <section class="ref" id="masthead">
     <div class="ref-head"><h2>Masthead</h2><span class="src">layout/Navbar.svelte · varian times</span></div>
-    <p class="note">Strip tinta 32px di atas, baris merek putih 64px, baris kategori 44px dengan garis tinta 2px di bawahnya. Aktif = garis merah 3px menempel garis tinta. NavProgress 3px merah tepat di bawah masthead.</p>
+    <p class="note">Strip tinta 32px, baris merek charcoal 64px dengan pita merah miring di tepi kiri (seperti banner YouTube), baris kategori putih 44px dengan garis tinta 2px di bawahnya. Aktif = garis merah 3px menempel garis tinta. NavProgress 3px merah tepat di bawah masthead.</p>
     <div class="spec spec--tight">
       <div class="spec-cap">Desktop · diam</div>
       <div class="mh">
         <div class="mh-top"><span class="lbl">Anime · Jejepangan · Tokusatsu</span><div class="soc"><svg><use href="#i-ig"/></svg><svg><use href="#i-x"/></svg><svg><use href="#i-yt"/></svg><svg><use href="#i-fb"/></svg><a class="masuk" href="#masthead">Masuk</a></div></div>
-        <div class="mh-brand"><a class="logo" href="#masthead"><span class="mark"></span><span class="word">seputar<br>otaku</span></a><div class="mh-act"><a class="btn btn--ghost" href="#masthead"><svg><use href="#i-search"/></svg> Cari</a><span class="avatar">B</span></div></div>
+        <div class="mh-brand band"><a class="logo" href="#masthead"><span class="mark"></span><span class="word">seputar<br>otaku</span></a><div class="mh-act"><a class="btn btn--ghost" href="#masthead"><svg><use href="#i-search"/></svg> Cari</a><span class="avatar">B</span></div></div>
         <div class="mh-cats"><ul><li><a class="is-on" href="#masthead">Home</a></li><li><a href="#masthead">Anime</a></li><li><a href="#masthead">Review</a></li><li><a href="#masthead">Event &amp; Press Release</a></li><li><a href="#masthead">Tokusatsu</a></li><li><a href="#masthead">Jejepangan</a></li><li><a href="#masthead">Media Partner</a></li></ul></div>
         <div class="progress"></div>
       </div>
@@ -579,13 +593,13 @@
     <div class="spec spec--tight">
       <div class="spec-cap">Desktop · setelah scroll (56px, merek dan kategori satu baris)</div>
       <div class="mh mh--scrolled">
-        <div class="mh-inline"><a class="logo" href="#masthead"><span class="mark"></span><span class="word">seputar otaku</span></a><ul><li><a href="#masthead">Home</a></li><li><a class="is-on" href="#masthead">Anime</a></li><li><a href="#masthead">Review</a></li><li><a href="#masthead">Event</a></li><li><a href="#masthead">Tokusatsu</a></li><li><a href="#masthead">Jejepangan</a></li></ul><a class="btn btn--ghost btn--icon" href="#masthead" aria-label="Cari"><svg><use href="#i-search"/></svg></a></div>
+        <div class="mh-inline band"><a class="logo" href="#masthead"><span class="mark"></span><span class="word">seputar otaku</span></a><ul><li><a href="#masthead">Home</a></li><li><a class="is-on" href="#masthead">Anime</a></li><li><a href="#masthead">Review</a></li><li><a href="#masthead">Event</a></li><li><a href="#masthead">Tokusatsu</a></li><li><a href="#masthead">Jejepangan</a></li></ul><a class="btn btn--ghost btn--icon" href="#masthead" aria-label="Cari"><svg><use href="#i-search"/></svg></a></div>
       </div>
     </div>
     <div class="spec spec--tight spec--ground">
       <div class="spec-cap">Ponsel 390px · burger, logo, cari; kategori scroll horizontal</div>
       <div class="mh mh--mobile">
-        <div class="mh-brand"><a class="btn btn--ghost btn--icon" href="#masthead" aria-label="Menu"><svg><use href="#i-menu"/></svg></a><a class="logo" href="#masthead"><span class="mark"></span></a><a class="btn btn--ghost btn--icon" href="#masthead" aria-label="Cari"><svg><use href="#i-search"/></svg></a></div>
+        <div class="mh-brand band"><a class="btn btn--ghost btn--icon" href="#masthead" aria-label="Menu"><svg><use href="#i-menu"/></svg></a><a class="logo" href="#masthead"><span class="mark"></span></a><a class="btn btn--ghost btn--icon" href="#masthead" aria-label="Cari"><svg><use href="#i-search"/></svg></a></div>
         <div class="mh-cats"><ul><li><a class="is-on" href="#masthead">Home</a></li><li><a href="#masthead">Anime</a></li><li><a href="#masthead">Review</a></li><li><a href="#masthead">Event &amp; Press Release</a></li><li><a href="#masthead">Tokusatsu</a></li></ul></div>
       </div>
     </div>
@@ -616,20 +630,20 @@
       </div>
       <div class="spec">
         <div class="spec-cap">magazine · 4:5 + lipatan · satu-satunya tempat badge kategori berisi</div>
-        <article class="card card--mag fold" style="max-width:360px"><div class="ph ph--dark">4:5</div><span class="badge">Tech</span><h3 class="tl"><a href="#kartu">Gigabyte Pamer Laptop Gaming OLED 240 Hz di Indonesia</a></h3><div class="meta"><span class="lbl" style="color:rgba(255,255,255,.7)">2 minggu lalu</span></div></article>
+        <article class="card card--mag" style="max-width:360px"><div class="ph ph--dark">4:5</div><span class="badge">Tech</span><h3 class="tl"><a href="#kartu">Gigabyte Pamer Laptop Gaming OLED 240 Hz di Indonesia</a></h3><div class="meta"><span class="lbl" style="color:rgba(255,255,255,.7)">2 minggu lalu</span></div></article>
       </div>
     </div>
   </section>
 
   <section class="ref" id="beranda">
     <div class="ref-head"><h2>Beranda</h2><span class="src">Hero top-stories · LatestList news-list · ReaderSection</span></div>
-    <p class="note">Hero terang: foto utama dengan lipatan, judul tinta di bawahnya, rail empat baris bergaris. Tidak ada gradasi gelap di atas foto. Terbaru sebagai baris berita, bukan grid kartu.</p>
+    <p class="note">Hero mengikuti banner mereka: panel charcoal, foto utama dipotong miring di tepi kanan, pita merah di tepi kiri, judul putih di bidang solid (bukan gradasi di atas foto). Rail empat baris bergaris. Terbaru sebagai baris berita, bukan grid kartu.</p>
     <div class="spec spec--tight spec--ground">
-      <div class="spec-cap">Hero · top-stories · 7/12 + 5/12</div>
-      <div class="hero" style="margin-top:1rem">
-        <div class="hero-lead"><div class="ph fold">16:9 · foto utama</div><h3 class="tl"><a href="#beranda">Comifuro 23 Resmi Usai, Dua Hari Penuh Keseruan, Berikut Rangkumannya!</a></h3><p class="desc">Comifuro 23 resmi berakhir! Terima kasih untuk dua hari penuh keseruan di ICE BSD, dari booth kreator, fans gathering, hingga parade cosplay.</p><div class="meta"><span class="lbl cat">Event &amp; Press Release</span><span class="lbl muted">Hari ini</span></div></div>
+      <div class="spec-cap">Hero · top-stories · panel charcoal, foto tepi miring, pita merah kiri · 7/12 + 5/12</div>
+      <div class="hero band" style="margin-top:1rem">
+        <div class="hero-lead"><div class="ph slant">16:9 · foto utama</div><h3 class="tl"><a href="#beranda">Comifuro 23 Resmi Usai, Dua Hari Penuh Keseruan, Berikut Rangkumannya!</a></h3><p class="desc">Comifuro 23 resmi berakhir! Terima kasih untuk dua hari penuh keseruan di ICE BSD, dari booth kreator, fans gathering, hingga parade cosplay.</p><div class="meta"><span class="lbl cat">Event &amp; Press Release</span><span class="lbl muted">Hari ini</span></div></div>
         <div class="hero-rail">
-          <div class="row"><div class="ph">3:2</div><div><div class="meta" style="margin:0 0 .3rem"><span class="badge">Terkini</span></div><h3 class="tl"><a href="#beranda">Nonton Anime The Detective Is Already Dead Season 2 Episode 5 Sub Indo, Preview dan Jadwal Rilis</a></h3><div class="meta"><span class="lbl cat">Preview</span><span class="lbl muted">Kemarin</span></div></div></div>
+          <div class="row"><div class="ph">3:2</div><div><div class="meta" style="margin:0 0 .3rem"><span class="lbl hl"><span>Terkini</span></span></div><h3 class="tl"><a href="#beranda">Nonton Anime The Detective Is Already Dead Season 2 Episode 5 Sub Indo, Preview dan Jadwal Rilis</a></h3><div class="meta"><span class="lbl cat">Preview</span><span class="lbl muted">Kemarin</span></div></div></div>
           <div class="row"><div class="ph">3:2</div><div><h3 class="tl"><a href="#beranda">Good Smile Company Temukan Program Berbahaya di Situs Resminya, 2.800 Pelanggan Berpotensi Terdampak</a></h3><div class="meta"><span class="lbl cat">Otaku</span><span class="lbl muted">4 hari lalu</span></div></div></div>
           <div class="row"><div class="ph">3:2</div><div><h3 class="tl"><a href="#beranda">Death Stranding Isolations Rilis Teaser Perdana, Tayang di Disney+ 2027 Mendatang</a></h3><div class="meta"><span class="lbl cat">Anime</span><span class="lbl muted">4 hari lalu</span></div></div></div>
           <div class="row"><div class="ph">3:2</div><div><h3 class="tl"><a href="#beranda">Xing Su, Sebuah Game Action RPG Anime Resmi Meluncur di China pada 2028</a></h3><div class="meta"><span class="lbl cat">Game</span><span class="lbl muted">4 hari lalu</span></div></div></div>
@@ -644,9 +658,9 @@
       <article class="lrow"><div class="ph">3:2</div><div><h3 class="tl"><a href="#beranda">Setlist Night to Remember Vol. 3 Dirilis, Ada IRIS OUT dan Butter-Fly</a></h3><p class="desc">Konser soundtrack anime kembali dengan orkestra penuh dan tamu dari Jepang.</p><div class="meta"><span class="lbl cat">Event &amp; Press Release</span><span class="lbl muted">6 jam lalu</span><span class="lbl muted">oleh Danin</span></div></div></article>
     </div>
     <div class="spec spec--ground">
-      <div class="spec-cap">Seputar Otaku's Pick · panel putih bingkai tinta 2px + lipatan · kata "Pick" sebagai badge</div>
-      <div class="pick fold">
-        <div class="pick-head"><div><h3>Seputar Otaku's <span class="badge">Pick</span></h3><div class="sub">Bacaan pilihan untukmu. Pilih minat agar rekomendasinya makin pas.</div></div><a class="btn btn--primary" href="#beranda">Pilih minat <svg><use href="#i-arrow"/></svg></a></div>
+      <div class="spec-cap">Seputar Otaku's Pick · panel putih bingkai tinta 2px · kata "Pick" disorot kotak merah miring</div>
+      <div class="pick">
+        <div class="pick-head"><div><h3>Seputar Otaku's <span class="hl"><span>Pick</span></span></h3><div class="sub">Bacaan pilihan untukmu. Pilih minat agar rekomendasinya makin pas.</div></div><a class="btn btn--primary" href="#beranda">Pilih minat <svg><use href="#i-arrow"/></svg></a></div>
         <div class="cards">
           <article class="card"><div class="ph">16:10</div><h3 class="tl"><a href="#beranda">Cyberpunk Edgerunners 2 Review: Mencari Happy Ending di Night City</a></h3><div class="meta"><span class="lbl cat">Review</span><span class="lbl muted">1 minggu lalu</span></div></article>
           <article class="card"><div class="ph">16:10</div><h3 class="tl"><a href="#beranda">Honor of Kings Rayakan Anniversary Global dengan Dunshan</a></h3><div class="meta"><span class="lbl cat">Event</span><span class="lbl muted">1 minggu lalu</span></div></article>
@@ -655,13 +669,13 @@
         </div>
       </div>
     </div>
-    <div class="spec spec--tight" style="background:var(--so-ink);padding:1.5rem">
-      <div class="sh on-dark"><div><h3><span class="disc"></span>Teknologi</h3><div class="sub">Satu-satunya pita gelap di beranda (TechSection immersive).</div></div><a class="more" href="#beranda" style="color:#fff">Lihat semua <svg><use href="#i-arrow"/></svg></a></div>
+    <div class="spec spec--tight band" style="background:var(--so-charcoal);padding:1.5rem 1.5rem 1.5rem 3.75rem">
+      <div class="sh on-dark"><div><h3><span class="disc"></span>Teknologi</h3><div class="sub">Satu-satunya bidang gelap di tengah beranda (TechSection immersive).</div></div><a class="more" href="#beranda" style="color:#fff">Lihat semua <svg><use href="#i-arrow"/></svg></a></div>
       <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
-        <article class="card card--mag fold" style="aspect-ratio:4/5"><div class="ph ph--dark"></div><span class="badge">Tech</span><h3 class="tl"><a href="#beranda">HUAWEI nova 16s Series Pamer Kamera RYYB</a></h3></article>
-        <article class="card card--mag fold"><div class="ph ph--dark"></div><span class="badge">Tech</span><h3 class="tl"><a href="#beranda">Gigabyte Pamer Laptop Gaming OLED 240 Hz</a></h3></article>
-        <article class="card card--mag fold"><div class="ph ph--dark"></div><span class="badge">Tech</span><h3 class="tl"><a href="#beranda">VCT Pacific 2027 Rombak Format, Indonesia Dapat Jalur Langsung</a></h3></article>
-        <article class="card card--mag fold"><div class="ph ph--dark"></div><span class="badge">Tech</span><h3 class="tl"><a href="#beranda">Steam Deck 2 Dikabarkan Pakai Chip Zen 5</a></h3></article>
+        <article class="card card--mag" style="aspect-ratio:4/5"><div class="ph ph--dark"></div><span class="badge">Tech</span><h3 class="tl"><a href="#beranda">HUAWEI nova 16s Series Pamer Kamera RYYB</a></h3></article>
+        <article class="card card--mag"><div class="ph ph--dark"></div><span class="badge">Tech</span><h3 class="tl"><a href="#beranda">Gigabyte Pamer Laptop Gaming OLED 240 Hz</a></h3></article>
+        <article class="card card--mag"><div class="ph ph--dark"></div><span class="badge">Tech</span><h3 class="tl"><a href="#beranda">VCT Pacific 2027 Rombak Format, Indonesia Dapat Jalur Langsung</a></h3></article>
+        <article class="card card--mag"><div class="ph ph--dark"></div><span class="badge">Tech</span><h3 class="tl"><a href="#beranda">Steam Deck 2 Dikabarkan Pakai Chip Zen 5</a></h3></article>
       </div>
     </div>
   </section>
@@ -712,15 +726,15 @@
     <div class="ref-head"><h2>Event</h2><span class="src">EventCard · EventSpotlight · EventScheduleSection · AddToCalendar</span></div>
     <div class="two">
       <div class="spec">
-        <div class="spec-cap">EventCard · poster 3:4 · tab tanggal merah</div>
+        <div class="spec-cap">EventCard · poster 3:4 · tab tanggal merah miring</div>
         <div class="cards" style="grid-template-columns:repeat(2,1fr)">
           <article class="card ev"><div class="ph">3:4</div><span class="date">31 Okt – 1 Nov</span><h3 class="tl"><a href="#event">Comic Frontier 23</a></h3><div class="meta"><span class="lbl muted" style="display:inline-flex;gap:.3rem;align-items:center"><svg><use href="#i-pin"/></svg>ICE BSD, Tangerang</span></div><div class="meta" style="margin-top:.25rem"><span class="lbl cat">Rp 50.000</span></div></article>
           <article class="card ev"><div class="ph">3:4</div><span class="date">28 Nov</span><h3 class="tl"><a href="#event">DevFest Bogor 2026</a></h3><div class="meta"><span class="lbl muted" style="display:inline-flex;gap:.3rem;align-items:center"><svg><use href="#i-pin"/></svg>Unpak, Bogor</span></div><div class="meta" style="margin-top:.25rem"><span class="lbl cat">Rp 50.000</span></div></article>
         </div>
       </div>
       <div class="spec spec--ground">
-        <div class="spec-cap">EventSpotlight · panel tinta + lipatan · countdown tabular</div>
-        <div class="spot fold">
+        <div class="spec-cap">EventSpotlight · panel charcoal + pita merah · countdown tabular</div>
+        <div class="spot band" style="background:var(--so-charcoal)">
           <span class="lbl" style="color:rgba(255,255,255,.55)">Berikutnya</span>
           <h3 class="tl">Jakarta Webtoon Festival 2026</h3>
           <div class="cd"><div><b>12</b><span>Hari</span></div><div><b>08</b><span>Jam</span></div><div><b>41</b><span>Menit</span></div></div>
@@ -747,7 +761,7 @@
         <h1>Comifuro 23 Resmi Usai, Dua Hari Penuh Keseruan, Berikut Rangkumannya!</h1>
         <p class="dek">Comifuro 23 resmi berakhir! Terima kasih untuk dua hari penuh keseruan di ICE BSD, dari booth kreator, fans gathering, hingga parade cosplay.</p>
         <div class="by"><span class="avatar">D</span><span>oleh <b>Danindra</b></span><span class="lbl muted">3 November 2026</span><span class="lbl muted">4 menit baca</span></div>
-        <figure><div class="ph fold">16:9 · foto hero</div><figcaption class="lbl-xs">Suasana pintu masuk Hall 10 ICE BSD pada hari pertama Comifuro 23. Foto: Dok. Seputar Otaku</figcaption></figure>
+        <figure><div class="ph slant">16:9 · foto hero</div><figcaption class="lbl-xs">Suasana pintu masuk Hall 10 ICE BSD pada hari pertama Comifuro 23. Foto: Dok. Seputar Otaku</figcaption></figure>
         <div class="acts">
           <a class="btn btn--outline" href="#artikel"><svg><use href="#i-share"/></svg> Bagikan</a>
           <a class="btn btn--outline is-saved" href="#artikel"><svg><use href="#i-bookmark"/></svg> Tersimpan</a>
@@ -809,7 +823,7 @@
     <div class="ref-head"><h2>Pencarian &amp; auth</h2><span class="src">SearchPalette · AuthModal · satu-satunya bayangan</span></div>
     <div class="spec spec--tight">
       <div class="overlay">
-        <div class="sp fold">
+        <div class="sp">
           <div class="sp-bar"><svg><use href="#i-search"/></svg><div class="q">kamen rider<span> zeztz</span></div><span class="esc">ESC</span></div>
           <div class="sp-group lbl-xs">Artikel</div>
           <div class="sp-opt is-on"><div class="ph">3:2</div><div><h3 class="tl"><a href="#overlay">Kamen Rider Zeztz Episode 9: Debut Form Baru dan Lagu Tema Kedua</a></h3><div class="meta" style="margin-top:.2rem"><span class="lbl cat">Tokusatsu</span><span class="lbl muted">Kemarin</span></div></div></div>
@@ -822,7 +836,7 @@
     </div>
     <div class="spec spec--tight">
       <div class="overlay">
-        <div class="auth fold">
+        <div class="auth">
           <a class="logo" href="#overlay"><span class="mark"></span></a>
           <div><h3>Masuk ke Seputar Otaku</h3><p class="t-bs muted">Simpan artikel, ikuti topik, dan komentar dengan nama kamu.</p></div>
           <div class="tabs"><a class="is-on" href="#overlay">Masuk</a><a href="#overlay">Daftar</a></div>
@@ -853,7 +867,7 @@
   <section class="ref" id="footer">
     <div class="ref-head"><h2>Footer</h2><span class="src">layout/Footer.svelte</span></div>
     <div class="spec spec--tight">
-      <footer class="ft">
+      <footer class="ft band">
         <div class="ft-grid">
           <div><a class="logo on-dark" href="#footer"><span class="mark"></span><span class="word">seputar<br>otaku</span></a><p class="tag">Anime, Jejepangan dan Tokusatsu. Media komunitas otaku Indonesia sejak 2021.</p><div class="socs"><a href="#footer" aria-label="Instagram"><svg><use href="#i-ig"/></svg></a><a href="#footer" aria-label="X"><svg><use href="#i-x"/></svg></a><a href="#footer" aria-label="YouTube"><svg><use href="#i-yt"/></svg></a><a href="#footer" aria-label="Facebook"><svg><use href="#i-fb"/></svg></a></div></div>
           <div><h5>Kategori</h5><ul><li><a href="#footer">Anime</a></li><li><a href="#footer">Review</a></li><li><a href="#footer">Tokusatsu</a></li><li><a href="#footer">Jejepangan</a></li><li><a href="#footer">Event &amp; Press Release</a></li></ul></div>
