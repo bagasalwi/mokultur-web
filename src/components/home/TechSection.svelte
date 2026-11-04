@@ -3,6 +3,7 @@
   import type { ArticleListItem } from '$lib/api';
   import { timeAgo, imgFallback } from '$lib/format';
   import SectionHead from '$components/ui/SectionHead.svelte';
+  import ChannelTitle from '$components/ui/ChannelTitle.svelte';
   import NewsroomBlock from '$components/home/NewsroomBlock.svelte';
 
   export let articles: ArticleListItem[] = [];
@@ -10,6 +11,9 @@
   export let title = 'Teknologi';
   export let description = 'Berita dan ulasan seputar teknologi terkini.';
   export let categorySlug = 'tech';
+  /** Seputar Otaku theme only (see ChannelTitle): the boxed word, and the word before a one-word title. */
+  export let titleLead: string | null = null;
+  export let titleMark: string | null = null;
 
 
 
@@ -24,7 +28,7 @@
       <div class="container-xl">
         <div class="article-list-big__header d-flex align-items-end justify-content-between mb-3">
           <div>
-            <h3 class="article-list-big__title fw-boldest mb-1">{title}</h3>
+            <h3 class="article-list-big__title fw-boldest mb-1"><ChannelTitle {title} lead={titleLead} mark={titleMark} /></h3>
             {#if description}
               <p class="article-list-big__description text-muted small mb-0">{description}</p>
             {/if}
@@ -72,7 +76,7 @@
          four, headed like every other homepage section. -->
     <section class="newsroom" aria-labelledby={headingId}>
       <div class="container-xl">
-        <SectionHead {title} sub={description || null} {headingId}>
+        <SectionHead {title} lead={titleLead} mark={titleMark} sub={description || null} {headingId}>
           <a slot="action" href="/category/{categorySlug}" class="theme-btn theme-btn--see-all theme-btn--sm flex-shrink-0">
             Lihat Semua <i class="bi bi-arrow-right" aria-hidden="true"></i>
           </a>
@@ -87,7 +91,7 @@
       <div class="container-xl">
         <div class="article-list-big__header d-flex align-items-end justify-content-between mb-4">
           <div>
-            <span class="article-list-big__eyebrow"><i class="bi bi-cpu me-1"></i>{title}</span>
+            <span class="article-list-big__eyebrow"><i class="bi bi-cpu me-1"></i><ChannelTitle {title} lead={titleLead} mark={titleMark} /></span>
             {#if description}
               <p class="article-list-big__description text-muted small mb-0">{description}</p>
             {/if}
@@ -142,7 +146,7 @@
       <div class="container-xl">
         <div class="article-list-big__header d-flex align-items-end justify-content-between mb-4">
           <div>
-            <span class="article-list-big__eyebrow"><i class="bi bi-cpu me-1"></i>{title}</span>
+            <span class="article-list-big__eyebrow"><i class="bi bi-cpu me-1"></i><ChannelTitle {title} lead={titleLead} mark={titleMark} /></span>
             {#if description}
               <p class="article-list-big__description small mb-0">{description}</p>
             {/if}

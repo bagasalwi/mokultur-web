@@ -47,7 +47,7 @@ Kode yang sama dipasang kedua kali untuk Seputar Otaku (`/var/www/seputarotaku-w
 | `COOKIE_DOMAIN` | domain cookie login pembaca (default `.mokultur.com`) |
 | `DASHBOARD_URL` | tujuan redirect `/admin` |
 | `SITE_NOINDEX=1` | seluruh situs `noindex, nofollow`, `robots.txt` Disallow semua, tanpa sitemap/RSS, tanpa Analytics/AdSense/Subscribe with Google |
-| `SITE_THEME` | `seputarotaku` memasang `data-theme` di `<html>` dan mengaktifkan `src/styles/themes/_seputarotaku.scss` (referensi: `docs/DESIGN-SEPUTAROTAKU.md`). Kosong = tampilan Mokultur, tidak ada rule tema yang cocok |
+| `SITE_THEME` | `seputarotaku` memasang `data-theme` di `<html>` dan mengaktifkan `src/styles/themes/_seputarotaku.scss` (referensi: `docs/DESIGN-SEPUTAROTAKU.md`). Kosong = tampilan Mokultur, tidak ada rule tema yang cocok. Tema ini punya mode gelap: cookie `so_mode` (`light`/`dark`) dari tombol di navbar, dibaca `hooks.server.ts` menjadi `data-mode` + `data-bs-theme` di `<html>` |
 | `WEB_FEATURES` | fitur opsional yang dipakai: `talent,ratecard,moku,comifuro23,reels,newsletter,push,swg` (`*` = semua). Yang tidak disebut: halamannya 404, komponennya tidak tampil |
 | `ORG_LOGO`, `SITE_ALTERNATE_NAME`, `TWITTER_HANDLE`, `SITE_DESCRIPTION` | merek di JSON-LD, tag Twitter, dan manifest (kosong = tag dihilangkan / pakai setting) |
 

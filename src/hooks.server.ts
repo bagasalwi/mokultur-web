@@ -6,6 +6,7 @@ import { isAnimePath } from '$lib/route-policy';
 import { SITE_NOINDEX, SITE_THEME } from '$lib/server/site';
 
 const COOKIE_NAME = 'mokultur_token';
+const MODE_COOKIE = 'so_mode';
 const SECRET_BYTES = new TextEncoder().encode(env.JWT_SECRET ?? '');
 
 export const handle: Handle = async ({ event, resolve }) => {
@@ -45,11 +46,17 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   // The theme attribute goes on <html> in the server render itself, so the
   // themed styles apply to the first paint and hydration changes nothing.
+  // The reader's light/dark choice (the `so_mode` cookie, set by the navbar
+  // toggle) rides along the same way; without it the stylesheet follows
+  // prefers-color-scheme. data-bs-theme lets Bootstrap's own dark palette
+  // cover the controls the theme does not restyle.
+  const mode = event.cookies.get(MODE_COOKIE);
+  const modeAttrs = mode === 'dark' ? ' data-mode="dark" data-bs-theme="dark"' : mode === 'light' ? ' data-mode="light"' : '';
   const response = await resolve(
     event,
     SITE_THEME === 'mokultur'
       ? undefined
-      : { transformPageChunk: ({ html }) => html.replace('<html lang="id">', `<html lang="id" data-theme="${SITE_THEME}">`) },
+      : { transformPageChunk: ({ html }) => html.replace('<html lang="id">', `<html lang="id" data-theme="${SITE_THEME}"${modeAttrs}>`) },
   );
 
   // A site kept out of search (SITE_NOINDEX) says so on every page, endpoint and redirect.

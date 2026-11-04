@@ -55,7 +55,9 @@
   const HERO_COUNT: Record<string, number> = { ticker: 6, 'spotlight-stack': 6, masthead: 4 };
   $: heroType = data.settings?.hero_type ?? 'cinematic';
   $: heroIds = new Set(data.headlines.slice(0, HERO_COUNT[heroType] ?? 5).map((a) => a.id));
-  $: latestList = data.latest.filter((a) => !heroIds.has(a.id)).slice(0, newsList ? 15 : 9);
+  // Seputar Otaku asked for 18 in Terbaru (six rows of three); Mokultur keeps its counts.
+  $: latestCount = data.site.theme === 'seputarotaku' ? 18 : newsList ? 15 : 9;
+  $: latestList = data.latest.filter((a) => !heroIds.has(a.id)).slice(0, latestCount);
   $: shownIds = new Set([...heroIds, ...latestList.map((a) => a.id)]);
   // Signed-in readers get their feed; guests get slightly older stories they
   // may have missed, which also keeps the pick row distinct from Terbaru.
@@ -148,7 +150,7 @@
     <section class="container-xl home-latest">
       <div class="row g-4 g-xl-5">
         <div class="col-lg-8">
-          <SectionHead title="Terbaru" headingId="home-latest-heading">
+          <SectionHead title="Terbaru" lead="Berita" headingId="home-latest-heading">
             <a slot="action" href="/index-article" class="theme-btn theme-btn--see-all theme-btn--sm">Lihat Semua <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
           </SectionHead>
           {#if newsList}
@@ -188,6 +190,7 @@
   {#snippet pressSection()}
     <EventSection
       title="Liputan & Press Release"
+      titleMark="Press Release"
       articles={eventList}
       style={data.settings?.event_section_style ?? 'standard'}
     />
@@ -201,6 +204,7 @@
 
   {#snippet techSection()}
     <TechSection
+      titleLead="Berita"
       articles={techList}
       style={data.settings?.tech_section_style ?? 'immersive'}
     />

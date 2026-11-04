@@ -123,6 +123,21 @@
 
   $: currentPath = $page.url.pathname;
 
+  // Seputar Otaku theme: the reader's light/dark switch. The choice goes in a
+  // cookie that hooks.server.ts reads back onto <html>, so the next page is
+  // rendered in that mode from the first byte. Without a cookie the stylesheet
+  // follows prefers-color-scheme, which is what the toggle flips away from.
+  $: themed = $page.data.site?.theme === 'seputarotaku';
+  function toggleMode() {
+    const root = document.documentElement;
+    const dark = root.dataset.mode ? root.dataset.mode === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const next = dark ? 'light' : 'dark';
+    root.dataset.mode = next;
+    if (next === 'dark') root.setAttribute('data-bs-theme', 'dark');
+    else root.removeAttribute('data-bs-theme');
+    document.cookie = `so_mode=${next}; path=/; max-age=31536000; samesite=lax`;
+  }
+
   // Whitelist with a fallback, matching Hero.svelte: an unknown value from the
   // database renders the shipped layout rather than an empty header.
   const NAVBAR_STYLES = ['times', 'compact', 'masthead', 'split', 'minimal'];
@@ -370,6 +385,15 @@
     >
       <i class="bi bi-search"></i>
     </button>
+
+    {#if themed}
+      <!-- Which icon shows is decided in CSS from the mode in force, so the
+           server render is right even before hydration. -->
+      <button class="btn btn-sm btn-icon-mokultur mode-toggle" type="button" on:click={toggleMode} title="Mode gelap / terang" aria-label="Ganti mode gelap atau terang">
+        <i class="bi bi-moon-stars mode-toggle__dark" aria-hidden="true"></i>
+        <i class="bi bi-sun mode-toggle__light" aria-hidden="true"></i>
+      </button>
+    {/if}
 
     {#if socials.length > 0}
       <div class="d-none d-lg-flex align-items-center gap-1">

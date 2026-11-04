@@ -195,10 +195,27 @@ Satu-satunya bayangan di situs adalah pada lapisan melayang (search palette,
 auth modal, menu akun): `0 12px 32px rgba(18,20,23,.18)`.
 
 ### Garis
-- 1px `--so-rule`: pemisah baris daftar, sidebar, footer kolom.
-- 2px `--so-ink`: struktur (atas section head, bawah masthead, bingkai panel).
-- 3px `--so-red`: hanya keadaan aktif (tab, link navbar aktif) dan
-  NavProgress.
+Semua garis tipis (revisi 2026-11-04: "garisnya terlalu tebal").
+- 1px `--so-rule`: pemisah baris daftar, sidebar, footer kolom, border input
+  dan chip.
+- 1px `--so-line` (abu lebih gelap): struktur (atas section head, bingkai
+  panel, atas sidebar card, atas komentar).
+- 2px `--so-red`: hanya keadaan aktif (tab, link navbar aktif), garis atas
+  footer, dan NavProgress.
+
+### Mode gelap & terang
+Dua palet, satu set token. Terang adalah bawaan. Gelap mengikuti
+`prefers-color-scheme` sampai pembaca menekan tombol bulan/matahari di
+masthead; pilihannya disimpan di cookie `so_mode` (`light` | `dark`, 1 tahun)
+dan dipasang `hooks.server.ts` sebagai `data-mode` di `<html>` sehingga
+halaman berikutnya sudah benar sejak byte pertama. `data-bs-theme="dark"`
+ikut dipasang agar kontrol Bootstrap mengikuti.
+Token gelap: paper `#15181c`, ground `#1e2228`, text `#eef0f3`, muted
+`#a3abb6`, rule `#2b3039`, line `#3b414b`, black `#070808`; `--so-ink`
+berbalik menjadi `#eef0f3` dan teks di atasnya memakai `--so-ink-contrast`
+(`#0b0c0e`), bukan putih literal. Panel `.glow` tetap hitam di kedua mode.
+Komponen yang mengecat putih sendiri di `<style>`-nya (kategori, pencarian,
+palet, modal login, NewsroomBlock) ditimpa ke token di blok "Surfaces".
 
 ### Bentuk
 Satu radius: `--so-radius` 6px untuk foto, thumbnail, tombol, input, chip,
@@ -242,10 +259,15 @@ newsletter, push, swg) **tidak dibuatkan tema**; begitu pula anime dan forum.
   seperti logo di post). Kanan: pencarian (ikon putih, label "Cari" ≥768px),
   avatar merah. Ponsel: burger kiri, logo tengah, pencarian kanan; tinggi
   56px.
-- Baris kategori 44px: link Figtree 700 0.875rem uppercase tracking 0.03em,
-  warna `--so-text`; hover merah; aktif garis bawah 3px merah menempel pada
-  garis tinta 2px di bawah baris. Ponsel: scroll horizontal, tanpa wrap,
-  gradasi putih di tepi kanan sebagai petunjuk.
+- Baris kategori 44px: latar dan teks mengikuti setting dashboard
+  `navbar_bg` / `navbar_text` (hitam dan putih sekarang; "navbar menu bisa
+  diatur, untuk sekarang set hitam full"), jadi masthead satu blok gelap
+  dengan hairline `navbar_text` 14% di antara dua barisnya. Link Figtree 700
+  0.8125rem uppercase tracking 0.03em, opacity 0.82; hover opacity 1; aktif
+  garis bawah 2px merah. Baris merek juga memakai `navbar_bg` (glow
+  mengandaikan warna gelap). Di kanan ikon pencarian ada tombol mode
+  bulan/matahari (`.mode-toggle`; ikon yang tampil dipilih CSS dari mode
+  yang berlaku).
 - Scrolled: baris merek dan kategori digabung jadi satu baris `.glow` 56px
   (logo 28px, wordmark satu baris 1.125rem, link putih 0.8125rem), tanpa
   bayangan.
@@ -312,10 +334,16 @@ Select/checkbox/radio `accent-color` merah. Textarea radius 6px.
 padding 0.75rem 0, dipisah garis 1px; aktif garis bawah 3px merah, teks
 tinta.
 
-### 4.3 Judul bagian (`ui/SectionHead.svelte`)
-Garis tinta 2px di atas, padding-top 0.75rem. Kiri: cakram merah 10px +
-judul `display-md` (Figtree 800 sentence-case). Subjudul `body-sm` muted di
-bawah judul. Slot aksi ("Lihat semua →") di kanan sebagai Figtree 700
+### 4.3 Judul bagian (`ui/SectionHead.svelte`, `ui/ChannelTitle.svelte`)
+Mengikuti cara merek menulis "Seputar Otaku's [Pick]": judul `display-md`
+(Figtree 800 sentence-case) dengan kata terakhirnya di kotak merah
+(`.channel-mark`: radius 0.25em, 0.85em, putih 800). Garis `--so-line` 1px
+di atas, padding-top 0.75rem, tanpa cakram. `ChannelTitle` memecah judulnya:
+`mark` untuk ekor yang lebih panjang ("Liputan & [Press Release]"), `lead`
+untuk kata di depan judul satu kata ("Berita [Terbaru]", "Berita
+[Teknologi]"); di Mokultur keduanya diabaikan dan judul tampil apa adanya.
+Judul sidebar (`.side-card__title`) polos tanpa cakram. Subjudul `body-sm`
+muted di bawah judul. Slot aksi ("Lihat semua →") di kanan sebagai Figtree 700
 0.875rem, panah bergerak 2px ke kanan saat hover. Tidak ada border-left.
 
 ### 4.4 Kartu artikel (`articles/ArticleCard.svelte`, `common/ArticleCard.svelte`)
@@ -570,8 +598,10 @@ Satu codebase, satu tema tambahan, nol perubahan pada tampilan Mokultur.
    `hero_type=top-stories`, `card_style=vertical`,
    `latest_section_style=news-list`, `article_detail_style=classic`,
    `event_section_style=standard`, `tech_section_style=immersive`,
-   `navbar_bg=#0b0c0e`, `navbar_text=#ffffff`, `primary_color=#c01c28`,
-   `dark_color=#121417`.
+   `navbar_bg=#000000` (atau `#0b0c0e`), `navbar_text=#ffffff`,
+   `primary_color=#c01c28`, `dark_color=#121417`. Terbaru di beranda
+   menampilkan 18 artikel saat tema aktif (`+page.svelte` `latestCount`,
+   loader meminta 24).
 5. **Tahapan**: (a) fondasi: token, font, tombol, badge, section head,
    kartu, masthead, footer, cookie; (b) beranda: hero, Terbaru, Pick, event,
    tech, sidebar; (c) artikel dan arsip; (d) pencarian, auth, dashboard,
@@ -581,6 +611,13 @@ Satu codebase, satu tema tambahan, nol perubahan pada tampilan Mokultur.
 6. **Verifikasi Mokultur tak berubah**: `SITE_THEME` kosong → tidak ada
    atribut `data-theme`, tidak ada rule tema yang cocok; diff HTML SSR 17
    halaman seperti yang dipakai saat multisite.
+7. **Mode gelap** (revisi 2026-11-04): mixin `so-dark` di stylesheet tema,
+   dipakai dua kali (`@media (prefers-color-scheme: dark)` tanpa
+   `data-mode='light'`, dan `[data-mode='dark']`). Tombol di
+   `layout/Navbar.svelte` hanya dirender saat `page.data.site.theme`
+   seputarotaku; ia menulis cookie `so_mode` dan atribut `data-mode` /
+   `data-bs-theme`. Skrip inline kecil di `+layout.svelte` memasang
+   `data-bs-theme` untuk kasus tanpa cookie sebelum paint pertama.
 
 ## Do & Don't
 

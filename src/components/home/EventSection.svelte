@@ -2,6 +2,7 @@
   import type { ArticleListItem } from '$lib/api';
   import ArticleCard from '$components/common/ArticleCard.svelte';
   import TechSection from '$components/home/TechSection.svelte';
+  import ChannelTitle from '$components/ui/ChannelTitle.svelte';
 
   export let articles: ArticleListItem[] = [];
   /**
@@ -13,17 +14,20 @@
   export let title = 'Event & Press Release';
   export let description = 'Kumpulan beragam artikel dari event-event yang ada di indonesia!';
   export let categorySlug = 'event';
+  /** Seputar Otaku theme only (see ChannelTitle). */
+  export let titleLead: string | null = null;
+  export let titleMark: string | null = null;
 </script>
 
 {#if articles.length > 0}
   {#if style === 'immersive' || style === 'magazine' || style === 'newsroom'}
-    <TechSection {articles} {style} {title} {description} {categorySlug} />
+    <TechSection {articles} {style} {title} {description} {categorySlug} {titleLead} {titleMark} />
   {:else}
   <section class="section-md article-list-big article-list-big--standard" style="background-color: #fafafa;">
     <div class="container-xl">
       <div class="article-list-big__header d-flex align-items-end justify-content-between mb-3">
         <div>
-          <h3 class="article-list-big__title fw-boldest mb-1">{title}</h3>
+          <h3 class="article-list-big__title fw-boldest mb-1"><ChannelTitle {title} lead={titleLead} mark={titleMark} /></h3>
           {#if description}
             <p class="article-list-big__description text-muted small mb-0">{description}</p>
           {/if}

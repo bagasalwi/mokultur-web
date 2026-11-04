@@ -5,14 +5,19 @@
    * Now that two of these sit side by side on the homepage, any drift between
    * the copies would be visible at a glance.
    */
+  import ChannelTitle from '$components/ui/ChannelTitle.svelte';
+
   export let title: string;
   export let sub: string | null = null;
   export let headingId: string | undefined = undefined;
+  /** Seputar Otaku theme only: the boxed word and, for a one-word title, the word before it. */
+  export let lead: string | null = null;
+  export let mark: string | null = null;
 </script>
 
 <div class="section-head" class:section-head--split={$$slots.action}>
   <div class="section-head__text">
-    <h2 id={headingId} class="section-head__title">{title}</h2>
+    <h2 id={headingId} class="section-head__title"><ChannelTitle {title} {lead} {mark} /></h2>
     {#if sub}<p class="section-head__sub">{sub}</p>{/if}
   </div>
   <slot name="action" />

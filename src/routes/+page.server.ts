@@ -5,6 +5,7 @@ import { LOUNGE_ENABLED } from '$lib/features';
 import { loadReader } from '$lib/server/reader';
 import type { ReaderFeed } from '$lib/reader';
 import { COOKIE_NAME } from '$lib/auth';
+import { SITE_THEME } from '$lib/server/site';
 
 export const load: PageServerLoad = async ({ setHeaders, url, fetch, parent, locals, cookies }) => {
   const preview = url.searchParams.get('preview_ads') === 'true';
@@ -17,8 +18,9 @@ export const load: PageServerLoad = async ({ setHeaders, url, fetch, parent, loc
   const [headlinesRes, latestRes, moreRes, tagsRes, popularRes, eventRes, writersRes, techRes, ad0Res, ad1Res, ad2Res, ad3Res, curhatanRes, threadsRes, reelsRes, seasonAnimeRes, airingRes, upcomingEventsRes, readerRes] = await Promise.allSettled([
     listArticles({ page: 1, perPage: 6 }),
     // 22, not 15: the hero takes the first few, and the desktop feed shows 15
-    // rows so it runs as long as the sidebar beside it.
-    listArticles({ page: 1, perPage: 22 }),
+    // rows so it runs as long as the sidebar beside it. Seputar Otaku lists
+    // 18 after a hero of up to 6, so it asks for two more.
+    listArticles({ page: 1, perPage: SITE_THEME === 'seputarotaku' ? 24 : 22 }),
     listArticles({ page: 2, perPage: 28 }),
     getPopularTags(15),
     // One list per tab on the popular card. Each range fails on its own, so

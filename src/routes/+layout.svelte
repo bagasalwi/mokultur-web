@@ -160,6 +160,9 @@
   {#if data.site.theme === 'seputarotaku'}
     <!-- The theme's one typeface; declared in styles/_fonts.scss, used only under data-theme. -->
     <link rel="preload" href="/themes/seputarotaku/Figtree.woff2?v=1" as="font" type="font/woff2" crossorigin="anonymous" />
+    <!-- No so_mode cookie yet: the stylesheet follows prefers-color-scheme on its
+         own; this only hands Bootstrap's controls the same answer before first paint. -->
+    {@html `<script>(function(d){if(!d.dataset.mode&&matchMedia('(prefers-color-scheme: dark)').matches)d.setAttribute('data-bs-theme','dark')})(document.documentElement)<\/script>`}
   {/if}
   {#if noindex}
     <meta name="robots" content="noindex, nofollow" />
