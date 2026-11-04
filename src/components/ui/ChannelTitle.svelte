@@ -14,8 +14,10 @@
   export let mark: string | null = null;
 
   $: themed = $page.data?.site?.theme === 'seputarotaku';
-  $: tail = mark && title.endsWith(mark) ? mark : mark ?? title.trim().split(/\s+/).pop() ?? title;
-  $: head = (title.endsWith(tail) ? title.slice(0, title.length - tail.length) : title).trim() || lead || '';
+  $: boxed = mark && title.includes(mark) ? mark : title.trim().split(/\s+/).pop() ?? title;
+  $: at = title.lastIndexOf(boxed);
+  $: head = title.slice(0, at).trim() || (at === 0 ? lead ?? '' : '');
+  $: rest = title.slice(at + boxed.length).trim();
 </script>
 
-{#if themed}{#if head}{head} {/if}<mark class="channel-mark">{tail}</mark>{:else}{title}{/if}
+{#if themed}{#if head}{head} {/if}<mark class="channel-mark">{boxed}</mark>{#if rest} {rest}{/if}{:else}{title}{/if}

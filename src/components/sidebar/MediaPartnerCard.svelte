@@ -11,7 +11,7 @@
 </script>
 
 {#if shown.length}
-  <SideCard title="Media partner kami" headingId="side-partners" lead="{total || shown.length} brand dan event sudah bekerja sama dengan kami.">
+  <SideCard title="Media partner kami" titleMark="partner" headingId="side-partners" lead="{total || shown.length} brand dan event sudah bekerja sama dengan kami.">
     <ul class="partners">
       {#each shown as p (p.id)}
         <li title={p.name}>

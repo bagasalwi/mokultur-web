@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { socialIcon } from '$lib/social';
   import { imgUrl } from '$lib/img';
   import { page } from '$app/stores';
   import { onMount, tick } from 'svelte';
@@ -96,25 +97,8 @@
   const year = new Date().getFullYear();
 
 
-  const iconMap: Record<string, string> = {
-    instagram: 'instagram',
-    facebook: 'facebook',
-    tiktok: 'tiktok',
-    twitter: 'twitter-x',
-    x: 'twitter-x',
-    youtube: 'youtube',
-    threads: 'threads',
-    whatsapp: 'whatsapp',
-    globe: 'globe',
-    website: 'globe',
-    linkedin: 'linkedin',
-    telegram: 'telegram',
-  };
 
-  function getIcon(platform: string, icon: string | null): string {
-    if (icon) return icon;
-    return iconMap[platform.toLowerCase()] ?? 'link-45deg';
-  }
+  const getIcon = socialIcon;
 
   function isActive(href: string, currentPath: string): boolean {
     if (href === '/') return currentPath === '/';

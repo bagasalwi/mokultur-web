@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ChannelTitle from '$components/ui/ChannelTitle.svelte';
   import type { PageData } from './$types';
   import Pagination from '$components/common/Pagination.svelte';
   import SectionHead from '$components/ui/SectionHead.svelte';
@@ -98,7 +99,7 @@
 
     <div class="cat-head__row">
       <div class="cat-head__text">
-        <h1>{category.name}</h1>
+        <h1><ChannelTitle title={category.name} lead="Kategori" /></h1>
         <p class="cat-head__desc">{description}</p>
         <p class="cat-head__meta">
           <span>{data.meta.total.toLocaleString('id-ID')} artikel</span>

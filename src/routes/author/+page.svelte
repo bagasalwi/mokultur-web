@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ChannelTitle from '$components/ui/ChannelTitle.svelte';
   import type { PageData } from './$types';
   import type { Writer } from '$lib/api';
   import Pagination from '$components/common/Pagination.svelte';
@@ -77,7 +78,7 @@
     <nav class="crew-crumbs" aria-label="Breadcrumb">
       <a href="/">Beranda</a><i class="bi bi-chevron-right" aria-hidden="true"></i><span aria-current="page">Penulis</span>
     </nav>
-    <h1>Orang-orang di balik {siteName}</h1>
+    <h1><ChannelTitle title="Orang-orang di balik {siteName}" mark={siteName} /></h1>
     <p class="crew-head__lead">Setiap liputan anime, game, dan event yang kamu baca ditulis oleh mereka. Terima kasih sudah menulis untuk komunitas.</p>
     <p class="crew-head__meta">
       <span><strong>{data.meta.total}</strong> penulis</span>
@@ -121,7 +122,7 @@
   {#if others.length}
     <section class="crew-all" aria-labelledby="crew-all-h">
       <div class="crew-bar">
-        <h2 id="crew-all-h">{spotlight ? 'Penulis lainnya' : 'Semua penulis'}</h2>
+        <h2 id="crew-all-h"><ChannelTitle title={spotlight ? 'Penulis lainnya' : 'Semua penulis'} mark={spotlight ? 'Penulis' : 'penulis'} /></h2>
         <div class="crew-sort" role="group" aria-label="Urutkan penulis">
           <a href="/author" class:is-active={data.sort === 'active'} aria-current={data.sort === 'active' ? 'true' : undefined}>Paling aktif</a>
           <a href="/author?sort=views" class:is-active={data.sort === 'views'} aria-current={data.sort === 'views' ? 'true' : undefined}>Paling dibaca</a>
@@ -176,7 +177,7 @@
 
   <section class="crew-join" aria-labelledby="crew-join-h">
     <div>
-      <h2 id="crew-join-h">Mau menulis untuk {siteName}?</h2>
+      <h2 id="crew-join-h"><ChannelTitle title="Mau menulis untuk {siteName}?" mark={siteName} /></h2>
       <p>Kami selalu mencari penulis yang suka anime, game, cosplay, dan budaya Jepang. Ceritakan dirimu dan contoh tulisanmu.</p>
     </div>
     <a class="theme-btn theme-btn--primary" href="/contact?type=other"><i class="bi bi-pencil" aria-hidden="true"></i> Gabung jadi penulis</a>

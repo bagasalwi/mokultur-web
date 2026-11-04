@@ -32,8 +32,9 @@ const GRADIENTS: Record<string, string> = {
 const FALLBACK_GRADIENT = 'linear-gradient(135deg, #111827 0%, #374151 100%)';
 
 /** Bootstrap Icons name (without the `bi-` prefix). */
+const ICON_ALIASES: Record<string, string> = { x: 'twitter-x', twitter: 'twitter-x' };
 export function socialIcon(platform: string, icon: string | null): string {
-  if (icon) return icon;
+  if (icon) return ICON_ALIASES[icon.toLowerCase()] ?? icon;
   return ICONS[platform.toLowerCase()] ?? 'link-45deg';
 }
 

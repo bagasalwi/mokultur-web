@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ChannelTitle from '$components/ui/ChannelTitle.svelte';
   import { browser } from '$app/environment';
   import type { PageData } from './$types';
   import type { SearchArticle } from '$lib/api';
@@ -92,7 +93,7 @@
       <a href="/">Beranda</a><i class="bi bi-chevron-right" aria-hidden="true"></i>
       {#if data.q}<a href="/search">Pencarian</a><i class="bi bi-chevron-right" aria-hidden="true"></i><span aria-current="page">“{data.q}”</span>{:else}<span aria-current="page">Pencarian</span>{/if}
     </nav>
-    <h1>{#if data.q}Hasil untuk “{data.q}”{:else}Cari di {siteName}{/if}</h1>
+    <h1>{#if data.q}<ChannelTitle title="Hasil untuk “{data.q}”" mark="“{data.q}”" />{:else}<ChannelTitle title="Cari di {siteName}" mark={siteName} />{/if}</h1>
 
     <form class="srch-form" role="search" action="/search" method="GET">
       <label class="visually-hidden" for="srch-q">Kata kunci</label>
@@ -268,7 +269,7 @@
       {@render discover()}
       {#if data.categories?.length}
         <section class="srch-block" aria-labelledby="srch-cats">
-          <h2 id="srch-cats">Jelajahi kategori</h2>
+          <h2 id="srch-cats"><ChannelTitle title="Jelajahi kategori" /></h2>
           <ul class="srch-chips">
             {#each data.categories as c (c.slug)}
               <li><a href="/category/{c.slug}">{c.name}</a></li>
@@ -278,7 +279,7 @@
       {/if}
       {#if data.latest.length}
         <section class="srch-block srch-block--wide" aria-labelledby="srch-latest">
-          <h2 id="srch-latest">Baru terbit</h2>
+          <h2 id="srch-latest"><ChannelTitle title="Baru terbit" /></h2>
           <LatestList articles={data.latest} />
         </section>
       {/if}
@@ -289,7 +290,7 @@
 {#snippet discover()}
   {#if data.trending.length}
     <section class="srch-block" aria-labelledby="srch-trending">
-      <h2 id="srch-trending">Lagi dicari</h2>
+      <h2 id="srch-trending"><ChannelTitle title="Lagi dicari" /></h2>
       <ul class="srch-chips">
         {#each data.trending as q (q)}
           <li><a href={searchHref(q)}><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> {q}</a></li>
@@ -299,7 +300,7 @@
   {/if}
   {#if popularTags.length}
     <section class="srch-block" aria-labelledby="srch-tags">
-      <h2 id="srch-tags">Topik populer</h2>
+      <h2 id="srch-tags"><ChannelTitle title="Topik populer" /></h2>
       <ul class="srch-chips">
         {#each popularTags as t (t.slug)}
           <li><a href="/tag/{t.slug}">#{t.name}</a></li>

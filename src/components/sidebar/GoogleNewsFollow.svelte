@@ -17,7 +17,7 @@
 </script>
 
 {#if variant === 'card'}
-  <SideCard title="Ikuti {siteName} di Google News" headingId="side-gnews" lead="Berita kami langsung muncul di feed Google News kamu, tanpa perlu mencari.">
+  <SideCard title="Ikuti {siteName} di Google News" titleMark="Google News" headingId="side-gnews" lead="Berita kami langsung muncul di feed Google News kamu, tanpa perlu mencari.">
     <a class="gnews-btn" {href} target="_blank" rel="noopener">
       <i class="bi bi-newspaper" aria-hidden="true"></i>
       <span>Ikuti di Google News</span>

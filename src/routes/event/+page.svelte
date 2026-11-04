@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ChannelTitle from '$components/ui/ChannelTitle.svelte';
   import type { PageData } from './$types';
   import { absoluteUrl, buildBreadcrumb, buildPageTitle } from '$lib/seo';
   import { monthKey, monthLabel } from '$lib/event';
@@ -57,7 +58,7 @@
 <div class="agenda container-xl">
   <header class="agenda-head">
     <div>
-      <h1>Jadwal Event</h1>
+      <h1><ChannelTitle title="Jadwal Event" /></h1>
       <p class="agenda-head__sub">Event anime, game, cosplay, dan pop culture yang bisa kamu datangi. Tambahkan ke kalender supaya tidak terlewat.</p>
     </div>
     <p class="agenda-head__count">
@@ -115,7 +116,7 @@
 
   <aside class="agenda-cta">
     <div>
-      <h2>Punya event?</h2>
+      <h2><ChannelTitle title="Punya event?" mark="event?" /></h2>
       <p>Kirim detail event-mu. Kami bantu masukkan ke jadwal dan bicarakan liputannya.</p>
     </div>
     <a class="theme-btn theme-btn--primary" href="/contact?type=event"><i class="bi bi-send" aria-hidden="true"></i> Daftarkan event</a>

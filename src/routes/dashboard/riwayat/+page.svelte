@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ChannelTitle from '$components/ui/ChannelTitle.svelte';
   import { invalidateAll } from '$app/navigation';
   import { timeAgo } from '$lib/format';
   import ReaderItem from '$components/reader/ReaderItem.svelte';
@@ -18,7 +19,7 @@
 <section aria-labelledby="me-history-heading">
   <div class="me-head">
     <div>
-      <h2 id="me-history-heading">Riwayat Bacaan</h2>
+      <h2 id="me-history-heading"><ChannelTitle title="Riwayat Bacaan" /></h2>
       <p>Artikel yang pernah kamu buka, terbaru di atas. Simpan yang ingin kamu baca lagi.</p>
     </div>
   </div>

@@ -10,7 +10,7 @@
 </script>
 
 {#if socials.length}
-  <SideCard title="Ikuti {siteName}" headingId="side-follow" lead="Kabar anime, game, dan event terbaru langsung di timeline kamu.">
+  <SideCard title="Ikuti {siteName}" titleMark={siteName} headingId="side-follow" lead="Kabar anime, game, dan event terbaru langsung di timeline kamu.">
     <ul class="follow">
       {#each socials as s (s.id)}
         <li>

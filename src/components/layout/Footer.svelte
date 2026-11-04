@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { socialIcon } from '$lib/social';
   import NewsletterSignup from '$components/sidebar/NewsletterSignup.svelte';
   import { clearConsent } from '$lib/consent';
   import type { SiteSettings, NavbarItem, SocialMediaItem, Category } from '$lib/api';
@@ -13,25 +14,8 @@
   const tagline = settings?.site_description ?? 'News, ulasan, dan wawasan budaya pop terkini.';
   const year = new Date().getFullYear();
 
-  const iconMap: Record<string, string> = {
-    instagram: 'instagram',
-    facebook: 'facebook',
-    tiktok: 'tiktok',
-    twitter: 'twitter-x',
-    x: 'twitter-x',
-    youtube: 'youtube',
-    threads: 'threads',
-    whatsapp: 'whatsapp',
-    globe: 'globe',
-    website: 'globe',
-    linkedin: 'linkedin',
-    telegram: 'telegram',
-  };
 
-  function getIcon(platform: string, icon: string | null): string {
-    if (icon) return icon;
-    return iconMap[platform.toLowerCase()] ?? 'link-45deg';
-  }
+  const getIcon = socialIcon;
 
   $: mid = Math.ceil(footerItems.length / 2);
   $: col1 = footerItems.length > 0 ? footerItems.slice(0, mid) : [{ navTarget: '/', navName: 'Beranda' }, { navTarget: '/index-article', navName: 'Artikel' }];

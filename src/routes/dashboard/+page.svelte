@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ChannelTitle from '$components/ui/ChannelTitle.svelte';
   import { invalidateAll } from '$app/navigation';
   import { imgUrl } from '$lib/img';
   import { timeAgo } from '$lib/format';
@@ -52,7 +53,7 @@
   <section aria-labelledby="me-feed-heading">
     <div class="me-head">
       <div>
-        <h2 id="me-feed-heading">Untuk Kamu</h2>
+        <h2 id="me-feed-heading"><ChannelTitle title="Untuk Kamu" /></h2>
         <p>Disusun dari minat dan bacaanmu, dengan sedikit topik baru untuk ditemukan.</p>
       </div>
     </div>

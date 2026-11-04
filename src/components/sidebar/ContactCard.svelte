@@ -15,7 +15,7 @@
   $: whatsapp = (settings?.contact_whatsapp ?? '').replace(/\D/g, '') || null;
 </script>
 
-<SideCard tone="dark" title="Punya kabar untuk kami?" headingId="side-contact" lead="Tim {siteName} terbuka untuk rilis, undangan liputan, dan kolaborasi.">
+<SideCard tone="dark" title="Punya kabar untuk kami?" titleMark="kabar" headingId="side-contact" lead="Tim {siteName} terbuka untuk rilis, undangan liputan, dan kolaborasi.">
   <ul class="contact-card">
     {#each LINKS as link (link.type)}
       <li>

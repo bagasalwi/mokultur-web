@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ChannelTitle from '$components/ui/ChannelTitle.svelte';
   import type { PageData } from './$types';
   import LatestList from '$components/home/LatestList.svelte';
   import Pagination from '$components/common/Pagination.svelte';
@@ -170,7 +171,7 @@
     <aside class="pf-aside" aria-label="Tentang tulisan {user.name}">
       {#if segments.length}
         <section class="pf-beats" aria-labelledby="pf-beats-h">
-          <h2 id="pf-beats-h">Sering menulis tentang</h2>
+          <h2 id="pf-beats-h"><ChannelTitle title="Sering menulis tentang" /></h2>
           <div class="pf-beats__bar" aria-hidden="true">
             {#each segments as s (s.label)}<span style:width="{Math.max(s.pct, 2)}%" style:background={s.color}></span>{/each}
           </div>

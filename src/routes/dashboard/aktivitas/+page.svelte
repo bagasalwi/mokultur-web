@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ChannelTitle from '$components/ui/ChannelTitle.svelte';
   import { invalidateAll } from '$app/navigation';
   import { timeAgo } from '$lib/format';
   import type { PageData } from './$types';
@@ -13,7 +14,7 @@
 <section aria-labelledby="me-activity-heading">
   <div class="me-head">
     <div>
-      <h2 id="me-activity-heading">Aktivitas</h2>
+      <h2 id="me-activity-heading"><ChannelTitle title="Aktivitas" lead="Semua" /></h2>
       <p>Komentar dan artikel yang kamu sukai, terbaru di atas.</p>
     </div>
   </div>

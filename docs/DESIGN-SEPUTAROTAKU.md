@@ -223,6 +223,12 @@ pagination; badge 4px; panel besar (hero, Pick, modal, spotlight, "Baca
 selanjutnya") `--so-radius-lg` 10px. Masthead dan footer tanpa radius (penuh
 lebar). Bulat hanya cakram logo, avatar, dan penanda judul bagian.
 
+### Hover
+Judul kartu berubah merah saat hover (tanpa garis bawah). Tombol outline
+(`.theme-btn--surface`, Ikuti, tombol bagikan) terisi tinta dengan teks
+`--so-ink-contrast` saat hover. Headline memakai `text-wrap: pretty`, bukan
+`balance`, supaya mengisi lebar kolomnya.
+
 ### Gerak
 Satu momen yang diarahkan: **garis bawah merah tumbuh dari kiri** pada judul
 yang di-hover (`background-size` 0→100%, `--so-base`, `--so-ease`). Selain
@@ -346,8 +352,11 @@ di atas, padding-top 0.75rem, tanpa cakram. `ChannelTitle` memecah judulnya:
 `mark` untuk ekor yang lebih panjang ("Liputan & [Press Release]"), `lead`
 untuk kata di depan judul satu kata ("Berita [Terbaru]", "Berita
 [Teknologi]"); di Mokultur keduanya diabaikan dan judul tampil apa adanya.
-Judul sidebar (`.side-card__title`) polos tanpa cakram. Subjudul `body-sm`
-muted di bawah judul. Slot aksi ("Lihat semua →") di kanan sebagai Figtree 700
+Judul sidebar (`SideCard`, `titleLead`/`titleMark`) dan judul halaman
+(kategori, Semua artikel, pencarian, event, penulis, dashboard pembaca)
+memakai kotak yang sama; tidak ada lagi cakram merah di judul. `mark`
+boleh di tengah judul ("Ikuti [Seputar Otaku] di Google News"). Subjudul
+`body-sm` muted di bawah judul. Slot aksi ("Lihat semua →") di kanan sebagai Figtree 700
 0.875rem, panah bergerak 2px ke kanan saat hover. Tidak ada border-left.
 
 ### 4.4 Kartu artikel (`articles/ArticleCard.svelte`, `common/ArticleCard.svelte`)

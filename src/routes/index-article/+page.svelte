@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ChannelTitle from '$components/ui/ChannelTitle.svelte';
   import type { PageData } from './$types';
   import LatestList from '$components/home/LatestList.svelte';
   import Pagination from '$components/common/Pagination.svelte';
@@ -70,7 +71,7 @@
     </nav>
     <div class="ix-head__row">
       <div class="ix-head__text">
-        <h1>{heading}</h1>
+        <h1><ChannelTitle title={heading} /></h1>
         <p class="ix-head__meta">{data.meta.total.toLocaleString('id-ID')} artikel, diurutkan dari yang terbaru</p>
       </div>
       <form class="ix-find" role="search" action="/search" method="GET">

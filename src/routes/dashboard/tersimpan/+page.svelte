@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ChannelTitle from '$components/ui/ChannelTitle.svelte';
   import { invalidateAll } from '$app/navigation';
   import { timeAgo } from '$lib/format';
   import ReaderItem from '$components/reader/ReaderItem.svelte';
@@ -18,7 +19,7 @@
 <section aria-labelledby="me-saved-heading">
   <div class="me-head">
     <div>
-      <h2 id="me-saved-heading">Tersimpan</h2>
+      <h2 id="me-saved-heading"><ChannelTitle title="Tersimpan" lead="Artikel" /></h2>
       <p>{total ? `${total} artikel yang kamu simpan untuk dibaca nanti.` : 'Artikel yang kamu simpan untuk dibaca nanti.'}</p>
     </div>
   </div>

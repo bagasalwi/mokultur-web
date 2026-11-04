@@ -11,7 +11,7 @@
 </script>
 
 {#if writers.length > 0}
-  <SideCard title="Penulis" headingId="side-writers" lead="Yang tulisannya paling banyak dibaca.">
+  <SideCard title="Penulis" titleLead="Tim" headingId="side-writers" lead="Yang tulisannya paling banyak dibaca.">
     <ul class="writers">
       {#each writers as w (w.id)}
         <li>

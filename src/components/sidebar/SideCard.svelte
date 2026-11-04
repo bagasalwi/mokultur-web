@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ChannelTitle from '$components/ui/ChannelTitle.svelte';
   /**
    * The frame every sidebar card shares: heading, optional lead, content, and
    * an optional footer. 'dark' is the house gradient panel for the one card
@@ -8,10 +9,13 @@
   export let headingId: string;
   export let lead: string | null = null;
   export let tone: 'light' | 'dark' = 'light';
+  /** Seputar Otaku theme only (see ChannelTitle): the boxed word(s), and a word before a one-word title. */
+  export let titleLead: string | null = null;
+  export let titleMark: string | null = null;
 </script>
 
 <section class="side-card" class:side-card--dark={tone === 'dark'} aria-labelledby={headingId}>
-  <h2 id={headingId} class="side-card__title">{title}</h2>
+  <h2 id={headingId} class="side-card__title"><ChannelTitle {title} lead={titleLead} mark={titleMark} /></h2>
   {#if lead}<p class="side-card__lead">{lead}</p>{/if}
   <div class="side-card__body"><slot /></div>
   {#if $$slots.footer}<div class="side-card__footer"><slot name="footer" /></div>{/if}
