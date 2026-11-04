@@ -1406,18 +1406,19 @@ $t: "html[data-theme='seputarotaku']";
   // Footer logo: the setting is the round mark, so it keeps its own proportions.
   footer.site-footer img[alt] { width: auto; height: 40px; }
 
-  // "Baca juga" inside the article body: a ruled box with the red label,
-  // rows separated by hairlines, the title turning red on hover.
+  // "Baca juga" inside the article body: the same black card as "Berikutnya",
+  // label muted, titles white, red on hover.
   .bodyArticle .read-also, .read-also {
-    padding: 0.9rem 1.1rem;
-    border: 1px solid var(--so-rule);
-    border-left: 3px solid var(--so-red);
-    border-radius: var(--so-radius);
-    background: var(--so-ground);
+    padding: 1rem 1.1rem;
+    border: 0;
+    border-radius: var(--so-radius-lg);
+    color: #fff;
+    background-color: var(--so-black);
+    background-image: var(--so-glow-image);
   }
   .read-also__label {
     margin: 0 0 0.4rem;
-    color: var(--so-muted);
+    color: rgba(255, 255, 255, 0.6);
     font-size: 0.6875rem;
     font-weight: 700;
     letter-spacing: 0.06em;
@@ -1429,15 +1430,49 @@ $t: "html[data-theme='seputarotaku']";
     padding: 0.6rem 0.25rem;
     border-radius: 0;
     background: transparent;
-    color: var(--so-text);
+    color: #fff;
     box-shadow: none;
-    & + .read-also__item { border-top: 1px solid var(--so-rule); }
+    & + .read-also__item { border-top: 1px solid rgba(255, 255, 255, 0.14); }
     &:hover { color: var(--so-red); box-shadow: none; }
     &:hover .read-also__title { color: var(--so-red); text-decoration: none; }
     &:hover .read-also__go { color: var(--so-red); transform: none; }
   }
-  .read-also__title { font-weight: 700; letter-spacing: -0.01em; transition: color var(--so-fast); }
-  .read-also__thumb { border-radius: calc(var(--so-radius) - 2px); }
+  .read-also__title { color: #fff; font-weight: 700; letter-spacing: -0.01em; transition: color var(--so-fast); }
+  .read-also__date { color: rgba(255, 255, 255, 0.6); }
+  .read-also__go { color: rgba(255, 255, 255, 0.7); }
+  .read-also__thumb { border-radius: calc(var(--so-radius) - 2px); background: var(--so-ink-2); }
+
+  // ---- Phones ---------------------------------------------------------------
+  // The viewport-anchored glow is for wide screens. On a phone the masthead is
+  // plain black and the dark panels carry a small glow in their own corner,
+  // like the "Berikutnya" card.
+  @media (max-width: 991px) {
+    header.sticky-top { background-image: none; }
+    .home-collab-card.anime-hero-full,
+    .article-detail.home-collab-card {
+      background-attachment: scroll;
+      background-image: radial-gradient(20rem 12rem at 0 0, var(--so-glow), transparent 62%);
+    }
+  }
+  // Category boxes never wrap into two lines; the text is clipped instead.
+  .badge-main, .home-pick__cat {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: top;
+  }
+  @media (max-width: 575px) {
+    .badge-main, .home-pick__cat { padding: 0.3rem 0.45rem; font-size: 0.625rem !important; }
+    .vcard__title, .home-pick__card-title { font-size: 0.9375rem; line-height: 1.25; }
+    .hero-top-stories__title { font-size: 1.5rem; }
+    .article-detail__title { font-size: 1.625rem; }
+    .article-detail__description { font-size: 0.9375rem; }
+    .article-hero-breadcrumb { flex-wrap: wrap; }
+    .article-hero-breadcrumb .breadcrumb-item { max-width: 100%; overflow: visible; white-space: normal; }
+    .article-hero-breadcrumb .breadcrumb-item a { max-width: none; overflow: visible; white-space: normal; text-overflow: clip; }
+  }
 
   // ---- Motion -------------------------------------------------------------
   @media (prefers-reduced-motion: reduce) {
