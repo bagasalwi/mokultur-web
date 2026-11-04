@@ -264,8 +264,12 @@ newsletter, push, swg) **tidak dibuatkan tema**; begitu pula anime dan forum.
   diatur, untuk sekarang set hitam full"), jadi masthead satu blok gelap
   dengan hairline `navbar_text` 14% di antara dua barisnya. Link Figtree 700
   0.8125rem uppercase tracking 0.03em, opacity 0.82; hover opacity 1; aktif
-  garis bawah 2px merah. Baris merek juga memakai `navbar_bg` (glow
-  mengandaikan warna gelap). Di kanan ikon pencarian ada tombol mode
+  garis bawah 2px merah. Glow merah dipasang pada `<header>` dengan
+  `background-attachment: fixed`, dan panel gelap di bawahnya (hero,
+  head artikel) memakai gradien fixed yang sama, sehingga aksen merah turun
+  dari pojok kiri atas melewati dua baris navbar ke panel tanpa sambungan
+  (revisi 2026-11-04: "navbar ke artikel mulus"; iOS tanpa fixed
+  menggambar tiap elemen sendiri). Di kanan ikon pencarian ada tombol mode
   bulan/matahari (`.mode-toggle`; ikon yang tampil dipilih CSS dari mode
   yang berlaku).
 - Scrolled: baris merek dan kategori digabung jadi satu baris `.glow` 56px

@@ -18,6 +18,8 @@ $t: "html[data-theme='seputarotaku']";
   --so-ink: #eef0f3;
   --so-ink-2: #d4d9e0;
   --so-ink-contrast: #0b0c0e;
+  --so-red: color-mix(in srgb, var(--site-primary, #c01c28) 80%, #fff);
+  --so-red-deep: var(--site-primary, #c01c28);
   --so-black: #070808;
   --so-glow: rgba(192, 28, 40, 0.5);
   --so-red-tint: rgba(192, 28, 40, 0.22);
@@ -290,7 +292,16 @@ $t: "html[data-theme='seputarotaku']";
   .article-card--horizontal__title { font-weight: 700; letter-spacing: -0.012em; }
 
   // ---- Masthead (Navbar, variant times) -----------------------------------
-  header.sticky-top { background: transparent !important; }
+  // One glow for the masthead and the dark panel under it: the gradient is
+  // anchored to the viewport (background-attachment: fixed) on the header, the
+  // hero and the article head, so the red runs from the top-left corner down
+  // through both navbar rows into the panel with no seam. Browsers without
+  // fixed attachment (iOS) draw each one on its own element instead.
+  header.sticky-top {
+    background-color: var(--navbar-bg, var(--so-black)) !important;
+    background-image: var(--so-glow-image);
+    background-attachment: fixed;
+  }
   .navbar-times--scrolled { box-shadow: none; }
   // Both bars take the dashboard's navbar colours (Pengaturan → navbar_bg /
   // navbar_text; black and white today), so the masthead is one dark block
@@ -300,15 +311,13 @@ $t: "html[data-theme='seputarotaku']";
     padding: 0.7rem 0;
     border-bottom: 0;
     color: var(--navbar-text, #fff);
-    background-color: var(--navbar-bg, var(--so-black));
-    background-image: var(--so-glow-image);
-    --so-glow: rgba(192, 28, 40, 0.38);
+    background: transparent;
   }
   .navbar-times--scrolled .navbar-brand-bar { padding: 0.45rem 0; }
   .navbar-logo-link img { height: 32px; }
   .navbar-logo-link .logo-text { color: var(--navbar-text, #fff); font-weight: 800; letter-spacing: -0.03em; }
   .navbar-sections-bar {
-    background-color: var(--navbar-bg, var(--so-black));
+    background-color: transparent;
     border-top: 1px solid color-mix(in srgb, var(--navbar-text, #fff) 14%, transparent);
     border-bottom: 0;
   }
@@ -420,6 +429,7 @@ $t: "html[data-theme='seputarotaku']";
     color: #fff;
     background-color: var(--so-black);
     background-image: var(--so-glow-image);
+    background-attachment: fixed;
     box-shadow: none;
   }
   .hero-top-stories { gap: 2rem; }
@@ -721,6 +731,7 @@ $t: "html[data-theme='seputarotaku']";
     color: #fff;
     background-color: var(--so-black);
     background-image: var(--so-glow-image);
+    background-attachment: fixed;
     box-shadow: none;
   }
   .article-hero-breadcrumb {
@@ -733,6 +744,8 @@ $t: "html[data-theme='seputarotaku']";
     .breadcrumb-item a { color: inherit; }
     .breadcrumb-item a:hover { color: #fff; }
     .breadcrumb-item:first-child a { padding: 0; border-radius: 0; background: transparent; }
+    .breadcrumb-item + .breadcrumb-item { padding-left: 0.5rem; }
+    .breadcrumb-item + .breadcrumb-item::before { padding: 0 0.5rem 0 0; color: rgba(255, 255, 255, 0.44); }
   }
   .article-detail__title {
     font-size: clamp(1.875rem, 4vw, 2.75rem);
@@ -744,6 +757,8 @@ $t: "html[data-theme='seputarotaku']";
   .article-detail__meta {
     gap: 0.5rem 1.25rem;
     span {
+      display: inline-flex;
+      gap: 0.35em;
       padding: 0;
       border: 0;
       border-radius: 0;
@@ -756,7 +771,7 @@ $t: "html[data-theme='seputarotaku']";
     }
     // The byline: "Oleh" small, the name white and bold, as on the post.
     span:first-child { color: rgba(255, 255, 255, 0.72); font-size: 0.875rem; font-weight: 400; letter-spacing: 0; text-transform: none; }
-    span:first-child a { color: #fff !important; font-weight: 700; }
+    span:first-child a { margin-left: 0 !important; color: #fff !important; font-weight: 700; }
     span:first-child a:hover { text-decoration: underline; text-decoration-color: var(--so-red); }
   }
   .article-hero-img { border-radius: var(--so-radius); box-shadow: none; }
@@ -784,6 +799,8 @@ $t: "html[data-theme='seputarotaku']";
   .article-toc { border-left: 0; border: 1px solid var(--so-rule); border-radius: var(--so-radius); background: var(--so-ground); }
   .article-toc__summary i { border-radius: var(--so-radius); }
 
+  // The text column starts where the share row and the contents box start.
+  .bodyArticle { margin-left: 0; }
   .bodyArticle {
     max-width: 68ch;
     font-size: 1.0625rem;
@@ -1389,6 +1406,18 @@ $t: "html[data-theme='seputarotaku']";
   .auth-modal__google:hover { border-color: var(--so-ink); background: var(--so-ground); color: var(--so-text); }
   .auth-modal__divider::after { background: var(--so-rule); }
   .srch-hit__flag { background: var(--so-ink); color: var(--so-ink-contrast); }
+  .gnews-btn, .gnews-btn:hover { color: var(--so-ink-contrast); }
+  .gnews-inline { background: var(--so-ground); }
+  .topics a, .atc__menu, .card-w, .pagination-dark .page-item .page-link,
+  .archive-page .archive-feature-card, .archive-page .archive-sidebar-card, .archive-page .archive-section, .archive-page .article-card { background: var(--so-paper); }
+  .card-w__name a, .card-w__stats dd, .card-w__latest a, .archive-sidebar-card__item strong, .archive-page .archive-feature-card__content h2 a, .archive-page .archive-sidebar-card h3, .partners__join { color: var(--so-text); }
+  .newsroom__desc, .card-w__handle, .card-w__bio, .card-w__stats dt, .card-w__latest span, .article-card-date { color: var(--so-muted); }
+  .archive-page .article-card-title, .archive-page .article-card-title a { color: var(--so-text); }
+  .article-toc__summary { background: transparent; border-left: 0; color: var(--so-text); }
+  .article-toc__title, .article-toc__list a { color: var(--so-text); }
+  .article-toc__list li { color: var(--so-muted); }
+  .article-toc__summary i { background: var(--so-paper); color: var(--so-text); }
+  .article-toc__list a:hover { color: var(--so-red); }
 
   // ---- Motion -------------------------------------------------------------
   @media (prefers-reduced-motion: reduce) {
